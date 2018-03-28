@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    username: root
+    password: sasa
+    url: jdbc:mysql://localhost:3306/ssm
+    driver-class-name: com.mysql.jdbc.Driver
+server.port: 8081
