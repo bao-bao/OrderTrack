@@ -55,30 +55,4 @@ public class AppConfig extends WebMvcConfigurerAdapter {
                 .allowedMethods("GET", "POST", "PUT", "OPTIONS", "DELETE", "PATCH")
                 .allowCredentials(true).maxAge(3600);
     }
-
-    // 数据库连接初始化
-    @Bean
-    public void druidDataSourceInit() {
-        DbPoolConnection.getInstance();
-    }
-
-    @Bean
-    public ServletRegistrationBean druidServletRegistrationBean() {
-        ServletRegistrationBean servletRegistrationBean = new ServletRegistrationBean();
-        servletRegistrationBean.setServlet(new StatViewServlet());
-        servletRegistrationBean.addUrlMappings("/druid/*");
-        return servletRegistrationBean;
-    }
-
-    @Bean
-    public FilterRegistrationBean duridFilterRegistrationBean() {
-        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
-        filterRegistrationBean.setFilter(new WebStatFilter());
-        Map<String, String> initParams = new HashMap<String, String>();
-        //设置忽略请求
-        initParams.put("exclusions", "*.js,*.gif,*.jpg,*.bmp,*.png,*.css,*.ico,/druid/*");
-        filterRegistrationBean.setInitParameters(initParams);
-        filterRegistrationBean.addUrlPatterns("/*");
-        return filterRegistrationBean;
-    }
 }

@@ -84,7 +84,6 @@
 </template>
 
 <script>
-import {hello} from '../axios/api'
 export default {
   name: 'HelloWorld',
   data () {
@@ -94,7 +93,7 @@ export default {
   },
   methods: {
     getName() {
-      hello(this.$api.hello, {id: 123}).then(res => {
+      this.$api.get(this.$api.hello, {id: 123}).then(res => {
         this.msg = res.data;
       });
     }

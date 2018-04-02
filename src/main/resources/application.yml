@@ -1,7 +1,7 @@
 spring:
   datasource:
-    username: root
-    password: sasa
-    url: jdbc:mysql://localhost:3306/ssm
+    username: asd
+    password: asd
+    url: jdbc:mysql://192.168.1.66:3306/otrack?useSSL=false
     driver-class-name: com.mysql.jdbc.Driver
 server.port: 8081

@@ -7,7 +7,8 @@ public enum ReturnCode {
     // for login module
     INVALID_USERNAME(101),
     WRONG_PASSWORD(102),
-    ;
+    // sql error
+    DATABASE_ERROR(201);
 
     private int code;
 
