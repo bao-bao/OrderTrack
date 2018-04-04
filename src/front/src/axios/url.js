@@ -14,8 +14,17 @@ export default {
   //   api = '/proxy/client';
   // }
 
-  login: "/login",
   // hello: '/hello',
+
+  /**登录验证 */
+  login: "/login",
+
+  /**人员管理 */
+  getUserList: "/getUserList",
+  addUser: "/addUser",
+  updateUser: "/updateUser",
+  deleteUser: "/deleteUser",
+
   /**订单管理**/
   //1 获取订单列表 GET /order/getOrderList
   getOrderList: "/order/getOrderList",

@@ -11,4 +11,8 @@ public interface UserService {
     ReturnCode loginValidate(String username, String password);
     User getUserInfo(String username);
     List<User> getUserList(int pageId, int pageSize, User filter);
+    List<User> queryUserList(String username, Integer role);
+    ReturnCode addUser(User user);
+    ReturnCode updateUser(User user);
+    ReturnCode deleteUser(User user);
 }

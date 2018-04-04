@@ -1,18 +1,18 @@
 package com.ordertrack.entity;
 
 /* Created by AMXPC on 2018/3/25. */
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import lombok.Data;
+
+import java.sql.Timestamp;
 
 @Entity
 @Data
 @Table(name = "user")
 public class User {
     @Id
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name = "userid")
     private Integer id;
 
@@ -28,4 +28,9 @@ public class User {
     @Column(name = "isactive")
     private Boolean isActive;
 
+    @Column(name = "createtime")
+    private Timestamp createTime;
+
+    @Column(name = "changetime")
+    private Timestamp changeTIme;
 }

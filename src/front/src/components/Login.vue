@@ -59,9 +59,17 @@ export default {
                 type: "error"
               });
             }
+          }).catch(err => {
+            this.$message({
+              message: err,
+              type: "error"
+            });
           });
         } else {
-          console.log("error submit!!");
+          this.$message({
+            message: "参数错误",
+            type: "error"
+          })
           return false;
         }
       });

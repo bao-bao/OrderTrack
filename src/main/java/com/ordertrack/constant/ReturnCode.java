@@ -8,7 +8,10 @@ public enum ReturnCode {
     INVALID_USERNAME(101),
     WRONG_PASSWORD(102),
     // sql error
-    DATABASE_ERROR(201);
+    DATABASE_ERROR(201),
+    // user el.
+    USERNAME_EXIST(301)
+    ;
 
     private int code;
 

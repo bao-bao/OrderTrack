@@ -2,11 +2,6 @@ package com.ordertrack.config;
 
 /* Created by AMXPC on 2018/3/25. */
 
-import com.alibaba.druid.support.http.StatViewServlet;
-import com.alibaba.druid.support.http.WebStatFilter;
-import com.ordertrack.database.DbPoolConnection;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -16,9 +11,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Configuration
 public class AppConfig extends WebMvcConfigurerAdapter {

@@ -8,8 +8,19 @@ import qs from 'qs'
 import Element from 'element-ui';
 import url from './axios/url';
 
+import 'font-awesome/css/font-awesome.css'
 import 'element-ui/lib/theme-chalk/index.css';    // 默认主题
 //import '../static/css/theme-green/index.css';       // 浅绿色主题
+
+Vue.use(Element, { size: 'small' });
+Vue.config.productionTip = false
+/* eslint-disable no-new */
+new Vue({
+  el: '#app',
+  router,
+  components: { App },
+  template: '<App/>'
+})
 
 // 设置axios
 let axiosIns = axios.create({});
@@ -59,50 +70,10 @@ let api = {};
 ajaxMethod.forEach((method)=> {
     //数组取值的两种方式
     api[method] = function (uri, data, config) {
-        return new Promise(function (resolve, reject) {
-            axiosIns[method](uri, data, config).then((response)=> {
-                /*根据后台数据进行处理
-                 *1 code===200   正常数据+错误数据     code!==200   网络异常等
-                 *2 code===200   正常数据     code!==200   错误数据+网络异常等
-                 * 这里使用的是第一种方式
-                 * ......
-                 */
-                if (response.data.StatusCode) {
-                    //toast封装：  参考ele-mint-ui
-                    Toast({
-                        message: response.data.Message,
-                        position: 'top',
-                        duration: 2000
-                    });
-                    if (response.data.Message === '未登录') {
-                        Toast({
-                            message: response.data.Message,
-                            position: '',
-                            duration: 2000
-                        });
-                        //使用vue实例做出对应行为  change state or router
-                    }
-                } else {
-                    resolve(response);
-                }
-            }).catch((response)=> {
-                //reject response
-                //alert('xiuxiu，限你10分钟到我面前来,不然...');
-            })
-        })
+        return axiosIns[method](uri, data, config);
     }
 });
 
 // 将API方法绑定到全局
 Vue.prototype.$api = api
 Vue.prototype.$url = url
-
-Vue.use(Element, { size: 'small' });
-Vue.config.productionTip = false
-/* eslint-disable no-new */
-new Vue({
-  el: '#app',
-  router,
-  components: { App },
-  template: '<App/>'
-})
