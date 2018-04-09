@@ -10,7 +10,9 @@ public enum ReturnCode {
     // sql error
     DATABASE_ERROR(201),
     // user el.
-    USERNAME_EXIST(301)
+    USERNAME_EXIST(301),
+    // order el.
+    ORDER_INVALID(401)
     ;
 
     private int code;

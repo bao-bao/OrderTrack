@@ -27,7 +27,7 @@
           </el-col>
           <el-col :span="4">
             <el-button type="primary" style="margin-left:20px"
-            icon="el-icon-search" @click="renderUser()">搜索</el-button>
+            :loading="isloading" icon="el-icon-search" @click="renderUser()">搜索</el-button>
           </el-col>
           <el-col :span="4" :offset="5" style="text-align:right">
             <el-button type="warning" icon="el-icon-circle-plus" @click="addUser()">新增</el-button>
@@ -35,7 +35,7 @@
         </el-row>
       </el-form>
     </div>
-    <el-table show-header border :data="tableData" style="width: 100%; text-align: center">
+    <el-table :v-loading="isloading" show-header border :data="tableData" style="width: 100%; text-align: center">
       <el-table-column prop="id" label="#" min-width="50">
         <template slot-scope="scope">
           <el-tag size="medium">{{ scope.row.id }}</el-tag>
@@ -94,6 +94,7 @@ export default {
   data: function() {
     return {
       isUpdate: false,
+      isloading: false,
       dialogFormVisible: false,
       dialogFormTitle: "新增人员信息",
       tableData: [],
@@ -138,11 +139,7 @@ export default {
         .catch(_ => {});
     },
     renderUser() {
-      const loading = this.$loading({
-        lock: true,
-        text: "Loading",
-        background: "rgba(255, 255, 255, 0.7)"
-      });
+      this.isloading = true;
       let params = this.filterData;
       this.$api
         .post(this.$url.getUserList, params)
@@ -156,15 +153,15 @@ export default {
               type: "error"
             });
           }
-          loading.close();
+          this.isloading = false;
         })
         .catch(err => {
           console.log(err);
           this.$message({
-            message: JSON.stringify(err.data),
+            message: JSON.stringify(err),
             type: "error"
           });
-          loading.close();
+          this.isloading = false;
         });
     },
     addUser() {
@@ -279,3 +276,9 @@ export default {
   }
 };
 </script>
+
+<style>
+.el-table__header th {
+  text-align: center;
+}
+</style>

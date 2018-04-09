@@ -6,7 +6,7 @@
                 <template v-if="item.subs">
                     <el-submenu :index="item.index">
                         <template slot="title"><i :class="item.icon"></i>{{ item.title }}</template>
-                        <el-menu-item v-for="(subItem,i) in item.subs" :key="i" :index="subItem.index">{{ subItem.title }}
+                        <el-menu-item v-for="(subItem,i) in item.subs" :key="i" :index="item.index + subItem.index">{{ subItem.title }}
                         </el-menu-item>
                     </el-submenu>
                 </template>
@@ -27,37 +27,37 @@
                 items: [
                     {
                         icon: 'el-icon-bell',
-                        index: 'home',
+                        index: '/home',
                         title: '首页'
                     },
                     {
                         icon: 'el-icon-document',
-                        index: 'order',
+                        index: '/order',
                         title: '订单管理',
                         subs: [
                             {
-                                index: 'onBusiness',
+                                index: '/onbusiness',
                                 title: '生产中'
                             },
                             {
-                                index: 'history',
+                                index: '/history',
                                 title: '历史记录'
                             }
                         ]
                     },
                     {
                         icon: 'el-icon-news',
-                        index: 'employee',
+                        index: '/employee',
                         title: '职员管理'
                     },
                     {
                         icon: 'el-icon-setting',
-                        index: 'price',
+                        index: '/price',
                         title: '货物管理'
                     },
                     {
                         icon: 'el-icon-star-off',
-                        index: 'self',
+                        index: '/self',
                         title: '个人信息'
                     }
                 ]

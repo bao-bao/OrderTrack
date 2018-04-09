@@ -111,3 +111,29 @@ a{text-decoration: none}
 .editor-btn{
     margin-top: 20px;
 }
+/* table */
+.el-table__header th {
+    text-align: center;
+  }
+  .demo-table-expand {
+    font-size: 0;
+  }
+  .demo-table-expand label {
+    width: 90px;
+    color: #99a9bf;
+  }
+  .demo-table-expand .el-form-item {
+    margin-right: 0;
+    margin-bottom: 0;
+    width: 33.33%;
+  }
+  .cell {
+    font-size: 14px;
+  }
+  td form div {
+    text-align: left;
+  }
+
+  textarea {
+      font-family: "Helvetica Neue",Helvetica, "microsoft yahei", arial, STHeiTi, sans-serif;
+  }

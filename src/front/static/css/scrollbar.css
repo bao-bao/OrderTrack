@@ -1,0 +1,23 @@
+.el-table__body-wrapper {
+    overflow:auto;
+}
+::-webkit-scrollbar {
+    width:6px;
+    height:6px;
+}
+::-webkit-scrollbar-button {
+    display:none;
+}
+::-webkit-scrollbar-track {
+    background:#eee;
+}
+::-webkit-scrollbar-thumb {
+    background:#aaa;
+    border-radius: 3px;
+}
+::-webkit-scrollbar-corner {
+    background:#eee;
+}
+::-webkit-scrollbar-resizer  {
+    background:#eee;
+}

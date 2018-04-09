@@ -21,6 +21,25 @@ export default new Router({
         {
           path: "/employee",
           component: resolve => require(["../components/Employee.vue"], resolve)
+        },
+        {
+          path: "/order",
+          component: {template: "<router-view></router-view>"},
+          children: [
+            {
+              path: "onbusiness",
+              component: resolve => require(["../components/OnBusiness.vue"], resolve)
+            },
+            {
+              path: "history",
+              component: resolve => require(["../components/History.vue"], resolve)
+            },
+            {
+              path: "detail/:id",
+              name: "orderDetail",
+              component: resolve => require(["../components/OrderDetail.vue"], resolve)
+            }
+          ]
         }
       ]
     },

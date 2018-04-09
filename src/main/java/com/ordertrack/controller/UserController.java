@@ -19,7 +19,7 @@ import javax.annotation.Resource;
 import java.util.List;
 
 @Controller
-@RequestMapping("/api")
+@RequestMapping("/api/user")
 public class UserController {
     @Resource
     private UserServiceImpl userService;

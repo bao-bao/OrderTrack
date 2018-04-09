@@ -1,10 +1,9 @@
 package com.ordertrack.entity;
 
 /* Created by AMXPC on 2018/3/25. */
-import javax.persistence.*;
-
 import lombok.Data;
 
+import javax.persistence.*;
 import java.sql.Timestamp;
 
 @Entity
@@ -32,5 +31,5 @@ public class User {
     private Timestamp createTime;
 
     @Column(name = "changetime")
-    private Timestamp changeTIme;
+    private Timestamp changeTime;
 }

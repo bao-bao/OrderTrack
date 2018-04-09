@@ -20,14 +20,21 @@ export default {
   login: "/login",
 
   /**人员管理 */
-  getUserList: "/getUserList",
-  addUser: "/addUser",
-  updateUser: "/updateUser",
-  deleteUser: "/deleteUser",
+  getUserList: "/user/getUserList",
+  addUser: "/user/addUser",
+  updateUser: "/user/updateUser",
+  deleteUser: "/user/deleteUser",
 
   /**订单管理**/
-  //1 获取订单列表 GET /order/getOrderList
   getOrderList: "/order/getOrderList",
-  //2 获取订单信息 GET /order/getOrder
-  getOrder: "/order/getOrder"
+  addOrder: "/order/addOrder",
+  updateOrder: "/order/updateOrder",
+  deleteOrder: "/order/deleteOrder",
+
+  getOrderInfo: "/order/getOrderInfo",
+  getOrderDetail: "/order/getOrderDetail",
+  addOrderDetail: "/order/addOrderDetail",
+  updateOrderDetail: "/order/updateOrderDetail",
+  deleteOrderDetail: "/order/deleteOrderDetail",
+
 };
