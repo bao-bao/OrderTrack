@@ -57,8 +57,18 @@
                     },
                     {
                         icon: 'el-icon-star-off',
-                        index: '/self',
-                        title: '个人信息'
+                        index: '/setting',
+                        title: '其他配置',
+                        subs: [
+                            {
+                                index: '/work',
+                                title: '工作量'
+                            },
+                            {
+                                index: '/additive',
+                                title: '添加物'
+                            }
+                        ]
                     }
                 ]
             }

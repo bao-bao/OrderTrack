@@ -17,13 +17,15 @@ export default {
   // hello: '/hello',
 
   /**登录验证 */
-  login: "/login",
+  login: "/user/login",
 
   /**人员管理 */
   getUserList: "/user/getUserList",
   addUser: "/user/addUser",
   updateUser: "/user/updateUser",
   deleteUser: "/user/deleteUser",
+
+  updateSelf: "/user/updateSelf",
 
   /**订单管理**/
   getOrderList: "/order/getOrderList",
@@ -37,4 +39,5 @@ export default {
   updateOrderDetail: "/order/updateOrderDetail",
   deleteOrderDetail: "/order/deleteOrderDetail",
 
+  getOrderHistory: "/order/getOrderHistory",
 };

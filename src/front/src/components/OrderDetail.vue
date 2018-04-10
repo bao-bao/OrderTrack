@@ -2,7 +2,7 @@
   <div>
     <div class="crumbs">
       <el-breadcrumb separator="/">
-        <el-breadcrumb-item :to="{path: '/'}"><i class="el-icon-date"></i> 订单管理</el-breadcrumb-item>
+        <el-breadcrumb-item>订单管理</el-breadcrumb-item>
         <el-breadcrumb-item>订单详情</el-breadcrumb-item>
         <el-breadcrumb-item>{{orderId}}</el-breadcrumb-item>
       </el-breadcrumb>
@@ -48,7 +48,7 @@
               <span>{{ showDate(order.deliveryDate) }}</span>
             </el-form-item>
             <el-form-item label="净重合计">
-              <span>{{ order.totalWeight }} KGS</span>
+              <span>{{ order.totalWeight }} kg</span>
             </el-form-item>
             <el-form-item label="内包装数量">
               <span>{{ order.totalSmall }} 件</span>
@@ -272,6 +272,7 @@ export default {
           let data = res.data;
           if (data.code == "SUCCESS") {
             this.tableData = data.list;
+            this.renderOrder();
           } else {
             this.$message({
               message: "查询失败， 失败原因：" + data.code,
@@ -396,7 +397,6 @@ export default {
   beforeRouteEnter(to, from, next) {
     next(vm => {
       vm.orderId = vm.$route.params.id;
-      vm.renderOrder();
       vm.renderOrderDetail();
     });
   }

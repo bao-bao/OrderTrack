@@ -101,4 +101,18 @@ public class OrderController {
         return orderService.deleteOrderDetail(orderDetail);
     }
 
+    @ResponseBody
+    @PostMapping("/getOrderHistory")
+    public ListResponse<Order> getOrderHistory(@RequestBody OrderListRequest request) {
+        ListResponse<Order> resp = new ListResponse<>();
+        String contractId = request.getContractId();
+        String customName = request.getCustomName();
+        Long startDate = request.getStartDate();
+        Long endDate = request.getEndDate();
+        List<Order> orderList = orderService.queryOrderListHistory(contractId, customName, startDate, endDate);
+        resp.setList(orderList);
+        resp.setCode(ReturnCode.SUCCESS);
+        return resp;
+    }
+
 }

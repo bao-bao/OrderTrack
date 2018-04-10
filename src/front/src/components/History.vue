@@ -2,90 +2,93 @@
   <div>
     <div class="crumbs">
       <el-breadcrumb separator="/">
-        <el-breadcrumb-item><i class="el-icon-date"></i> 职员管理</el-breadcrumb-item>
-        <el-breadcrumb-item>职员列表</el-breadcrumb-item>
+        <el-breadcrumb-item><i class="el-icon-date"></i> 订单管理</el-breadcrumb-item>
+        <el-breadcrumb-item>历史记录</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div>
       <el-form ref="filterData" :model="filterData">
-        <el-row :gutter="0">
+        <el-row :gutter="20">
           <el-col :span="5">
             <el-form-item label-width="0px">
-              <el-input v-model="filterData.name">
-                <template slot="prepend">用户名</template>
+              <el-input v-model="filterData.contractId">
+                <template slot="prepend">合同号</template>
               </el-input>
             </el-form-item>
           </el-col>
-          <el-col :span="6">
-            <el-form-item label="职位" label-width="60px">
-              <el-select v-model="filterData.role">
-                <el-option v-for="item in roleOption"
-                :key="item.value" :label="item.label" :value="item.value">
-                </el-option>
-              </el-select>
+          <el-col :span="5">
+            <el-form-item label-width="0px">
+              <el-input v-model="filterData.customName">
+                <template slot="prepend">客户名称</template>
+              </el-input>
             </el-form-item>
           </el-col>
-          <el-col :span="4">
-            <el-button type="primary" style="margin-left:20px"
-            :loading="isloading" icon="el-icon-search" @click="renderUser()">搜索</el-button>
+          <el-col :span="8">
+            <el-form-item>
+              <el-date-picker v-model="filterData.daterange" type="daterange" value-format="timestamp"
+              range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期">
+              </el-date-picker>
+            </el-form-item>
           </el-col>
-          <el-col :span="4" :offset="5" style="text-align:right">
-            <el-button type="warning" icon="el-icon-circle-plus" @click="addUser()">新增</el-button>
+          <el-col :span="2">
+            <el-button type="primary" style="margin-left:20px"
+            icon="el-icon-search" @click="renderOrder()">搜索</el-button>
           </el-col>
         </el-row>
       </el-form>
     </div>
-    <el-table :v-loading="isloading" show-header border :data="tableData" style="width: 100%; text-align: center">
-      <el-table-column prop="id" label="#" min-width="50">
-        <template slot-scope="scope">
-          <el-tag size="medium">{{ scope.row.id }}</el-tag>
+    <el-table show-header border :data="tableData" style="width: 100%; text-align: center">
+      <el-table-column type="expand">
+        <template slot-scope="props">
+          <el-form label-position="left" inline class="demo-table-expand">
+            <el-form-item label="净重合计">
+              <span>{{ props.row.totalWeight }} kg</span>
+            </el-form-item>
+            <el-form-item label="小件数合计">
+              <span>{{ props.row.totalSmall }} 件</span>
+            </el-form-item>
+            <el-form-item label="大件数合计">
+              <span>{{ props.row.totalBig }} 件</span>
+            </el-form-item>
+            <el-form-item label="采购单号">
+              <template slot-scope="scope">{{ scope.row.purchaseId }}</template>
+            </el-form-item>
+            <el-form-item label="包装图片" style="width: 100%">
+              <span>{{ props.row.picture }}</span>
+            </el-form-item>
+          </el-form>
         </template>
       </el-table-column>
-      <el-table-column prop="name" label="用户名" min-width="180">
-        <template slot-scope="scope">{{ scope.row.name }}</template>
-      </el-table-column>
-      <el-table-column prop="role" label="职位" min-width="150">
-        <template slot-scope="scope">{{ showRole(scope.row.role) }}</template>
-      </el-table-column>
-      <el-table-column prop="isActive" label="是否在职" min-width="100">
-        <template slot-scope="scope"><i :class="[ scope.row.isActive ? 'fa fa-check' : 'fa fa-times' ]"></i></template>
-      </el-table-column>
-      <el-table-column label="操作" min-width="140">
+      <el-table-column prop="id" label="#" min-width="70">
         <template slot-scope="scope">
-          <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+          <el-tag size="medium">{{ scope.row.orderId }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column prop="customName" label="客户名称" min-width="180">
+        <template slot-scope="scope">{{ scope.row.customName }}</template>
+      </el-table-column>
+      <el-table-column prop="deliveryDate" label="要求交货期" min-width="150">
+        <template slot-scope="scope">{{ showDate(scope.row.deliveryDate) }}</template>
+      </el-table-column>
+      <el-table-column prop="contractId" label="销售合同号" min-width="150">
+        <template slot-scope="scope">{{ scope.row. contractId }}</template>
+      </el-table-column>
+      <el-table-column prop="totalPrice" label="总价值" min-width="130">
+        <template slot-scope="scope">{{ scope.row. totalPrice }}</template>
+      </el-table-column>
+      <el-table-column prop="status" label="当前状态" min-width="100">
+        <template slot-scope="scope">
+          <el-tag size="medium" :type="scope.row.status == 1 ? '' : scope.row.status == 0 ? 'warning' : 'success'">
+            {{ showStatus(scope.row.status) }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" min-width="260">
+        <template slot-scope="scope">
+          <el-button size="mini" @click="handleDetail(scope.$index, scope.row)">详细信息</el-button>
           <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-    <el-dialog :title="dialogFormTitle" :visible="dialogFormVisible" width="30%" :before-close="handleClose">
-      <el-form ref="form" :model="form">
-        <el-row :gutter="20">
-          <el-col :span="22">
-            <el-form-item label="用户名" label-width="80px">
-              <el-input v-model="form.name"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="22">
-            <el-form-item label="职位" label-width="80px">
-              <el-select v-model="form.role">
-                <el-option v-for="item in roleEditOption"
-                :key="item.value" :label="item.label" :value="item.value">
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="22">
-            <el-form-item label="是否在职" label-width="80px">
-              <el-switch v-model="form.isActive"></el-switch>
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="isUpdate == true ? doUpdate() : doAdd()">确 定</el-button>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
@@ -94,34 +97,32 @@ export default {
   data: function() {
     return {
       isUpdate: false,
-      isloading: false,
       dialogFormVisible: false,
-      dialogFormTitle: "新增人员信息",
+      dialogFormTitle: "新增订单信息",
       tableData: [],
       filterData: {
-        name: "",
-        role: 0
+        contractId: "",
+        customName: "",
+        daterange: null
       },
-      roleOption: [
-        { label: "全部", value: 0 },
-        { label: "管理员", value: 1 },
-        { label: "经理", value: 2 },
-        { label: "职员", value: 3 }
-      ],
-      roleEditOption: [
-        { label: "管理员", value: 1 },
-        { label: "经理", value: 2 },
-        { label: "职员", value: 3 }
-      ],
-      form: {}
+      form: {},
+      statusOption: [
+        { label: "准备中", value: 0 },
+        { label: "已接单", value: 1 },
+        { label: "待提货", value: 2 },
+        { label: "待分配", value: 3 },
+        { label: "包装中", value: 4 },
+        { label: "待结算", value: 5 },
+        { label: "已完成", value: 6 }
+      ]
     };
   },
   methods: {
-    handleEdit(index, row) {
-      this.isUpdate = true;
-      this.dialogFormTitle = "编辑人员信息";
-      this.form = JSON.parse(JSON.stringify(row));
-      this.dialogFormVisible = true;
+    handleDetail(index, row) {
+      return this.$router.push({
+        name: "orderDetail",
+        params: { id: row.orderId }
+      });
     },
     handleDelete(index, row) {
       this.$confirm("确认删除？")
@@ -138,11 +139,22 @@ export default {
         })
         .catch(_ => {});
     },
-    renderUser() {
-      this.isloading = true;
-      let params = this.filterData;
+    renderOrder() {
+      const loading = this.$loading({
+        lock: true,
+        text: "Loading",
+        background: "rgba(255, 255, 255, 0.7)"
+      });
+      let params = {
+        customName: this.filterData.customName,
+        contractId: this.filterData.contractId,
+        startDate:
+          this.filterData.daterange == null ? 0 : this.filterData.daterange[0],
+        endDate:
+          this.filterData.daterange == null ? 0 : this.filterData.daterange[1]
+      };
       this.$api
-        .post(this.$url.getUserList, params)
+        .post(this.$url.getOrderHistory, params)
         .then(res => {
           let data = res.data;
           if (data.code == "SUCCESS") {
@@ -153,90 +165,20 @@ export default {
               type: "error"
             });
           }
-          this.isloading = false;
-        })
-        .catch(err => {
-          console.log(err);
-          this.$message({
-            message: JSON.stringify(err),
-            type: "error"
-          });
-          this.isloading = false;
-        });
-    },
-    addUser() {
-      this.isUpdate = false;
-      this.dialogFormTitle = "新增人员信息";
-      this.form = {
-        name: "",
-        role: 3,
-        isActive: true
-      };
-      this.dialogFormVisible = true;
-    },
-    doAdd() {
-      this.dialogFormVisible = false;
-      let params = this.form;
-      this.$api
-        .post(this.$url.addUser, params)
-        .then(res => {
-          let data = res.data;
-          if (data == "SUCCESS") {
-            this.$message({
-              message: "添加成功",
-              type: "success"
-            });
-            this.renderUser();
-          } else if (data == "USERNAME_EXIST") {
-            this.$message({
-              message: "添加失败， 用户已存在",
-              type: "error"
-            });
-          } else {
-            this.$message({
-              message: "添加失败， 失败原因：" + data,
-              type: "error"
-            });
-          }
+          loading.close();
         })
         .catch(err => {
           this.$message({
-            message: err,
+            message: JSON.stringify(err.data),
             type: "error"
           });
-        });
-    },
-    doUpdate() {
-      this.dialogFormVisible = false;
-      let params = this.form;
-      this.$api
-        .post(this.$url.updateUser, params)
-        .then(res => {
-          let data = res.data;
-          if (data == "SUCCESS") {
-            this.$message({
-              message: "更新成功",
-              type: "success"
-            });
-            this.renderUser();
-          } else {
-            this.$message({
-              message: "更新失败， 失败原因：" + data,
-              type: "error"
-            });
-          }
-        })
-        .catch(err => {
-          this.$message({
-            message: err,
-            type: "error"
-          });
+          loadming.close();
         });
     },
     doDelete(index, row) {
       let params = row;
       this.$api
-        .post(this.$url.deleteUser, params)
+        .post(this.$url.deleteOrder, params)
         .then(res => {
           let data = res.data;
           if (data == "SUCCESS") {
@@ -244,7 +186,7 @@ export default {
               message: "删除成功",
               type: "success"
             });
-            this.renderUser();
+            this.renderOrder();
           } else {
             this.$message({
               message: "删除失败， 失败原因：" + data,
@@ -259,26 +201,24 @@ export default {
           });
         });
     },
-    showRole(role) {
+    showStatus(status) {
       let label = "";
-      this.roleOption.forEach(element => {
-        if (element.value == role) {
+      this.statusOption.forEach(element => {
+        if (element.value == status) {
           label = element.label;
         }
       });
       return label;
+    },
+    showDate(timestamp) {
+      let date = new Date(timestamp);
+      return date.toLocaleDateString();
     }
   },
   beforeRouteEnter(to, from, next) {
     next(vm => {
-      vm.renderUser();
+      vm.renderOrder();
     });
   }
 };
 </script>
-
-<style>
-.el-table__header th {
-  text-align: center;
-}
-</style>
