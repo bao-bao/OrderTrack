@@ -4,10 +4,7 @@ package com.ordertrack.controller;
 
 import com.ordertrack.constant.ReturnCode;
 import com.ordertrack.entity.User;
-import com.ordertrack.pojo.ListResponse;
-import com.ordertrack.pojo.LoginRequest;
-import com.ordertrack.pojo.LoginResponse;
-import com.ordertrack.pojo.UserListRequest;
+import com.ordertrack.pojo.*;
 import com.ordertrack.service.impl.UserServiceImpl;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -75,4 +72,21 @@ public class UserController {
     public ReturnCode deleteUser(@RequestBody User user) {
         return userService.deleteUser(user);
     }
+
+    @ResponseBody
+    @PostMapping("/updateSelf")
+    public ReturnCode addUser(@RequestBody UpdateSelfRequest request) {
+        User user = request.getUser();
+        String newPassword = request.getNewPassword();
+        String username = user.getName();
+        String password = request.getOldPassword();
+        ReturnCode code = userService.loginValidate(username, password);
+        if(ReturnCode.SUCCESS == code) {
+            user.setPassword(newPassword);
+            return userService.updateUser(user);
+        } else {
+            return ReturnCode.WRONG_PASSWORD;
+        }
+    }
+
 }
