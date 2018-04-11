@@ -2,24 +2,17 @@
   <div>
     <div class="crumbs">
       <el-breadcrumb separator="/">
-        <el-breadcrumb-item><i class="el-icon-date"></i> 职员管理</el-breadcrumb-item>
-        <el-breadcrumb-item>职员列表</el-breadcrumb-item>
+        <el-breadcrumb-item><i class="el-icon-date"></i> 其他配置</el-breadcrumb-item>
+        <el-breadcrumb-item>添加物</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div>
       <el-form ref="filterData" :model="filterData">
         <el-row :gutter="0">
-          <el-col :span="5">
-            <el-form-item label-width="0px">
-              <el-input v-model="filterData.name">
-                <template slot="prepend">用户名</template>
-              </el-input>
-            </el-form-item>
-          </el-col>
           <el-col :span="6">
-            <el-form-item label="职位" label-width="60px">
-              <el-select v-model="filterData.role">
-                <el-option v-for="item in roleOption"
+            <el-form-item label="使用状态" label-width="80px">
+              <el-select v-model="filterData.status">
+                <el-option v-for="item in statusOption"
                 :key="item.value" :label="item.label" :value="item.value">
                 </el-option>
               </el-select>
@@ -27,10 +20,10 @@
           </el-col>
           <el-col :span="4">
             <el-button type="primary" style="margin-left:20px"
-            icon="el-icon-search" @click="renderUser()">搜索</el-button>
+            icon="el-icon-search" @click="renderAdditive()">搜索</el-button>
           </el-col>
-          <el-col :span="4" :offset="5" style="text-align:right">
-            <el-button type="warning" icon="el-icon-circle-plus" @click="addUser()">新增</el-button>
+          <el-col :span="4" :offset="10" style="text-align:right">
+            <el-button type="warning" icon="el-icon-circle-plus" @click="addAdditive()">新增</el-button>
           </el-col>
         </el-row>
       </el-form>
@@ -41,49 +34,35 @@
           <el-tag size="medium">{{ scope.row.id }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="name" label="用户名" min-width="180">
+      <el-table-column prop="name" label="名称" min-width="180">
         <template slot-scope="scope">{{ scope.row.name }}</template>
       </el-table-column>
-      <el-table-column prop="role" label="职位" min-width="150">
-        <template slot-scope="scope">{{ showRole(scope.row.role) }}</template>
-      </el-table-column>
-      <el-table-column prop="isActive" label="是否在职" min-width="100">
-        <template slot-scope="scope"><i :class="[ scope.row.isActive ? 'fa fa-check' : 'fa fa-times' ]"></i></template>
+      <el-table-column prop="isActive" label="是否使用" min-width="100">
+        <template slot-scope="scope">
+          <el-switch v-model="scope.row.isActive"
+          active-color="#13ce66" inactive-color="#ff4949" @change="doUpdate(scope.row)">
+          </el-switch>
+        </template>
       </el-table-column>
       <el-table-column label="操作" min-width="140">
         <template slot-scope="scope">
-          <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
           <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-    <el-dialog :title="dialogFormTitle" :visible="dialogFormVisible" width="30%" :before-close="handleClose">
+    <el-dialog title="新增添加物" :visible="dialogFormVisible" width="30%">
       <el-form ref="form" :model="form">
         <el-row :gutter="20">
           <el-col :span="22">
-            <el-form-item label="用户名" label-width="80px">
+            <el-form-item label="名称" label-width="80px">
               <el-input v-model="form.name"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="22">
-            <el-form-item label="职位" label-width="80px">
-              <el-select v-model="form.role">
-                <el-option v-for="item in roleEditOption"
-                :key="item.value" :label="item.label" :value="item.value">
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="22">
-            <el-form-item label="是否在职" label-width="80px">
-              <el-switch v-model="form.isActive"></el-switch>
             </el-form-item>
           </el-col>
         </el-row>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="isUpdate == true ? doUpdate() : doAdd()">确 定</el-button>
+        <el-button type="primary" @click="doAdd()">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -93,35 +72,20 @@
 export default {
   data: function() {
     return {
-      isUpdate: false,
       dialogFormVisible: false,
-      dialogFormTitle: "新增人员信息",
       tableData: [],
       filterData: {
-        name: "",
-        role: 0
+        status: 0
       },
-      roleOption: [
-        { label: "全部", value: 0 },
-        { label: "管理员", value: 1 },
-        { label: "经理", value: 2 },
-        { label: "职员", value: 3 }
-      ],
-      roleEditOption: [
-        { label: "管理员", value: 1 },
-        { label: "经理", value: 2 },
-        { label: "职员", value: 3 }
+      statusOption: [
+        { label: "全部", value: 2 },
+        { label: "使用中", value: 1 },
+        { label: "被禁用", value: 0 }
       ],
       form: {}
     };
   },
   methods: {
-    handleEdit(index, row) {
-      this.isUpdate = true;
-      this.dialogFormTitle = "编辑人员信息";
-      this.form = JSON.parse(JSON.stringify(row));
-      this.dialogFormVisible = true;
-    },
     handleDelete(index, row) {
       this.$confirm("确认删除？")
         .then(_ => {
@@ -129,15 +93,7 @@ export default {
         })
         .catch(_ => {});
     },
-    handleClose(done) {
-      this.$confirm("确认关闭？")
-        .then(_ => {
-          this.dialogFormVisible = false;
-          done();
-        })
-        .catch(_ => {});
-    },
-    renderUser() {
+    renderAdditive() {
       const loading = this.$loading({
         lock: true,
         text: "Loading",
@@ -145,7 +101,7 @@ export default {
       });
       let params = this.filterData;
       this.$api
-        .post(this.$url.getUserList, params)
+        .post(this.$url.getAdditiveList, params)
         .then(res => {
           let data = res.data;
           if (data.code == "SUCCESS") {
@@ -166,12 +122,9 @@ export default {
           loading.close();
         });
     },
-    addUser() {
-      this.isUpdate = false;
-      this.dialogFormTitle = "新增人员信息";
+    addAdditive() {
       this.form = {
         name: "",
-        role: 3,
         isActive: true
       };
       this.dialogFormVisible = true;
@@ -180,7 +133,7 @@ export default {
       this.dialogFormVisible = false;
       let params = this.form;
       this.$api
-        .post(this.$url.addUser, params)
+        .post(this.$url.addAdditive, params)
         .then(res => {
           let data = res.data;
           if (data == "SUCCESS") {
@@ -188,12 +141,7 @@ export default {
               message: "添加成功",
               type: "success"
             });
-            this.renderUser();
-          } else if (data == "USERNAME_EXIST") {
-            this.$message({
-              message: "添加失败， 用户已存在",
-              type: "error"
-            });
+            this.renderAdditive();
           } else {
             this.$message({
               message: "添加失败， 失败原因：" + data,
@@ -208,11 +156,11 @@ export default {
           });
         });
     },
-    doUpdate() {
+    doUpdate(row) {
       this.dialogFormVisible = false;
-      let params = this.form;
+      let params = row;
       this.$api
-        .post(this.$url.updateUser, params)
+        .post(this.$url.updateAdditive, params)
         .then(res => {
           let data = res.data;
           if (data == "SUCCESS") {
@@ -220,7 +168,7 @@ export default {
               message: "更新成功",
               type: "success"
             });
-            this.renderUser();
+            this.renderAdditive();
           } else {
             this.$message({
               message: "更新失败， 失败原因：" + data,
@@ -238,7 +186,7 @@ export default {
     doDelete(index, row) {
       let params = row;
       this.$api
-        .post(this.$url.deleteUser, params)
+        .post(this.$url.deleteAdditive, params)
         .then(res => {
           let data = res.data;
           if (data == "SUCCESS") {
@@ -246,7 +194,7 @@ export default {
               message: "删除成功",
               type: "success"
             });
-            this.renderUser();
+            this.renderAdditive();
           } else {
             this.$message({
               message: "删除失败， 失败原因：" + data,
@@ -260,20 +208,12 @@ export default {
             type: "error"
           });
         });
-    },
-    showRole(role) {
-      let label = "";
-      this.roleOption.forEach(element => {
-        if (element.value == role) {
-          label = element.label;
-        }
-      });
-      return label;
     }
   },
   beforeRouteEnter(to, from, next) {
     next(vm => {
-      vm.renderUser();
+        vm.filterData.status = 2;
+      vm.renderAdditive();
     });
   }
 };

@@ -61,8 +61,8 @@
                         title: '其他配置',
                         subs: [
                             {
-                                index: '/work',
-                                title: '工作量'
+                                index: '/workRate',
+                                title: '工作效率'
                             },
                             {
                                 index: '/additive',

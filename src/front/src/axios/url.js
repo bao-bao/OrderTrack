@@ -40,4 +40,17 @@ export default {
   deleteOrderDetail: "/order/deleteOrderDetail",
 
   getOrderHistory: "/order/getOrderHistory",
+
+  /**其他配置**/
+  getAdditiveList: "/setting/getAdditiveList",
+  addAdditive: "/setting/addAdditive",
+  updateAdditive: "/setting/updateAdditive",
+  deleteAdditive: "/setting/deleteAdditive",
+
+  getAdditiveName: "/setting/getAdditiveName",
+
+  getWorkRateList: "/setting/getWorkRateList",
+  addWorkRate: "/setting/addWorkRate",
+  updateWorkRate: "/setting/updateWorkRate",
+  deleteWorkRate: "/setting/deleteWorkRate",
 };

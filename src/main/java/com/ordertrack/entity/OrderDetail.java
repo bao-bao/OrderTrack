@@ -46,11 +46,8 @@ public class OrderDetail {
     @Column(name = "fruitsticker")
     private String fruitSticker;
 
-    @Column(name = "hasbeads")
-    private Boolean hasBeads;
-
-    @Column(name = "hasparticle")
-    private Boolean hasParticle;
+    @Column(name = "extra", length = 200)
+    private String extra;
 
     @Column(name = "remark", length = 200)
     private String remark;

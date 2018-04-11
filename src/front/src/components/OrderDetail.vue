@@ -29,7 +29,7 @@
           </el-col>
           <el-col :span="2" :offset="1" style="text-align:right">
             <el-form-item label-width="0px">
-                <el-button type="warning" icon="el-icon-circle-plus" @click="addOrderDetail()">新增</el-button>
+                <el-button type="warning" icon="el-icon-circle-plus" :disabled="isFinish" @click="addOrderDetail()">新增</el-button>
             </el-form-item>
           </el-col>
         </el-row>
@@ -60,7 +60,7 @@
       </el-card>
     </div>
     <el-table show-header border :data="tableData" style="width: 100%; text-align: center">
-        <el-table-column type="expand">
+      <el-table-column type="expand">
         <template slot-scope="props">
           <el-form label-position="left" inline class="demo-table-expand">
             <el-form-item label="内包装规格">
@@ -101,19 +101,13 @@
       <el-table-column prop="productStandard" label="产品规格" min-width="130">
         <template slot-scope="scope">{{ scope.row.productStandard }}</template>
       </el-table-column>
-      <el-table-column prop="hasBeads" label="硅胶珠" min-width="80">
-        <template slot-scope="scope"><i :class="[ scope.row.hasBeads ? 'fa fa-check' : 'fa fa-times' ]"></i></template>
-      </el-table-column>
-      <el-table-column prop="hasParticle" label="彩粒" min-width="80">
-        <template slot-scope="scope"><i :class="[ scope.row.hasParticle ? 'fa fa-check' : 'fa fa-times' ]"></i></template>
-      </el-table-column>
-      <el-table-column prop="hasParticle" label="粘贴" min-width="80">
-        <template slot-scope="scope"><i :class="[ scope.row.hasParticle ? 'fa fa-check' : 'fa fa-times' ]"></i></template>
+      <el-table-column prop="additive" label="额外添加" min-width="160" show-overflow-tooltip>
+        <template slot-scope="scope">{{ showAdditive(scope.row.extra) }}</template>
       </el-table-column>
       <el-table-column label="操作" min-width="160">
         <template slot-scope="scope">
-          <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-          <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+          <el-button size="mini" :disabled="isFinish" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+          <el-button size="mini" :disabled="isFinish" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -165,14 +159,12 @@
               <el-input v-model="form.fruitSticker"></el-input>
             </el-form-item>
           </el-col>
-          <el-col :span="11">
-            <el-form-item label="硅胶珠" label-width="100px">
-              <el-switch v-model="form.hasBeads"></el-switch>
-            </el-form-item>
-          </el-col>
-          <el-col :span="11">
-            <el-form-item label="彩粒" label-width="100px">
-              <el-switch v-model="form.hasParticle"></el-switch>
+          <el-col :span="22">
+            <el-form-item label="额外添加" label-width="100px">
+              <el-checkbox-group v-model="form.extra">
+                <el-checkbox v-for="additive in additiveOption" :label="additive" :key="additive">
+                  {{additive}}</el-checkbox>
+              </el-checkbox-group>
             </el-form-item>
           </el-col>
           <el-col :span="22">
@@ -184,7 +176,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="isUpdate == true ? doUpdate() : doAdd()">确 定</el-button>
+        <el-button type="primary"  @click="isUpdate == true ? doUpdate() : doAdd()">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -194,6 +186,7 @@
 export default {
   data: function() {
     return {
+      isFinish: false,
       orderId: 0,
       isUpdate: false,
       dialogFormVisible: false,
@@ -204,6 +197,7 @@ export default {
         customName: "",
         daterange: null
       },
+      additiveOption: [],
       order: {},
       form: {}
     };
@@ -213,6 +207,7 @@ export default {
       this.isUpdate = true;
       this.dialogFormTitle = "编辑订单内容";
       this.form = JSON.parse(JSON.stringify(row));
+      this.form.extra = JSON.parse(this.form.extra);
       this.dialogFormVisible = true;
     },
     handleDelete(index, row) {
@@ -231,7 +226,7 @@ export default {
         .catch(_ => {});
     },
     goBack() {
-        this.$router.go(-1);
+      this.$router.go(-1);
     },
     renderOrder() {
       let params = {
@@ -243,6 +238,7 @@ export default {
           let data = res.data;
           if (data.code == "SUCCESS") {
             this.order = data.order;
+            this.isFinish = this.order.status == 6;
           } else {
             this.$message({
               message: "查询失败， 失败原因：" + data.code,
@@ -289,6 +285,27 @@ export default {
           loading.close();
         });
     },
+    renderAdditive() {
+      this.$api
+        .get(this.$url.getAdditiveName)
+        .then(res => {
+          let data = res.data;
+          if (data.code == "SUCCESS") {
+            this.additiveOption = data.list;
+          } else {
+            this.$message({
+              message: "查询失败， 失败原因：" + data.code,
+              type: "error"
+            });
+          }
+        })
+        .catch(err => {
+          this.$message({
+            message: JSON.stringify(err.data),
+            type: "error"
+          });
+        });
+    },
     addOrderDetail() {
       this.isUpdate = false;
       this.dialogFormTitle = "新增订单内容";
@@ -303,14 +320,14 @@ export default {
         outerCount: "",
         smell: "",
         fruitSticker: "",
-        hasBeads: false,
-        hasParticle: false,
+        additive: [],
         remark: ""
       };
       this.dialogFormVisible = true;
     },
     doAdd() {
       this.dialogFormVisible = false;
+      this.form.extra = JSON.stringify(this.form.extra);
       let params = this.form;
       this.$api
         .post(this.$url.addOrderDetail, params)
@@ -338,6 +355,7 @@ export default {
     },
     doUpdate() {
       this.dialogFormVisible = false;
+      this.form.extra = JSON.stringify(this.form.extra);
       let params = this.form;
       this.$api
         .post(this.$url.updateOrderDetail, params)
@@ -392,11 +410,25 @@ export default {
     showDate(timestamp) {
       let date = new Date(timestamp);
       return date.toLocaleDateString();
+    },
+    showAdditive(str) {
+      let show = "";
+      console.log(str)
+      let arr = JSON.parse(str);
+      if (arr.length == 0) {
+        return "无";
+      } else {
+        arr.forEach(element => {
+          show += element + ",";
+        });
+        return show.substring(0, show.length - 1);
+      }
     }
   },
   beforeRouteEnter(to, from, next) {
     next(vm => {
       vm.orderId = vm.$route.params.id;
+      vm.renderAdditive();
       vm.renderOrderDetail();
     });
   }

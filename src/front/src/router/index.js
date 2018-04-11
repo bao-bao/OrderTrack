@@ -40,6 +40,20 @@ export default new Router({
               component: resolve => require(["../components/OrderDetail.vue"], resolve)
             }
           ]
+        },
+        {
+          path: "/setting",
+          component: {template: "<router-view></router-view>"},
+          children: [
+            {
+              path: "additive",
+              component: resolve => require(["../components/Additive.vue"], resolve)
+            },
+            {
+              path: "workRate",
+              component: resolve => require(["../components/WorkRate.vue"], resolve)
+            }
+          ]
         }
       ]
     },
