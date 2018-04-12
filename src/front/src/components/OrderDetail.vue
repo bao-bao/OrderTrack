@@ -111,6 +111,11 @@
         </template>
       </el-table-column>
     </el-table>
+    <div class="block" style="text-align: right; margin-top: 5px">
+      <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" 
+      :current-page.sync="currentPage" :page-size="pageSize" layout="total, prev, pager, next" :total="total">
+      </el-pagination>
+    </div>
     <el-dialog :title="dialogFormTitle" :visible="dialogFormVisible" width="70%" :before-close="handleClose">
       <el-form ref="form" :model="form">
         <el-row :gutter="20">
@@ -192,6 +197,10 @@ export default {
       dialogFormVisible: false,
       dialogFormTitle: "新增订单内容",
       tableData: [],
+      listData: [],
+      currentPage: 1,
+      pageSize: 6,
+      total: 0,
       filterData: {
         contractId: "",
         customName: "",
@@ -203,6 +212,25 @@ export default {
     };
   },
   methods: {
+    initPagination(size) {
+      this.pageSize = size;
+      this.currentPage = 1;
+      this.total = this.listData.length;
+      this.tableData = this.listData.slice(
+        (this.currentPage - 1) * size,
+        this.currentPage * size
+      );
+    },
+    handleSizeChange(val) {
+      this.initPagination(val);
+    },
+    handleCurrentChange(val) {
+      this.currentPage = val;
+      this.tableData = this.listData.slice(
+        (val - 1) * this.pageSize,
+        val * this.pageSize
+      );
+    },
     handleEdit(index, row) {
       this.isUpdate = true;
       this.dialogFormTitle = "编辑订单内容";
@@ -267,7 +295,8 @@ export default {
         .then(res => {
           let data = res.data;
           if (data.code == "SUCCESS") {
-            this.tableData = data.list;
+            this.listData = data.list;
+            this.initPagination(6);
             this.renderOrder();
           } else {
             this.$message({

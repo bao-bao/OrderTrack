@@ -50,6 +50,11 @@
         </template>
       </el-table-column>
     </el-table>
+    <div class="block" style="text-align: right; margin-top: 5px">
+      <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" 
+      :current-page.sync="currentPage" :page-size="pageSize" layout="total, prev, pager, next" :total="total">
+      </el-pagination>
+    </div>
     <el-dialog title="新增添加物" :visible="dialogFormVisible" width="30%">
       <el-form ref="form" :model="form">
         <el-row :gutter="20">
@@ -74,6 +79,10 @@ export default {
     return {
       dialogFormVisible: false,
       tableData: [],
+      listData: [],
+      currentPage: 1,
+      pageSize: 10,
+      total: 0,
       filterData: {
         status: 0
       },
@@ -86,6 +95,25 @@ export default {
     };
   },
   methods: {
+    initPagination(size) {
+      this.pageSize = size;
+      this.currentPage = 1;
+      this.total = this.listData.length;
+      this.tableData = this.listData.slice(
+        (this.currentPage - 1) * size,
+        this.currentPage * size
+      );
+    },
+    handleSizeChange(val) {
+      this.initPagination(val);
+    },
+    handleCurrentChange(val) {
+      this.currentPage = val;
+      this.tableData = this.listData.slice(
+        (val - 1) * this.pageSize,
+        val * this.pageSize
+      );
+    },
     handleDelete(index, row) {
       this.$confirm("确认删除？")
         .then(_ => {
@@ -105,7 +133,8 @@ export default {
         .then(res => {
           let data = res.data;
           if (data.code == "SUCCESS") {
-            this.tableData = data.list;
+            this.listData = data.list;
+            this.initPagination(10);
           } else {
             this.$message({
               message: "查询失败， 失败原因：" + data.code,

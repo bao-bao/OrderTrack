@@ -37,8 +37,7 @@
       <el-table-column prop="standard" label="规格" min-width="180">
         <template slot-scope="scope">{{ scope.row.standard }} kg</template>
       </el-table-column>
-      <el-table-column prop="type" label="单位" min-width="180"
-      :filter-method="filterType" :filters="filterOption" filter-placement="bottom-end">
+      <el-table-column prop="type" label="单位" min-width="180">
         <template slot-scope="scope">{{ showType(scope.row.type) }}</template>
       </el-table-column>
       <el-table-column prop="count" label="工作量（吨）" min-width="180">
@@ -57,9 +56,9 @@
         </template>
       </el-table-column>
     </el-table>
-    <div class="block">
+    <div class="block" style="text-align: right; margin-top: 5px">
       <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" 
-      :current-page.sync="currentPage1" :page-size="100" layout="total, prev, pager, next" :total="">
+      :current-page.sync="currentPage" :page-size="pageSize" layout="total, prev, pager, next" :total="total">
       </el-pagination>
     </div>
     <el-dialog title="新增工作量" :visible="dialogFormVisible" width="30%">
@@ -96,6 +95,10 @@ export default {
     return {
       dialogFormVisible: false,
       tableData: [],
+      listData: [],
+      currentPage: 1,
+      pageSize: 10,
+      total: 0,
       filterData: {
         status: 0
       },
@@ -111,15 +114,35 @@ export default {
         { label: "其他", value: 4 }
       ],
       filterOption: [
-        { text: "纸箱", value: 1 },
-        { text: "托盘", value: 2 },
-        { text: "桶", value: 3 },
-        { text: "其他", value: 4 }
+        { label: "全部", value: 0 },
+        { label: "纸箱", value: 1 },
+        { label: "托盘", value: 2 },
+        { label: "桶", value: 3 },
+        { label: "其他", value: 4 }
       ],
       form: {}
     };
   },
   methods: {
+    initPagination(size) {
+      this.pageSize = size;
+      this.currentPage = 1;
+      this.total = this.listData.length;
+      this.tableData = this.listData.slice(
+        (this.currentPage - 1) * size,
+        this.currentPage * size
+      );
+    },
+    handleSizeChange(val) {
+      this.initPagination(val);
+    },
+    handleCurrentChange(val) {
+      this.currentPage = val;
+      this.tableData = this.listData.slice(
+        (val - 1) * this.pageSize,
+        val * this.pageSize
+      );
+    },
     handleDelete(index, row) {
       this.$confirm("确认删除？")
         .then(_ => {
@@ -139,7 +162,8 @@ export default {
         .then(res => {
           let data = res.data;
           if (data.code == "SUCCESS") {
-            this.tableData = data.list;
+            this.listData = data.list;
+            this.initPagination(10);
           } else {
             this.$message({
               message: "查询失败， 失败原因：" + data.code,
@@ -251,9 +275,6 @@ export default {
         }
       });
       return label;
-    },
-    filterType(value, row) {
-      return row.type === value;
     }
   },
   beforeRouteEnter(to, from, next) {
