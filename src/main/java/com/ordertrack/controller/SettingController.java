@@ -4,9 +4,11 @@ package com.ordertrack.controller;
 
 import com.ordertrack.constant.ReturnCode;
 import com.ordertrack.entity.Additive;
+import com.ordertrack.entity.Product;
 import com.ordertrack.entity.WorkRate;
 import com.ordertrack.pojo.AdditiveListRequest;
 import com.ordertrack.pojo.ListResponse;
+import com.ordertrack.pojo.ProductListRequest;
 import com.ordertrack.pojo.WorkRateListRequest;
 import com.ordertrack.service.impl.SettingServiceImpl;
 import org.springframework.stereotype.Controller;
@@ -60,6 +62,7 @@ public class SettingController {
         return resp;
     }
 
+
     @ResponseBody
     @PostMapping("/getWorkRateList")
     public ListResponse<WorkRate> getWorkRateList(@RequestBody WorkRateListRequest filterData) {
@@ -89,4 +92,33 @@ public class SettingController {
         return settingService.deleteWorkRate(workRate);
     }
 
+
+    @ResponseBody
+    @PostMapping("/getProductList")
+    public ListResponse<Product> getProductList(@RequestBody ProductListRequest filterData) {
+        ListResponse<Product> resp = new ListResponse<>();
+        Integer status = filterData.getStatus();
+        List<Product> productList = settingService.queryProductList(status);
+        resp.setList(productList);
+        resp.setCode(ReturnCode.SUCCESS);
+        return resp;
+    }
+
+    @ResponseBody
+    @PostMapping("/addProduct")
+    public ReturnCode addProduct(@RequestBody Product product) {
+        return settingService.addProduct(product);
+    }
+
+    @ResponseBody
+    @PostMapping("/updateProduct")
+    public ReturnCode updateProduct(@RequestBody Product product) {
+        return settingService.updateProduct(product);
+    }
+
+    @ResponseBody
+    @PostMapping("/deleteProduct")
+    public ReturnCode deleteProduct(@RequestBody Product product) {
+        return settingService.deleteProduct(product);
+    }
 }

@@ -95,6 +95,9 @@
       <el-table-column prop="chineseName" label="中文名称" min-width="180">
         <template slot-scope="scope">{{ scope.row.chineseName }}</template>
       </el-table-column>
+      <el-table-column prop="productPrice" label="产品总价" min-width="130">
+        <template slot-scope="scope">{{ scope.row.productPrice }} 元</template>
+      </el-table-column>
       <el-table-column prop="productWeight" label="产品净重" min-width="130">
         <template slot-scope="scope">{{ scope.row.productWeight }} kg</template>
       </el-table-column>
@@ -121,7 +124,12 @@
         <el-row :gutter="20">
           <el-col :span="22">
             <el-form-item label="中文名称" label-width="100px">
-              <el-input v-model="form.chineseName"></el-input>
+              <el-autocomplete :fetch-suggestions="querySearch" v-model="form.chineseName" @select="productSelect">
+                <i class="el-icon-edit el-input__icon" slot="suffix"></i>
+                <template slot-scope="props">
+                  <div>{{ props.item.show }}</div>
+                </template>
+              </el-autocomplete>
             </el-form-item>
           </el-col>
           <el-col :span="11">
@@ -208,6 +216,8 @@ export default {
       },
       additiveOption: [],
       order: {},
+      product: [],
+      piecePirce: 0,
       form: {}
     };
   },
@@ -255,6 +265,53 @@ export default {
     },
     goBack() {
       this.$router.go(-1);
+    },
+    querySearch(queryString, cb) {
+      var products = this.product;
+      var results = queryString
+        ? products.filter(this.createFilter(queryString))
+        : products;
+        results.forEach(element => {
+          element.show = element.name + " - " + element.price;
+          element.value = element.name;
+        });
+      cb(results);
+    },
+    createFilter(queryString) {
+      return product => {
+        return (
+          product.name.toLowerCase().indexOf(queryString.toLowerCase()) ===
+          0
+        );
+      };
+    },
+    productSelect(item) {
+      this.piecePirce = item.price;
+      this.form.name = item.name;
+    },
+    renderProduct() {
+      let params = {
+        status: 1
+      };
+      this.$api
+        .post(this.$url.getProductList, params)
+        .then(res => {
+          let data = res.data;
+          if (data.code == "SUCCESS") {
+            this.product = data.list;
+          } else {
+            this.$message({
+              message: "查询失败， 失败原因：" + data.code,
+              type: "error"
+            });
+          }
+        })
+        .catch(err => {
+          this.$message({
+            message: JSON.stringify(err.data),
+            type: "error"
+          });
+        });
     },
     renderOrder() {
       let params = {
@@ -341,6 +398,7 @@ export default {
       this.form = {
         orderId: this.orderId,
         chineseName: "",
+        productPrice: "",
         productWeight: "",
         productStandard: "",
         innerStandard: "",
@@ -348,6 +406,7 @@ export default {
         outerStandard: "",
         outerCount: "",
         smell: "",
+        extra: [],
         fruitSticker: "",
         additive: [],
         remark: ""
@@ -356,6 +415,7 @@ export default {
     },
     doAdd() {
       this.dialogFormVisible = false;
+      this.form.productPrice = this.piecePirce * this.form.productWeight;
       this.form.extra = JSON.stringify(this.form.extra);
       let params = this.form;
       this.$api
@@ -367,6 +427,7 @@ export default {
               message: "添加成功",
               type: "success"
             });
+            
             this.renderOrderDetail();
           } else {
             this.$message({
@@ -381,9 +442,13 @@ export default {
             type: "error"
           });
         });
+      this.piecePirce = 0;
     },
     doUpdate() {
       this.dialogFormVisible = false;
+      if(this.piecePirce != 0) {
+        this.form.productPrice = this.piecePirce * this.form.productWeight;
+      }
       this.form.extra = JSON.stringify(this.form.extra);
       let params = this.form;
       this.$api
@@ -409,6 +474,7 @@ export default {
             type: "error"
           });
         });
+      this.piecePirce = 0;
     },
     doDelete(index, row) {
       let params = row;
@@ -442,7 +508,6 @@ export default {
     },
     showAdditive(str) {
       let show = "";
-      console.log(str)
       let arr = JSON.parse(str);
       if (arr.length == 0) {
         return "无";
@@ -458,6 +523,7 @@ export default {
     next(vm => {
       vm.orderId = vm.$route.params.id;
       vm.renderAdditive();
+      vm.renderProduct();
       vm.renderOrderDetail();
     });
   }

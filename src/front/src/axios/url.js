@@ -53,4 +53,9 @@ export default {
   addWorkRate: "/setting/addWorkRate",
   updateWorkRate: "/setting/updateWorkRate",
   deleteWorkRate: "/setting/deleteWorkRate",
+
+  getProductList: "/setting/getProductList",
+  addProduct: "/setting/addProduct",
+  updateProduct: "/setting/updateProduct",
+  deleteProduct: "/setting/deleteProduct",
 };

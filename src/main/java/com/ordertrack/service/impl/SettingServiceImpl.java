@@ -4,8 +4,10 @@ package com.ordertrack.service.impl;
 
 import com.ordertrack.constant.ReturnCode;
 import com.ordertrack.dao.AdditiveDao;
+import com.ordertrack.dao.ProductDao;
 import com.ordertrack.dao.WorkRateDao;
 import com.ordertrack.entity.Additive;
+import com.ordertrack.entity.Product;
 import com.ordertrack.entity.WorkRate;
 import com.ordertrack.service.SettingService;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,8 @@ public class SettingServiceImpl implements SettingService {
     private AdditiveDao additiveDao;
     @Resource
     private WorkRateDao workRateDao;
+    @Resource
+    private ProductDao productDao;
 
     @Override
     @Transactional
@@ -92,6 +96,37 @@ public class SettingServiceImpl implements SettingService {
     @Transactional
     public ReturnCode deleteWorkRate(WorkRate workRate) {
         workRateDao.delete(workRate);
+        return ReturnCode.SUCCESS;
+    }
+
+    @Override
+    @Transactional
+    public List<Product> queryProductList(Integer status) {
+        if(status == 2) {
+            return productDao.findAll();
+        } else {
+            return productDao.findByIsActive(status == 1);
+        }
+    }
+
+    @Override
+    @Transactional
+    public ReturnCode addProduct(Product product) {
+        productDao.save(product);
+        return ReturnCode.SUCCESS;
+    }
+
+    @Override
+    @Transactional
+    public ReturnCode updateProduct(Product product) {
+        productDao.saveAndFlush(product);
+        return ReturnCode.SUCCESS;
+    }
+
+    @Override
+    @Transactional
+    public ReturnCode deleteProduct(Product product) {
+        productDao.delete(product);
         return ReturnCode.SUCCESS;
     }
 }

@@ -136,7 +136,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderDao.findByOrderId(orderId);
         order.setTotalSmall(order.getTotalSmall() + orderDetail.getInnerCount());
         order.setTotalBig(order.getTotalBig() + orderDetail.getOuterCount());
-        order.setTotalPrice(order.getTotalPrice());
+        order.setTotalPrice(order.getTotalPrice() + orderDetail.getProductPrice());
         order.setTotalWeight(order.getTotalWeight() + orderDetail.getProductWeight());
         orderDao.saveAndFlush(order);
         return ReturnCode.SUCCESS;
@@ -156,7 +156,7 @@ public class OrderServiceImpl implements OrderService {
         for(OrderDetail detail : details) {
             totalSmall += detail.getInnerCount();
             totalBig += detail.getOuterCount();
-            totalPrice += 0;
+            totalPrice += detail.getProductPrice();
             totalWeight += detail.getProductWeight();
         }
         order.setTotalSmall(totalSmall);
@@ -175,7 +175,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderDao.findByOrderId(orderId);
         order.setTotalSmall(order.getTotalSmall() - orderDetail.getInnerCount());
         order.setTotalBig(order.getTotalBig() - orderDetail.getOuterCount());
-        order.setTotalPrice(order.getTotalPrice());
+        order.setTotalPrice(order.getTotalPrice() - orderDetail.getProductPrice());
         order.setTotalWeight(order.getTotalWeight() - orderDetail.getProductWeight());
         orderDao.saveAndFlush(order);
         return ReturnCode.SUCCESS;

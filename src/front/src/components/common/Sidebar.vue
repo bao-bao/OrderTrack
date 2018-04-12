@@ -21,77 +21,76 @@
 </template>
 
 <script>
-    export default {
-        data() {
-            return {
-                items: [
-                    {
-                        icon: 'el-icon-bell',
-                        index: '/home',
-                        title: '首页'
-                    },
-                    {
-                        icon: 'el-icon-document',
-                        index: '/order',
-                        title: '订单管理',
-                        subs: [
-                            {
-                                index: '/onbusiness',
-                                title: '生产中'
-                            },
-                            {
-                                index: '/history',
-                                title: '历史记录'
-                            }
-                        ]
-                    },
-                    {
-                        icon: 'el-icon-news',
-                        index: '/employee',
-                        title: '职员管理'
-                    },
-                    {
-                        icon: 'el-icon-setting',
-                        index: '/price',
-                        title: '货物管理'
-                    },
-                    {
-                        icon: 'el-icon-star-off',
-                        index: '/setting',
-                        title: '其他配置',
-                        subs: [
-                            {
-                                index: '/workRate',
-                                title: '工作效率'
-                            },
-                            {
-                                index: '/additive',
-                                title: '添加物'
-                            }
-                        ]
-                    }
-                ]
-            }
+export default {
+  data() {
+    return {
+      items: [
+        {
+          icon: "el-icon-bell",
+          index: "/home",
+          title: "首页"
         },
-        computed:{
-            onRoutes(){
-                return this.$route.path.replace('/','');
+        {
+          icon: "el-icon-document",
+          index: "/order",
+          title: "订单管理",
+          subs: [
+            {
+              index: "/onbusiness",
+              title: "生产中"
+            },
+            {
+              index: "/history",
+              title: "历史记录"
             }
+          ]
+        },
+        {
+          icon: "el-icon-news",
+          index: "/employee",
+          title: "职员管理"
+        },
+        {
+          icon: "el-icon-star-off",
+          index: "/setting",
+          title: "其他配置",
+          subs: [
+            {
+              index: "/product",
+              title: "产品价格"
+            },
+            {
+              index: "/workRate",
+              title: "工作效率"
+            },
+            {
+              index: "/additive",
+              title: "添加物"
+            }
+          ]
         }
+      ]
+    };
+  },
+  computed: {
+    onRoutes() {
+      return this.$route.path.replace("/", "");
     }
+  }
+};
 </script>
 
 <style scoped>
-    .sidebar{
-        display: block;
-        position: absolute;
-        width: 15%;
-        left: 0;
-        top: 70px;
-        bottom:0;
-        background: #2E363F;
-    }
-    .sidebar > ul {
-        height:100%;
-    }
+.sidebar {
+  display: block;
+  position: absolute;
+  width: 15%;
+  left: 0;
+  top: 70px;
+  bottom: 0;
+  background: #2e363f;
+}
+.sidebar > ul {
+  height: 100%;
+}
 </style>

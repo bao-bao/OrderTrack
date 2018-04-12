@@ -4,6 +4,7 @@ package com.ordertrack.service;
 
 import com.ordertrack.constant.ReturnCode;
 import com.ordertrack.entity.Additive;
+import com.ordertrack.entity.Product;
 import com.ordertrack.entity.WorkRate;
 
 import java.util.List;
@@ -21,4 +22,8 @@ public interface SettingService {
     ReturnCode updateWorkRate(WorkRate workRate);
     ReturnCode deleteWorkRate(WorkRate workRate);
 
+    List<Product> queryProductList(Integer status);
+    ReturnCode addProduct(Product product);
+    ReturnCode updateProduct(Product product);
+    ReturnCode deleteProduct(Product product);
 }
