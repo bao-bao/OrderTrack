@@ -62,21 +62,21 @@
           </el-form>
         </template>
       </el-table-column>
-      <el-table-column prop="id" label="#" min-width="70">
+      <el-table-column prop="id" label="#" min-width="50">
         <template slot-scope="scope">
           <el-tag size="medium">{{ scope.row.orderId }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="customName" label="客户名称" min-width="180">
+      <el-table-column prop="customName" label="客户名称" min-width="130">
         <template slot-scope="scope">{{ scope.row.customName }}</template>
       </el-table-column>
-      <el-table-column prop="deliveryDate" label="要求交货期" min-width="150">
+      <el-table-column prop="deliveryDate" label="要求交货期" min-width="100">
         <template slot-scope="scope">{{ showDate(scope.row.deliveryDate) }}</template>
       </el-table-column>
       <el-table-column prop="contractId" label="销售合同号" min-width="150">
         <template slot-scope="scope">{{ scope.row. contractId }}</template>
       </el-table-column>
-      <el-table-column prop="totalPrice" label="总价值" min-width="130">
+      <el-table-column prop="totalPrice" label="总价值" min-width="90">
         <template slot-scope="scope">{{ scope.row. totalPrice }}</template>
       </el-table-column>
       <el-table-column prop="status" label="当前状态" min-width="100">
@@ -87,6 +87,12 @@
       </el-table-column>
       <el-table-column label="操作" min-width="260">
         <template slot-scope="scope">
+          <el-button size="mini" v-if="scope.row.status == 0" @click="handleTake(scope.$index, scope.row)">接单</el-button>
+          <el-button size="mini" v-if="scope.row.status == 1" @click="handleDown(scope.$index, scope.row)">下发</el-button>
+          <el-button size="mini" v-if="scope.row.status == 2" @click="handlePickUp(scope.$index, scope.row)">提货</el-button>
+          <el-button size="mini" v-if="scope.row.status == 3" @click="handleDivision(scope.$index, scope.row)">分工</el-button>
+          <el-button size="mini" v-if="scope.row.status == 4" @click="handleCheck(scope.$index, scope.row)">验收</el-button>
+          <el-button size="mini" v-if="scope.row.status == 5" @click="handleBalance(scope.$index, scope.row)">结算</el-button>
           <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
           <el-button size="mini" @click="handleDetail(scope.$index, scope.row)">详细信息</el-button>
           <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
@@ -165,7 +171,7 @@ export default {
       form: {},
       statusOption: [
         { label: "准备中", value: 0 },
-        { label: "已接单", value: 1 },
+        { label: "已接单", value: 1 }, 
         { label: "待提货", value: 2 },
         { label: "待分配", value: 3 },
         { label: "包装中", value: 4 },
@@ -199,6 +205,62 @@ export default {
       this.dialogFormTitle = "编辑订单信息";
       this.form = JSON.parse(JSON.stringify(row));
       this.dialogFormVisible = true;
+    },
+    handleTake(index, row) {
+      this.$confirm("确认提交？")
+        .then(_ => {
+          row.status = 1;
+          this.form = JSON.parse(JSON.stringify(row));
+          this.doUpdate();
+          done();
+        })
+        .catch(_ => {});
+    },
+    handleDown(index, row) {
+      this.$confirm("确认提交？")
+        .then(_ => {
+          row.status = 2;
+          this.form = JSON.parse(JSON.stringify(row));
+          this.doUpdate();
+          done();
+        })
+        .catch(_ => {});
+    },
+    handlePickUp(index, row) {
+      this.$confirm("确认提交？")
+        .then(_ => {
+          row.status = 3;
+          this.form = JSON.parse(JSON.stringify(row));
+          this.doUpdate();
+          done();
+        })
+        .catch(_ => {});
+    },
+    handleDivision(index, row) {
+      return this.$router.push({
+        name: "workDivision",
+        params: { id: row.orderId }
+      });
+    },
+    handleCheck(index, row) {
+      this.$confirm("确认提交？")
+        .then(_ => {
+          row.status = 5;
+          this.form = JSON.parse(JSON.stringify(row));
+          this.doUpdate();
+          done();
+        })
+        .catch(_ => {});
+    },
+    handleBalance(index, row) {
+      this.$confirm("确认提交？")
+        .then(_ => {
+          row.status = 6;
+          this.form = JSON.parse(JSON.stringify(row));
+          this.doUpdate();
+          done();
+        })
+        .catch(_ => {});
     },
     handleDetail(index, row) {
       return this.$router.push({
@@ -267,7 +329,7 @@ export default {
         contractId: "",
         deliveryDate: new Date(),
         picture: "",
-        status: 1
+        status: 0
       };
       this.dialogFormVisible = true;
     },

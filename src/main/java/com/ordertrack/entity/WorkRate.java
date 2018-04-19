@@ -8,11 +8,11 @@ import javax.persistence.*;
 
 @Entity
 @Data
-@Table(name = "working")
+@Table(name = "workrate")
 public class WorkRate {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Column(name = "workingid")
+    @Column(name = "workrateid")
     private Integer id;
 
     @Column(name = "count")

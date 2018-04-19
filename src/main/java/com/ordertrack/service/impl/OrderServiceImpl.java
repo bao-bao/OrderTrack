@@ -6,8 +6,10 @@ import com.ordertrack.constant.OrderStatus;
 import com.ordertrack.constant.ReturnCode;
 import com.ordertrack.dao.OrderDao;
 import com.ordertrack.dao.OrderDetailDao;
+import com.ordertrack.dao.WorkRecordDao;
 import com.ordertrack.entity.Order;
 import com.ordertrack.entity.OrderDetail;
+import com.ordertrack.entity.WorkRecord;
 import com.ordertrack.service.OrderService;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
@@ -16,6 +18,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -28,6 +32,10 @@ public class OrderServiceImpl implements OrderService {
     private OrderDao orderDao;
     @Resource
     private OrderDetailDao orderDetailDao;
+    @Resource
+    private WorkRecordDao workRecordDao;
+    @PersistenceContext
+    private EntityManager em;
 
     @Override
     @Transactional
@@ -186,4 +194,25 @@ public class OrderServiceImpl implements OrderService {
     public boolean orderCheck(Order order) {
         return true;
     }
+
+    @Override
+    @Transactional
+    public ReturnCode addWorkRecord(List<WorkRecord> records, Integer detailId) {
+        for(int i = 0; i < records.size(); i++) {
+            em.merge(records.get(i));
+            if(i % 30 == 0) {
+                em.flush();
+                em.clear();
+            }
+        }
+        orderDetailDao.updateIsFinishByOrderDetailId(detailId);
+        return ReturnCode.SUCCESS;
+    }
+
+    @Override
+    @Transactional
+    public List<WorkRecord> queryDivisionDetail(int detailId) {
+        return workRecordDao.findByOrderDetail(detailId);
+    }
+
 }

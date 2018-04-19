@@ -27,6 +27,8 @@ export default {
 
   updateSelf: "/user/updateSelf",
 
+  getWorkerList: "/user/getUserList",
+
   /**订单管理**/
   getOrderList: "/order/getOrderList",
   addOrder: "/order/addOrder",
@@ -58,4 +60,8 @@ export default {
   addProduct: "/setting/addProduct",
   updateProduct: "/setting/updateProduct",
   deleteProduct: "/setting/deleteProduct",
+
+  /**工作分配**/
+  addWorkRecord: "/order/addWorkRecord",
+  getDivisionDetail: "/order/getDivisionDetail",
 };

@@ -6,6 +6,7 @@ import com.ordertrack.constant.OrderStatus;
 import com.ordertrack.constant.ReturnCode;
 import com.ordertrack.entity.Order;
 import com.ordertrack.entity.OrderDetail;
+import com.ordertrack.entity.WorkRecord;
 import com.ordertrack.pojo.*;
 import com.ordertrack.service.impl.OrderServiceImpl;
 import org.springframework.stereotype.Controller;
@@ -115,4 +116,22 @@ public class OrderController {
         return resp;
     }
 
+    @ResponseBody
+    @PostMapping("/addWorkRecord")
+    public ReturnCode addWorkRecord(@RequestBody AddWorkRecordRequest request) {
+        List<WorkRecord> list = request.getList();
+        Integer detailId = request.getDetailId();
+        return orderService.addWorkRecord(list, detailId);
+    }
+
+    @ResponseBody
+    @PostMapping("/getDivisionDetail")
+    public ListResponse<WorkRecord> getDivisionDetail(@RequestBody DivisionDetailRequest request) {
+        ListResponse<WorkRecord> resp = new ListResponse<>();
+        Integer detailId = request.getDetailId();
+        List<WorkRecord> list = orderService.queryDivisionDetail(detailId);
+        resp.setList(list);
+        resp.setCode(ReturnCode.SUCCESS);
+        return resp;
+    }
 }

@@ -18,6 +18,9 @@ public class Additive {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "price")
+    private Double price;
+
     @Column(name = "isactive")
     private Boolean isActive;
 }

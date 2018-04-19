@@ -28,11 +28,17 @@ export default new Router({
           children: [
             {
               path: "onbusiness",
+              name: "onBusiness",
               component: resolve => require(["../components/OnBusiness.vue"], resolve)
             },
             {
               path: "history",
               component: resolve => require(["../components/History.vue"], resolve)
+            },
+            {
+              path: "workDivision/:id",
+              name: "workDivision",
+              component: resolve => require(["../components/WorkDivision.vue"], resolve)
             },
             {
               path: "detail/:id",

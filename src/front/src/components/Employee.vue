@@ -48,7 +48,7 @@
         <template slot-scope="scope">{{ showRole(scope.row.role) }}</template>
       </el-table-column>
       <el-table-column prop="isActive" label="是否在职" min-width="100">
-        <template slot-scope="scope"><i :class="[ scope.row.isActive ? 'fa fa-check' : 'fa fa-times' ]"></i></template>
+        <template slot-scope="scope"><i :class="[ scope.row.isActive ? 'fa fa-check icon-b' : 'fa fa-times icon-a' ]"></i></template>
       </el-table-column>
       <el-table-column label="操作" min-width="140">
         <template slot-scope="scope">
@@ -114,12 +114,12 @@ export default {
         { label: "全部", value: 0 },
         { label: "管理员", value: 1 },
         { label: "经理", value: 2 },
-        { label: "职员", value: 3 }
+        { label: "工作班组", value: 3 }
       ],
       roleEditOption: [
         { label: "管理员", value: 1 },
         { label: "经理", value: 2 },
-        { label: "职员", value: 3 }
+        { label: "工作班组", value: 3 }
       ],
       form: {}
     };

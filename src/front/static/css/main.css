@@ -138,3 +138,15 @@ a{text-decoration: none}
   textarea {
       font-family: "Helvetica Neue",Helvetica, "microsoft yahei", arial, STHeiTi, sans-serif;
   }
+
+  .el-autocomplete {
+    width: 100%;
+  }
+
+  .icon-a {
+      color: #f78989;
+  } 
+  
+  .icon-b {
+      color: #67c23a;
+  } 

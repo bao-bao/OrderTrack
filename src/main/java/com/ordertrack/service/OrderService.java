@@ -5,6 +5,7 @@ package com.ordertrack.service;
 import com.ordertrack.constant.ReturnCode;
 import com.ordertrack.entity.Order;
 import com.ordertrack.entity.OrderDetail;
+import com.ordertrack.entity.WorkRecord;
 
 import java.util.List;
 
@@ -25,4 +26,7 @@ public interface OrderService {
     ReturnCode addOrderDetail(OrderDetail orderDetail);
     ReturnCode updateOrderDetail(OrderDetail orderDetail);
     ReturnCode deleteOrderDetail(OrderDetail orderDetail);
+
+    ReturnCode addWorkRecord(List<WorkRecord> records, Integer detailId);
+    List<WorkRecord> queryDivisionDetail(int detailId);
 }

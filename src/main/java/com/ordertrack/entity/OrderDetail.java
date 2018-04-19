@@ -49,12 +49,18 @@ public class OrderDetail {
     @Column(name = "fruitsticker")
     private String fruitSticker;
 
+    @Column(name = "packtype")
+    private Integer packType;
+
     @Column(name = "extra", length = 200)
     private String extra;
 
     @Column(name = "remark", length = 200)
     private String remark;
-    
+
+    @Column(name = "isfinish")
+    private Boolean isFinish;
+
     @Column(name = "changetime")
     private Timestamp changeTime;
 

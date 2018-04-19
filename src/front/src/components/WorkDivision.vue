@@ -3,7 +3,7 @@
     <div class="crumbs">
       <el-breadcrumb separator="/">
         <el-breadcrumb-item>订单管理</el-breadcrumb-item>
-        <el-breadcrumb-item>订单详情</el-breadcrumb-item>
+        <el-breadcrumb-item>分工</el-breadcrumb-item>
         <el-breadcrumb-item>{{orderId}}</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -15,21 +15,9 @@
                 <el-button type="primary" icon="el-icon-arrow-left" @click="goBack()">返回</el-button>
             </el-form-item>
           </el-col>
-          <el-col :span="18" :offset="1">
+          <el-col :span="2" :offset="20" style="text-align:right">
             <el-form-item label-width="0px">
-              <el-steps :active="order.status" finish-status="success">
-                <el-step title="已接单"></el-step>
-                <el-step title="待提货"></el-step>
-                <el-step title="待分配"></el-step>
-                <el-step title="包装中"></el-step>
-                <el-step title="待验收"></el-step>
-                <el-step title="已完成"></el-step>
-              </el-steps>
-            </el-form-item>
-          </el-col>
-          <el-col :span="2" :offset="1" style="text-align:right">
-            <el-form-item label-width="0px">
-                <el-button type="warning" icon="el-icon-circle-plus" :disabled="isFinish" @click="addOrderDetail()">新增</el-button>
+                <el-button type="warning" icon="el-icon-circle-plus" @click="handleNext()">提交</el-button>
             </el-form-item>
           </el-col>
         </el-row>
@@ -63,7 +51,7 @@
       <el-table-column type="expand">
         <template slot-scope="props">
           <el-form label-position="left" inline class="demo-table-expand">
-            <el-form-item label="内包装规格">
+            <el-form-item label="包装规格">
               <span>{{ props.row.innerStandard }}</span>
             </el-form-item>
             <el-form-item label="数量">
@@ -95,110 +83,80 @@
       <el-table-column prop="chineseName" label="中文名称" min-width="180">
         <template slot-scope="scope">{{ scope.row.chineseName }}</template>
       </el-table-column>
-      <el-table-column prop="productPrice" label="产品总价" min-width="130">
-        <template slot-scope="scope">{{ scope.row.productPrice }} 元</template>
-      </el-table-column>
       <el-table-column prop="productWeight" label="产品净重" min-width="130">
         <template slot-scope="scope">{{ scope.row.productWeight }} kg</template>
       </el-table-column>
-      <el-table-column prop="productStandard" label="产品规格" min-width="130">
-        <template slot-scope="scope">{{ scope.row.productStandard }}</template>
+      <el-table-column prop="innerStandard" label="包装规格" min-width="130">
+        <template slot-scope="scope">{{ scope.row.innerStandard }}</template>
+      </el-table-column>
+      <el-table-column prop="innerCount" label="数量" min-width="130">
+        <template slot-scope="scope">{{ scope.row.innerCount }}</template>
       </el-table-column>
       <el-table-column prop="additive" label="额外添加" min-width="160" show-overflow-tooltip>
         <template slot-scope="scope">{{ showAdditive(scope.row.extra) }}</template>
       </el-table-column>
-      <el-table-column label="操作" min-width="160">
+      <el-table-column label="操作" min-width="100">
         <template slot-scope="scope">
-          <el-button size="mini" :disabled="isFinish" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-          <el-button size="mini" :disabled="isFinish" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+          <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">分配</el-button>
+        </template>
+      </el-table-column>
+      <el-table-column label="分配情况" min-width="100">
+        <template slot-scope="scope">
+          <i :class="[ scope.row.isFinish ? 'fa fa-check icon-b' : 'fa fa-times icon-a' ]"></i>
         </template>
       </el-table-column>
     </el-table>
     <div class="block" style="text-align: right; margin-top: 5px">
-      <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" 
+      <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
       :current-page.sync="currentPage" :page-size="pageSize" layout="total, prev, pager, next" :total="total">
       </el-pagination>
     </div>
-    <el-dialog :title="dialogFormTitle" :visible="dialogFormVisible" width="70%" :before-close="handleClose">
+    <el-dialog title="分配方式" :visible="dialogFormVisible" width="60%" :before-close="handleClose">
       <el-form ref="form" :model="form">
         <el-row :gutter="20">
-          <el-col :span="22">
-            <el-form-item label="中文名称" label-width="100px">
-              <el-autocomplete :fetch-suggestions="querySearch" v-model="form.chineseName" @select="productSelect">
-                <i class="el-icon-edit el-input__icon" slot="suffix"></i>
-                <template slot-scope="props">
-                  <div>{{ props.item.show }}</div>
-                </template>
-              </el-autocomplete>
-            </el-form-item>
-          </el-col>
           <el-col :span="11">
-            <el-form-item label="产品净重" label-width="100px">
-              <el-input v-model="form.productWeight"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="11">
-            <el-form-item label="产品规格" label-width="100px">
-              <el-input v-model="form.productStandard"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="11">
-            <el-form-item label="内包装规格" label-width="100px">
-              <el-input v-model="form.innerStandard"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="11">
-            <el-form-item label="数量" label-width="100px">
-              <el-input v-model="form.innerCount"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="11">
-            <el-form-item label="外包装规格" label-width="100px">
-              <el-input v-model="form.outerStandard"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="11">
-            <el-form-item label="件数" label-width="100px">
-              <el-input v-model="form.outerCount"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="11">
-            <el-form-item label="味道" label-width="100px">
-              <el-input v-model="form.smell"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="11">
-            <el-form-item label="水果贴" label-width="100px">
-              <el-input v-model="form.fruitSticker"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="11">
-            <el-form-item label="包装情况" label-width="100px">
-              <el-select v-model="form.packType">
-                <el-option v-for="item in workRateOption"
-                :key="item.id" :label="showPackLabel(item)" :value="item.id">
-                </el-option>
-              </el-select>
+            <el-form-item label="剩余分配量" label-width="100px">
+              <el-input v-model="currentSurplus" disabled></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="22">
-            <el-form-item label="额外添加" label-width="100px">
-              <el-checkbox-group v-model="form.extra">
-                <el-checkbox v-for="additive in additiveOption" :label="additive" :key="additive">
-                  {{additive}}</el-checkbox>
+            <el-form-item label="班组选择" label-width="100px">
+              <el-checkbox-group v-model="checkedWorker" @change="handleCheckedChange">
+                <el-checkbox v-for="worker in workers" :label="worker.name" :key="worker.name">
+                  {{worker.name}}</el-checkbox>
               </el-checkbox-group>
             </el-form-item>
           </el-col>
-          <el-col :span="22">
-            <el-form-item label="备注" label-width="100px">
-                <el-input type="textarea" v-model="form.remark"></el-input>
-            </el-form-item>
+          <el-col :span="22" v-for="record in form.list" :key="form.list.name">
+            <el-row :gutter="20">
+              <el-col :span="14">
+                <el-form-item label="班组名" label-width="100px">
+                    <el-input v-model="record.worker"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item label="开始时间" label-width="100px">
+                  <el-date-picker v-model="record.startTime" type="datetime" format="yyyy-MM-dd HH:00:00" placeholder="选择日期时间">
+                  </el-date-picker>
+                </el-form-item>
+              </el-col>
+              <el-col :span="14">
+                <el-form-item label="工作量" label-width="100px">
+                    <el-input v-model.number="record.count" @change="handleCountChange(record)"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item label="预计耗时" label-width="100px">
+                    <span>{{ record.spand }} 小时</span>
+                </el-form-item>
+              </el-col>
+            </el-row>
           </el-col>
         </el-row>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary"  @click="isUpdate == true ? doUpdate() : doAdd()">确 定</el-button>
+        <el-button type="primary"  @click="doAdd()">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -208,11 +166,8 @@
 export default {
   data: function() {
     return {
-      isFinish: false,
       orderId: 0,
-      isUpdate: false,
       dialogFormVisible: false,
-      dialogFormTitle: "新增订单内容",
       tableData: [],
       listData: [],
       currentPage: 1,
@@ -223,19 +178,16 @@ export default {
         customName: "",
         daterange: null
       },
-      additiveOption: [],
-      workRateOption: [],
-      workRateTypeOption: [
-        { label: "全部", value: 0 },
-        { label: "纸箱", value: 1 },
-        { label: "托盘", value: 2 },
-        { label: "桶", value: 3 },
-        { label: "其他", value: 4 }
-      ],
       order: {},
-      product: [],
-      piecePirce: 0,
-      form: {}
+      workers: [],
+      checkedWorker: [],
+      currentPackType: 0,
+      currentAllCount: 0,
+      currentSurplus: 0,
+      form: {
+        list: [],
+        detailId: 0
+      }
     };
   },
   methods: {
@@ -259,18 +211,14 @@ export default {
       );
     },
     handleEdit(index, row) {
-      this.isUpdate = true;
-      this.dialogFormTitle = "编辑订单内容";
-      this.form = JSON.parse(JSON.stringify(row));
-      this.form.extra = JSON.parse(this.form.extra);
+      this.form.list = [];
+      this.form.detailId = row.id;
       this.dialogFormVisible = true;
-    },
-    handleDelete(index, row) {
-      this.$confirm("确认删除？")
-        .then(_ => {
-          this.doDelete(index, row);
-        })
-        .catch(_ => {});
+      this.currentSurplus = row.productWeight;
+      this.currentAllCount = row.productWeight;
+      this.currentPackType = row.packType;
+      this.checkedWorker = [];
+      this.renderDivisionDetail();
     },
     handleClose(done) {
       this.$confirm("确认关闭？")
@@ -280,55 +228,74 @@ export default {
         })
         .catch(_ => {});
     },
+    handleNext() {
+      this.$confirm("确认提交？")
+        .then(_ => {
+          let tag = true;
+          this.listData.forEach(element => {
+            tag = element.isFinish && tag;
+          });
+          if (tag) {
+            this.order.status = 4;
+            this.updateOrderStatus();
+            setTimeout(() => {
+              this.$router.push({
+                name: "onBusiness"
+              });
+            }, 500);
+          }
+          done();
+        })
+        .catch(_ => {});
+    },
+    handleCheckedChange(val) {
+      let formLen = this.form.list.length;
+      let valLen = val.length;
+      let newList = [];
+      if (formLen > valLen) {
+        val.forEach(element => {
+          let i = 0;
+          for (i < this.form.list.length; i++) {
+            if (this.form.list[i].worker == element) {
+              newList.push(this.form.list[i]);
+            }
+          }
+        });
+        this.form.list = newList;
+      } else {
+        this.form.list.push({
+          worker: val[valLen - 1],
+          orderDetail: this.form.detailId,
+          count: "",
+          type: this.currentPackType,
+          isFinish: false,
+          spand: ""
+        });
+      }
+    },
+    handleCountChange(record) {
+      let count = 0;
+      this.form.list.forEach(element => {
+        count += element.count;
+      });
+      if (count > this.currentAllCount) {
+        this.$message({
+          message: "超出可分配量，请重新分配",
+          type: "error"
+        });
+      } else {
+        this.currentSurplus = this.currentAllCount - count;
+      }
+      let speed = 0;
+      this.workRateOption.forEach(element => {
+        if (element.id == this.currentPackType) {
+          speed = element.count;
+        }
+      });
+      record.spand = (record.count / 1000 / speed).toFixed(2);
+    },
     goBack() {
       this.$router.go(-1);
-    },
-    querySearch(queryString, cb) {
-      var products = this.product;
-      var results = queryString
-        ? products.filter(this.createFilter(queryString))
-        : products;
-        results.forEach(element => {
-          element.show = element.name + " - " + element.price;
-          element.value = element.name;
-        });
-      cb(results);
-    },
-    createFilter(queryString) {
-      return product => {
-        return (
-          product.name.toLowerCase().indexOf(queryString.toLowerCase()) ===
-          0
-        );
-      };
-    },
-    productSelect(item) {
-      this.piecePirce = item.price;
-      this.form.name = item.name;
-    },
-    renderProduct() {
-      let params = {
-        status: 1
-      };
-      this.$api
-        .post(this.$url.getProductList, params)
-        .then(res => {
-          let data = res.data;
-          if (data.code == "SUCCESS") {
-            this.product = data.list;
-          } else {
-            this.$message({
-              message: "查询失败， 失败原因：" + data.code,
-              type: "error"
-            });
-          }
-        })
-        .catch(err => {
-          this.$message({
-            message: JSON.stringify(err.data),
-            type: "error"
-          });
-        });
     },
     rendeWorkRate() {
       let params = {
@@ -354,6 +321,31 @@ export default {
           });
         });
     },
+    renderWorker() {
+      let params = {
+        name: "",
+        role: 3
+      };
+      this.$api
+        .post(this.$url.getWorkerList, params)
+        .then(res => {
+          let data = res.data;
+          if (data.code == "SUCCESS") {
+            this.workers = data.list;
+          } else {
+            this.$message({
+              message: "查询失败， 失败原因：" + data.code,
+              type: "error"
+            });
+          }
+        })
+        .catch(err => {
+          this.$message({
+            message: JSON.stringify(err.data),
+            type: "error"
+          });
+        });
+    },
     renderOrder() {
       let params = {
         orderId: this.orderId
@@ -364,7 +356,6 @@ export default {
           let data = res.data;
           if (data.code == "SUCCESS") {
             this.order = data.order;
-            this.isFinish = this.order.status == 6;
           } else {
             this.$message({
               message: "查询失败， 失败原因：" + data.code,
@@ -412,55 +403,57 @@ export default {
           loading.close();
         });
     },
-    renderAdditive() {
+    renderDivisionDetail() {
+      const loading = this.$loading({
+        lock: true,
+        text: "Loading",
+        background: "rgba(255, 255, 255, 0.7)"
+      });
+      let params = {
+        detailId: this.form.detailId
+      };
       this.$api
-        .get(this.$url.getAdditiveName)
+        .post(this.$url.getDivisionDetail, params)
         .then(res => {
           let data = res.data;
           if (data.code == "SUCCESS") {
-            this.additiveOption = data.list;
+            this.form.list = data.list;
+            this.checkedWorker = [];
+            this.form.list.forEach(element => {
+              this.checkedWorker.push(element.worker);
+              this.currentSurplus -= element.count;
+            });
           } else {
             this.$message({
               message: "查询失败， 失败原因：" + data.code,
               type: "error"
             });
           }
+          loading.close();
         })
         .catch(err => {
           this.$message({
             message: JSON.stringify(err.data),
             type: "error"
           });
+          loading.close();
         });
     },
-    addOrderDetail() {
-      this.isUpdate = false;
-      this.dialogFormTitle = "新增订单内容";
-      this.form = {
-        orderId: this.orderId,
-        chineseName: "",
-        productPrice: "",
-        productWeight: "",
-        productStandard: "",
-        innerStandard: "",
-        innerCount: "",
-        outerStandard: "",
-        outerCount: "",
-        smell: "",
-        extra: [],
-        fruitSticker: "",
-        additive: [],
-        remark: ""
-      };
-      this.dialogFormVisible = true;
-    },
     doAdd() {
+      if (this.currentSurplus != 0) {
+        this.$message({
+          message: "仍有未分配部分，请完成后再提交",
+          type: "warning"
+        });
+        return;
+      }
       this.dialogFormVisible = false;
-      this.form.productPrice = this.piecePirce * this.form.productWeight;
-      this.form.extra = JSON.stringify(this.form.extra);
+      this.form.list.forEach(element => {
+        element.startTime = element.startTime - element.startTime % 3600000;
+      });
       let params = this.form;
       this.$api
-        .post(this.$url.addOrderDetail, params)
+        .post(this.$url.addWorkRecord, params)
         .then(res => {
           let data = res.data;
           if (data == "SUCCESS") {
@@ -468,7 +461,6 @@ export default {
               message: "添加成功",
               type: "success"
             });
-            
             this.renderOrderDetail();
           } else {
             this.$message({
@@ -483,17 +475,12 @@ export default {
             type: "error"
           });
         });
-      this.piecePirce = 0;
     },
-    doUpdate() {
+    updateOrderStatus() {
       this.dialogFormVisible = false;
-      if(this.piecePirce != 0) {
-        this.form.productPrice = this.piecePirce * this.form.productWeight;
-      }
-      this.form.extra = JSON.stringify(this.form.extra);
-      let params = this.form;
+      let params = this.order;
       this.$api
-        .post(this.$url.updateOrderDetail, params)
+        .post(this.$url.updateOrder, params)
         .then(res => {
           let data = res.data;
           if (data == "SUCCESS") {
@@ -501,37 +488,10 @@ export default {
               message: "更新成功",
               type: "success"
             });
-            this.renderOrderDetail();
+            this.renderOrder();
           } else {
             this.$message({
               message: "更新失败， 失败原因：" + data,
-              type: "error"
-            });
-          }
-        })
-        .catch(err => {
-          this.$message({
-            message: err,
-            type: "error"
-          });
-        });
-      this.piecePirce = 0;
-    },
-    doDelete(index, row) {
-      let params = row;
-      this.$api
-        .post(this.$url.deleteOrderDetail, params)
-        .then(res => {
-          let data = res.data;
-          if (data == "SUCCESS") {
-            this.$message({
-              message: "删除成功",
-              type: "success"
-            });
-            this.renderOrderDetail();
-          } else {
-            this.$message({
-              message: "删除失败， 失败原因：" + data,
               type: "error"
             });
           }
@@ -558,31 +518,15 @@ export default {
         });
         return show.substring(0, show.length - 1);
       }
-    },
-    showPackLabel(item) {
-      let str = item.standard + "kg";
-      this.workRateTypeOption.forEach(element => {
-        if(element.value == item.type) {
-          str += element.label;
-        }
-      });
-      return str;
     }
   },
   beforeRouteEnter(to, from, next) {
     next(vm => {
       vm.orderId = vm.$route.params.id;
-      vm.renderAdditive();
-      vm.renderProduct();
+      vm.renderWorker();
       vm.rendeWorkRate();
       vm.renderOrderDetail();
     });
   }
 };
 </script>
-
-<style>
-.el-autocomplete {
-  width: 100%;
-}
-</style>
