@@ -198,6 +198,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public ReturnCode addWorkRecord(List<WorkRecord> records, Integer detailId) {
+        workRecordDao.deleteByOrderDetail(detailId);
         for(int i = 0; i < records.size(); i++) {
             em.merge(records.get(i));
             if(i % 30 == 0) {

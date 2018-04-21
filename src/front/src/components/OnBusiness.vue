@@ -53,8 +53,8 @@
             <el-form-item label="大件数合计">
               <span>{{ props.row.totalBig }} 件</span>
             </el-form-item>
-            <el-form-item label="采购单号">
-              <template slot-scope="scope">{{ scope.row.purchaseId }}</template>
+            <el-form-item label="采购单号" style="width: 100%">
+              <span>{{ props.row.purchaseId }}</span>
             </el-form-item>
             <el-form-item label="包装图片" style="width: 100%">
               <span>{{ props.row.picture }}</span>
@@ -73,11 +73,11 @@
       <el-table-column prop="deliveryDate" label="要求交货期" min-width="100">
         <template slot-scope="scope">{{ showDate(scope.row.deliveryDate) }}</template>
       </el-table-column>
-      <el-table-column prop="contractId" label="销售合同号" min-width="150">
-        <template slot-scope="scope">{{ scope.row. contractId }}</template>
+      <el-table-column prop="contractId" label="销售合同号" min-width="140">
+        <template slot-scope="scope">{{ scope.row.contractId }}</template>
       </el-table-column>
-      <el-table-column prop="totalPrice" label="总价值" min-width="90">
-        <template slot-scope="scope">{{ scope.row. totalPrice }}</template>
+      <el-table-column prop="totalPrice" label="总价值" min-width="100">
+        <template slot-scope="scope">{{ scope.row.totalPrice.toFixed(2) }} 元</template>
       </el-table-column>
       <el-table-column prop="status" label="当前状态" min-width="100">
         <template slot-scope="scope">
@@ -170,13 +170,13 @@ export default {
       },
       form: {},
       statusOption: [
-        { label: "准备中", value: 0 },
-        { label: "已接单", value: 1 }, 
-        { label: "待提货", value: 2 },
-        { label: "待分配", value: 3 },
-        { label: "包装中", value: 4 },
-        { label: "待结算", value: 5 },
-        { label: "已完成", value: 6 }
+        { label: "准备", value: 0 },
+        { label: "接单", value: 1 }, 
+        { label: "提货", value: 2 },
+        { label: "分配", value: 3 },
+        { label: "包装", value: 4 },
+        { label: "结算", value: 5 },
+        { label: "完成", value: 6 }
       ]
     };
   },

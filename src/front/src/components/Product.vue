@@ -38,7 +38,7 @@
         <template slot-scope="scope">{{ scope.row.name }}</template>
       </el-table-column>
       <el-table-column prop="price" label="价格" min-width="180">
-        <template slot-scope="scope">{{ scope.row.price }} 元/kg</template>
+        <template slot-scope="scope">{{ scope.row.price.toFixed(2) }} 元/kg</template>
       </el-table-column>
       <el-table-column prop="isActive" label="是否使用" min-width="100">
         <template slot-scope="scope">

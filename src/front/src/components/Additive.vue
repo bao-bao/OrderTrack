@@ -37,6 +37,9 @@
       <el-table-column prop="name" label="名称" min-width="180">
         <template slot-scope="scope">{{ scope.row.name }}</template>
       </el-table-column>
+      <el-table-column prop="name" label="价格" min-width="180">
+        <template slot-scope="scope">{{ scope.row.price.toFixed(2) }} 元/kg</template>
+      </el-table-column>
       <el-table-column prop="isActive" label="是否使用" min-width="100">
         <template slot-scope="scope">
           <el-switch v-model="scope.row.isActive"
@@ -61,6 +64,11 @@
           <el-col :span="22">
             <el-form-item label="名称" label-width="80px">
               <el-input v-model="form.name"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="22">
+            <el-form-item label="价格" label-width="80px">
+              <el-input v-model="form.price"></el-input>
             </el-form-item>
           </el-col>
         </el-row>

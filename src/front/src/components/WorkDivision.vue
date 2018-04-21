@@ -30,7 +30,7 @@
               <span>{{ order.customName }}</span>
             </el-form-item>
             <el-form-item label="总价值">
-              <span>{{ order.totalPrice }}</span>
+              <span>{{ order.totalPrice }} 元</span>
             </el-form-item>
             <el-form-item label="要求交货期">
               <span>{{ showDate(order.deliveryDate) }}</span>
@@ -51,20 +51,14 @@
       <el-table-column type="expand">
         <template slot-scope="props">
           <el-form label-position="left" inline class="demo-table-expand">
-            <el-form-item label="包装规格">
-              <span>{{ props.row.innerStandard }}</span>
-            </el-form-item>
-            <el-form-item label="数量">
-              <span>{{ props.row.innerCount }} 件</span>
-            </el-form-item>
-            <el-form-item label="味道">
-              <span>{{ props.row.smell }}</span>
-            </el-form-item>
             <el-form-item label="外包装规格">
               <span>{{ props.row.outerStandard }}</span>
             </el-form-item>
             <el-form-item label="件数">
               <span>{{ props.row.outerCount }} 件</span>
+            </el-form-item>
+            <el-form-item label="味道">
+              <span>{{ props.row.smell }}</span>
             </el-form-item>
             <el-form-item label="水果贴">
               <span>{{ props.row.fruitSticker }}</span>
@@ -255,13 +249,18 @@ export default {
       if (formLen > valLen) {
         val.forEach(element => {
           let i = 0;
-          for (i < this.form.list.length; i++) {
+          for (i; i < this.form.list.length; i++) {
             if (this.form.list[i].worker == element) {
               newList.push(this.form.list[i]);
             }
           }
         });
         this.form.list = newList;
+        this.form.list.forEach(element => {
+          if (element.count != "") {
+            this.currentSurplus = this.currentAllCount - element.count;
+          }
+        });
       } else {
         this.form.list.push({
           worker: val[valLen - 1],
@@ -356,6 +355,7 @@ export default {
           let data = res.data;
           if (data.code == "SUCCESS") {
             this.order = data.order;
+            this.order.totalPrice = this.order.totalPrice.toFixed(2);
           } else {
             this.$message({
               message: "查询失败， 失败原因：" + data.code,

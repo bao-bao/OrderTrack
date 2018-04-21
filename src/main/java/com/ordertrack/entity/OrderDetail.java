@@ -22,6 +22,9 @@ public class OrderDetail {
     @Column(name = "chinesename", length = 45)
     private String chineseName;
 
+    @Column(name = "piecepirce")
+    private Double piecePirce;
+
     @Column(name = "productprice")
     private Double productPrice;
 

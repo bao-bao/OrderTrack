@@ -17,13 +17,14 @@
           </el-col>
           <el-col :span="18" :offset="1">
             <el-form-item label-width="0px">
-              <el-steps :active="order.status" finish-status="success">
-                <el-step title="已接单"></el-step>
-                <el-step title="待提货"></el-step>
-                <el-step title="待分配"></el-step>
-                <el-step title="包装中"></el-step>
-                <el-step title="待验收"></el-step>
-                <el-step title="已完成"></el-step>
+              <el-steps :active="order.status+1" finish-status="success">
+                <el-step title="准备"></el-step>
+                <el-step title="接单"></el-step>
+                <el-step title="提货"></el-step>
+                <el-step title="分配"></el-step>
+                <el-step title="包装"></el-step>
+                <el-step title="验收"></el-step>
+                <el-step title="完成"></el-step>
               </el-steps>
             </el-form-item>
           </el-col>
@@ -42,7 +43,7 @@
               <span>{{ order.customName }}</span>
             </el-form-item>
             <el-form-item label="总价值">
-              <span>{{ order.totalPrice }}</span>
+              <span>{{ order.totalPrice }} 元</span>
             </el-form-item>
             <el-form-item label="要求交货期">
               <span>{{ showDate(order.deliveryDate) }}</span>
@@ -183,7 +184,7 @@
           </el-col>
           <el-col :span="22">
             <el-form-item label="额外添加" label-width="100px">
-              <el-checkbox-group v-model="form.extra">
+              <el-checkbox-group v-model="form.extra" @change="handleAdditiveChange">
                 <el-checkbox v-for="additive in additiveOption" :label="additive" :key="additive">
                   {{additive}}</el-checkbox>
               </el-checkbox-group>
@@ -223,6 +224,7 @@ export default {
         customName: "",
         daterange: null
       },
+      allAdditive: [],
       additiveOption: [],
       workRateOption: [],
       workRateTypeOption: [
@@ -234,7 +236,7 @@ export default {
       ],
       order: {},
       product: [],
-      piecePirce: 0,
+      additivePrice: 0,
       form: {}
     };
   },
@@ -263,6 +265,7 @@ export default {
       this.dialogFormTitle = "编辑订单内容";
       this.form = JSON.parse(JSON.stringify(row));
       this.form.extra = JSON.parse(this.form.extra);
+      this.handleAdditiveChange(this.form.extra)
       this.dialogFormVisible = true;
     },
     handleDelete(index, row) {
@@ -279,6 +282,16 @@ export default {
           done();
         })
         .catch(_ => {});
+    },
+    handleAdditiveChange(val) {
+      this.additivePrice = 0;
+      val.forEach(element => {
+        this.allAdditive.forEach(e => {
+          if(e.name == element) {
+            this.additivePrice += e.price;
+          }
+        });
+      });
     },
     goBack() {
       this.$router.go(-1);
@@ -303,7 +316,7 @@ export default {
       };
     },
     productSelect(item) {
-      this.piecePirce = item.price;
+      this.form.piecePirce = item.price;
       this.form.name = item.name;
     },
     renderProduct() {
@@ -364,6 +377,7 @@ export default {
           let data = res.data;
           if (data.code == "SUCCESS") {
             this.order = data.order;
+            this.order.totalPrice = this.order.totalPrice.toFixed(2);
             this.isFinish = this.order.status == 6;
           } else {
             this.$message({
@@ -413,12 +427,19 @@ export default {
         });
     },
     renderAdditive() {
+      let params = {
+        status: 2
+      }
       this.$api
-        .get(this.$url.getAdditiveName)
+        .post(this.$url.getAdditiveList, params)
         .then(res => {
           let data = res.data;
           if (data.code == "SUCCESS") {
-            this.additiveOption = data.list;
+            this.allAdditive = data.list;
+            this.additiveOption = [];
+            data.list.forEach(element => {
+              this.additiveOption.push(element.name);
+            });
           } else {
             this.$message({
               message: "查询失败， 失败原因：" + data.code,
@@ -456,7 +477,7 @@ export default {
     },
     doAdd() {
       this.dialogFormVisible = false;
-      this.form.productPrice = this.piecePirce * this.form.productWeight;
+      this.form.productPrice = (this.form.piecePirce + this.additivePrice) * this.form.productWeight;
       this.form.extra = JSON.stringify(this.form.extra);
       let params = this.form;
       this.$api
@@ -483,13 +504,10 @@ export default {
             type: "error"
           });
         });
-      this.piecePirce = 0;
     },
     doUpdate() {
       this.dialogFormVisible = false;
-      if(this.piecePirce != 0) {
-        this.form.productPrice = this.piecePirce * this.form.productWeight;
-      }
+      this.form.productPrice = (this.form.piecePirce + this.additivePrice) * this.form.productWeight;
       this.form.extra = JSON.stringify(this.form.extra);
       let params = this.form;
       this.$api
@@ -515,7 +533,6 @@ export default {
             type: "error"
           });
         });
-      this.piecePirce = 0;
     },
     doDelete(index, row) {
       let params = row;

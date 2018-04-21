@@ -30,7 +30,7 @@ if (process.env.NODE_ENV == 'development') {
 } else if (process.env.NODE_ENV == 'debug') {
     axiosIns.defaults.baseURL = '***';
 } else if (process.env.NODE_ENV == 'production') {
-    axiosIns.defaults.baseURL = '***';
+    axiosIns.defaults.baseURL = '/api';
 }
 
 axiosIns.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8';

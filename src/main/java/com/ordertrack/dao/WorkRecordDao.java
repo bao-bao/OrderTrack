@@ -11,4 +11,5 @@ import java.util.List;
 @Repository
 public interface WorkRecordDao extends JpaRepository<WorkRecord, Long> {
     List<WorkRecord> findByOrderDetail(int detailId);
+    int deleteByOrderDetail(Integer detailId);
 }
