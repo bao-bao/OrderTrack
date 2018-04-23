@@ -471,7 +471,8 @@ export default {
         extra: [],
         fruitSticker: "",
         additive: [],
-        remark: ""
+        remark: "",
+        isFinish: false,
       };
       this.dialogFormVisible = true;
     },

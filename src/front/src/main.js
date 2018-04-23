@@ -7,10 +7,21 @@ import axios from 'axios'
 import qs from 'qs'
 import Element from 'element-ui';
 import url from './axios/url';
+import vueEventCalendar from 'vue-event-calendar'
+import ECharts from 'vue-echarts/components/ECharts'
+ 
+// import ECharts modules manually to reduce bundle size
+import 'echarts'
 
+import 'vue-event-calendar/dist/style.css'
 import 'font-awesome/css/font-awesome.css'
 import 'element-ui/lib/theme-chalk/index.css';    // 默认主题
 //import '../static/css/theme-green/index.css';       // 浅绿色主题
+
+// register component to use
+Vue.component('chart', ECharts)
+
+Vue.use(vueEventCalendar, {locale: 'zh'})
 
 Vue.use(Element, { size: 'small' });
 Vue.config.productionTip = false

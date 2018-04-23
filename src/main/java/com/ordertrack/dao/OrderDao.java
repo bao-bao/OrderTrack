@@ -3,10 +3,13 @@ package com.ordertrack.dao;
 /* Created by AMXPC on 2018/4/8. */
 
 import com.ordertrack.entity.Order;
+import com.ordertrack.pojo.MonthVolume;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -28,6 +31,7 @@ public interface OrderDao extends JpaRepository<Order, Long> {
     List<Order> findOrderByCustomNameContainingAndOrderTimeBetweenAndStatusLessThan(String customName, Timestamp startTime, Timestamp endTime, Integer status);
     List<Order> findOrderByCustomNameContainingAndOrderTimeBetweenAndStatus(String customName, Timestamp startTime, Timestamp endTime, Integer status);
 
+    List<Order> findByStatusBetween(Integer min, Integer max);
     List<Order> findByStatusLessThan(Integer status);
     List<Order> findOrderByStatus(Integer status);
 }

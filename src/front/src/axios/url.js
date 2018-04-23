@@ -19,7 +19,10 @@ export default {
   /**登录验证 */
   login: "/user/login",
 
-  /**人员管理 */
+  /**首页数据**/
+  getIndexContent: "/home/getIndexContent",
+
+  /**人员管理**/
   getUserList: "/user/getUserList",
   addUser: "/user/addUser",
   updateUser: "/user/updateUser",
@@ -34,6 +37,7 @@ export default {
   addOrder: "/order/addOrder",
   updateOrder: "/order/updateOrder",
   deleteOrder: "/order/deleteOrder",
+  getStatusOrderList: "/order/getStatusOrderList",
 
   getOrderInfo: "/order/getOrderInfo",
   getOrderDetail: "/order/getOrderDetail",

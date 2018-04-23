@@ -27,7 +27,7 @@ export default {
       items: [
         {
           icon: "el-icon-bell",
-          index: "/home",
+          index: "/index",
           title: "首页"
         },
         {

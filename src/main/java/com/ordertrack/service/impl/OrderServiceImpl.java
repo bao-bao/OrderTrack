@@ -10,6 +10,7 @@ import com.ordertrack.dao.WorkRecordDao;
 import com.ordertrack.entity.Order;
 import com.ordertrack.entity.OrderDetail;
 import com.ordertrack.entity.WorkRecord;
+import com.ordertrack.pojo.MonthVolume;
 import com.ordertrack.service.OrderService;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
@@ -20,11 +21,10 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -104,6 +104,12 @@ public class OrderServiceImpl implements OrderService {
         } else {
             return Collections.emptyList();
         }
+    }
+
+    @Override
+    @Transactional
+    public List<Order> queryOrderListByStatus(Integer status) {
+        return orderDao.findOrderByStatus(status);
     }
 
     @Override
@@ -216,4 +222,61 @@ public class OrderServiceImpl implements OrderService {
         return workRecordDao.findByOrderDetail(detailId);
     }
 
+    @Override
+    @Transactional
+    public Integer getBusinessCount() {
+        return orderDao.findByStatusLessThan(OrderStatus.FINISH.getStatus()).size();
+    }
+
+    @Override
+    @Transactional
+    public Integer getOperateCount() {
+        return orderDao.findByStatusBetween(OrderStatus.PICKING_UP.getStatus(), OrderStatus.DISTRIBUTING.getStatus()).size();
+    }
+
+    @Override
+    @Transactional
+    public Integer getPauseCount() {
+        return 0;
+    }
+
+    @Override
+    @Transactional
+    public Integer getTotalCount() {
+        return orderDao.findAll().size();
+    }
+
+    @Override
+    @Transactional
+    public Integer getDivisionCount() {
+        return orderDao.findOrderByStatus(OrderStatus.DISTRIBUTING.getStatus()).size();
+    }
+
+    @Override
+    @Transactional
+    public Integer getPickUpCount() {
+        return orderDao.findOrderByStatus(OrderStatus.PICKING_UP.getStatus()).size();
+    }
+
+    @Override
+    @Transactional
+    public List<Order> getOnBusinessList() {
+        return orderDao.findByStatusLessThan(OrderStatus.FINISH.getStatus());
+    }
+
+    @Override
+    @Transactional
+    public List<MonthVolume> getLastYearList() {
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+08:00"));
+        int year = cal.get(Calendar.YEAR);
+        int month = cal.get(Calendar.MONTH) + 1;
+        Query query = em.createNativeQuery("select orderid, totalprice, month(deliverydate)" +
+                " from corder where ((year(deliverydate)=?1-1 and month(deliverydate)>?2)" +
+                " or (year(deliverydate)=?1 and month(deliverydate)<=?2))" +
+                " and status=6" +
+                " group by month(deliverydate)", MonthVolume.class);
+        query.setParameter(1, year);
+        query.setParameter(2, month);
+        return query.getResultList();
+    }
 }

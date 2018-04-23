@@ -201,7 +201,7 @@ export default {
             message: JSON.stringify(err.data),
             type: "error"
           });
-          loadming.close();
+          loading.close();
         });
     },
     doDelete(index, row) {

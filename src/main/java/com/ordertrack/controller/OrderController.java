@@ -38,6 +38,16 @@ public class OrderController {
         return resp;
     }
 
+    @ResponseBody
+    @PostMapping("/getStatusOrderList")
+    public ListResponse<Order> getOrderList(@RequestBody OrderStatusListRequest request) {
+        ListResponse<Order> resp = new ListResponse<>();
+        Integer status = request.getStatus();
+        List<Order> orderList = orderService.queryOrderListByStatus(status);
+        resp.setList(orderList);
+        resp.setCode(ReturnCode.SUCCESS);
+        return resp;
+    }
 
     @ResponseBody
     @PostMapping("/addOrder")

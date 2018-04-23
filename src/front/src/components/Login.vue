@@ -43,7 +43,7 @@ export default {
             let data = res.data;
             if (data.code == "SUCCESS") {
               localStorage.setItem("ms_user", JSON.stringify(data.currentUser));
-              self.$router.push("/home");
+              self.$router.push("/index");
               this.$message({
                 message: "登录成功",
                 type: "success"

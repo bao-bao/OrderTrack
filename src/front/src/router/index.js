@@ -15,11 +15,12 @@ export default new Router({
       component: resolve => require(["../components/common/Home.vue"], resolve),
       children: [
         {
-          path: "/baseform",
-          component: resolve => require(["../components/BaseForm.vue"], resolve)
+          path: "/index",
+          component: resolve => require(["../components/Index.vue"], resolve)
         },
         {
           path: "/employee",
+          name: "employee",
           component: resolve => require(["../components/Employee.vue"], resolve)
         },
         {
@@ -32,7 +33,13 @@ export default new Router({
               component: resolve => require(["../components/OnBusiness.vue"], resolve)
             },
             {
+              path: "onbusiness/:status",
+              name: "status",
+              component: resolve => require(["../components/OnBusiness.vue"], resolve)
+            },
+            {
               path: "history",
+              name: "history",
               component: resolve => require(["../components/History.vue"], resolve)
             },
             {
@@ -61,6 +68,7 @@ export default new Router({
             },
             {
               path: "product",
+              name: "product",
               component: resolve => require(["../components/Product.vue"], resolve)
             }
           ]

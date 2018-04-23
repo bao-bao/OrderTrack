@@ -35,7 +35,7 @@
             icon="el-icon-search" @click="renderOrder()">搜索</el-button>
           </el-col>
           <el-col :span="2" :offset="2" style="text-align:right">
-            <el-button type="warning" icon="el-icon-circle-plus" @click="addOrder()">新增</el-button>
+            <el-button type="warning" :v-show="status==0" icon="el-icon-circle-plus" @click="addOrder()">新增</el-button>
           </el-col>
         </el-row>
       </el-form>
@@ -168,6 +168,7 @@ export default {
         customName: "",
         daterange: null
       },
+      status: 0,
       form: {},
       statusOption: [
         { label: "准备", value: 0 },
@@ -317,7 +318,39 @@ export default {
             message: JSON.stringify(err.data),
             type: "error"
           });
-          loadming.close();
+          loading.close();
+        });
+    },
+    renderStatusOrder() {
+      const loading = this.$loading({
+        lock: true,
+        text: "Loading",
+        background: "rgba(255, 255, 255, 0.7)"
+      });
+      let params = {
+        status: this.status
+      };
+      this.$api
+        .post(this.$url.getStatusOrderList, params)
+        .then(res => {
+          let data = res.data;
+          if (data.code == "SUCCESS") {
+            this.listData = data.list;
+            this.initPagination(10);
+          } else {
+            this.$message({
+              message: "查询失败， 失败原因：" + data.code,
+              type: "error"
+            });
+          }
+          loading.close();
+        })
+        .catch(err => {
+          this.$message({
+            message: JSON.stringify(err.data),
+            type: "error"
+          });
+          loading.close();
         });
     },
     addOrder() {
@@ -327,6 +360,10 @@ export default {
         customName: "",
         purchaseId: "",
         contractId: "",
+        totalBig: 0,
+        totalSmall: 0,
+        totalWeight: 0,
+        totalPrice: 0,
         deliveryDate: new Date(),
         picture: "",
         status: 0
@@ -345,7 +382,11 @@ export default {
               message: "添加成功",
               type: "success"
             });
-            this.renderOrder();
+            if(this.status != 0) {
+              this.renderStatusOrder();
+            } else {
+              this.renderOrder();
+            }
           } else {
             this.$message({
               message: "添加失败， 失败原因：" + data,
@@ -372,7 +413,11 @@ export default {
               message: "更新成功",
               type: "success"
             });
-            this.renderOrder();
+            if(this.status != 0) {
+              this.renderStatusOrder();
+            } else {
+              this.renderOrder();
+            }
           } else {
             this.$message({
               message: "更新失败， 失败原因：" + data,
@@ -398,7 +443,11 @@ export default {
               message: "删除成功",
               type: "success"
             });
-            this.renderOrder();
+            if(this.status != 0) {
+              this.renderStatusOrder();
+            } else {
+              this.renderOrder();
+            }
           } else {
             this.$message({
               message: "删除失败， 失败原因：" + data,
@@ -429,7 +478,12 @@ export default {
   },
   beforeRouteEnter(to, from, next) {
     next(vm => {
-      vm.renderOrder();
+      if(vm.$route.params.status != undefined) {
+        vm.status = vm.$route.params.status;
+        vm.renderStatusOrder();
+      } else {
+        vm.renderOrder();
+      }
     });
   }
 };

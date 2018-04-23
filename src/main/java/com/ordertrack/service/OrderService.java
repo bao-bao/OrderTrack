@@ -19,6 +19,7 @@ public interface OrderService {
     ReturnCode addOrder(Order order);
     ReturnCode updateOrder(Order order);
     ReturnCode deleteOrder(Order order);
+    List<Order> queryOrderListByStatus(Integer status);
 
     boolean orderCheck(Order order);
 
@@ -29,4 +30,13 @@ public interface OrderService {
 
     ReturnCode addWorkRecord(List<WorkRecord> records, Integer detailId);
     List<WorkRecord> queryDivisionDetail(int detailId);
+
+    Integer getBusinessCount();
+    Integer getOperateCount();
+    Integer getPauseCount();
+    Integer getTotalCount();
+    Integer getDivisionCount();
+    Integer getPickUpCount();
+    List<Order> getOnBusinessList();
+    List getLastYearList();
 }
