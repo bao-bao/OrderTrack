@@ -59,11 +59,11 @@ public class UserServiceImpl implements UserService {
         if (username.equals("") && role == 0) {
             return userDao.findAll();
         } else if (!username.equals("") && role == 0) {
-            return userDao.findByNameContaining(username);
+            return userDao.findByNameContainingOrderByRole(username);
         } else if (username.equals("") && role != 0) {
-            return userDao.findByRole(role);
+            return userDao.findByRoleOrderByRole(role);
         } else {
-            return userDao.findByNameLikeAndRole(username, role);
+            return userDao.findByNameLikeAndRoleOrderByRole(username, role);
         }
     }
 

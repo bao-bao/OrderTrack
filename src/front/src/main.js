@@ -43,7 +43,7 @@ if (process.env.NODE_ENV == 'development') {
 } else if (process.env.NODE_ENV == 'production') {
     axiosIns.defaults.baseURL = '/api';
 }
-
+axiosIns.defaults.withCredentials = true;
 axiosIns.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8';
 axiosIns.defaults.headers.post['X-Requested-With'] = 'XMLHttpRequest';
 axiosIns.defaults.headers.get['X-Requested-With'] = 'XMLHttpRequest';
@@ -60,17 +60,14 @@ axiosIns.interceptors.request.use(function (config) {
     //配置config
     config.headers.Accept = 'application/json';
     config.headers.System = 'vue';
-    // let token = Vue.localStorage.get('token');
-    // if(token){
-    //     config.headers.Token = token;
-    // }
     return config;
 });
 axiosIns.interceptors.response.use(function (response) {
     let status = response.status;
     if (status === 200) {
         return Promise.resolve(response);
-    } else {
+    }
+     else {
         return Promise.reject(response);
     }
 });

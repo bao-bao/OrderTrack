@@ -9,10 +9,12 @@ public enum ReturnCode {
     WRONG_PASSWORD(102),
     // sql error
     DATABASE_ERROR(201),
+    NO_DATA(202),
     // user el.
     USERNAME_EXIST(301),
     // order el.
-    ORDER_INVALID(401)
+    ORDER_INVALID(401),
+    NO_AUTHORITY(500),
     ;
 
     private int code;

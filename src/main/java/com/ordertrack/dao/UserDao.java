@@ -12,7 +12,7 @@ import java.util.List;
 public interface UserDao extends JpaRepository<User, Long> {
     User findUserByName(String username);
     User findUserByNameAndPassword(String username, String password);
-    List<User> findByNameContaining(String username);
-    List<User> findByRole(Integer role);
-    List<User> findByNameLikeAndRole(String username, Integer role);
+    List<User> findByNameContainingOrderByRole(String username);
+    List<User> findByRoleOrderByRole(Integer role);
+    List<User> findByNameLikeAndRoleOrderByRole(String username, Integer role);
 }

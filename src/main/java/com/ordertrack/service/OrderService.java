@@ -24,12 +24,16 @@ public interface OrderService {
     boolean orderCheck(Order order);
 
     List<OrderDetail> queryOrderDetail(Integer orderId);
+    OrderDetail queryOrderDetailById(Integer detailId);
     ReturnCode addOrderDetail(OrderDetail orderDetail);
     ReturnCode updateOrderDetail(OrderDetail orderDetail);
     ReturnCode deleteOrderDetail(OrderDetail orderDetail);
 
     ReturnCode addWorkRecord(List<WorkRecord> records, Integer detailId);
+    ReturnCode deleteWorkRecord(WorkRecord workRecord);
+    List<WorkRecord> queryWorkRecordList(String name, Integer year, Integer month);
     List<WorkRecord> queryDivisionDetail(int detailId);
+    ReturnCode checkWork(int orderId);
 
     Integer getBusinessCount();
     Integer getOperateCount();

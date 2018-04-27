@@ -113,13 +113,15 @@ export default {
       roleOption: [
         { label: "全部", value: 0 },
         { label: "管理员", value: 1 },
-        { label: "经理", value: 2 },
-        { label: "工作班组", value: 3 }
+        { label: "仓库管理", value: 2 },
+        { label: "班组经理", value: 3 },
+        { label: "工作班组", value: 4 }
       ],
       roleEditOption: [
         { label: "管理员", value: 1 },
-        { label: "经理", value: 2 },
-        { label: "工作班组", value: 3 }
+        { label: "仓库管理", value: 2 },
+        { label: "班组经理", value: 3 },
+        { label: "工作班组", value: 4 }
       ],
       form: {}
     };
@@ -179,6 +181,12 @@ export default {
           if (data.code == "SUCCESS") {
             this.listData = data.list;
             this.initPagination(10);
+          } else if (data.code == "NO_AUTHORITY") {
+            this.$message({
+              message: "无权限操作",
+              type: "error"
+            });
+            this.$router.go(-1);
           } else {
             this.$message({
               message: "查询失败， 失败原因：" + data.code,
@@ -189,7 +197,7 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: JSON.stringify(err.data),
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
           loading.close();
@@ -200,7 +208,7 @@ export default {
       this.dialogFormTitle = "新增人员信息";
       this.form = {
         name: "",
-        role: 3,
+        role: 4,
         isActive: true
       };
       this.dialogFormVisible = true;
@@ -218,6 +226,12 @@ export default {
               type: "success"
             });
             this.renderUser();
+          } else if (data == "NO_AUTHORITY") {
+            this.$message({
+              message: "无权限操作",
+              type: "error"
+            });
+            this.$router.go(-1);
           } else if (data == "USERNAME_EXIST") {
             this.$message({
               message: "添加失败， 用户已存在",
@@ -232,7 +246,7 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: err,
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
         });
@@ -250,6 +264,12 @@ export default {
               type: "success"
             });
             this.renderUser();
+          } else if (data == "NO_AUTHORITY") {
+            this.$message({
+              message: "无权限操作",
+              type: "error"
+            });
+            this.$router.go(-1);
           } else {
             this.$message({
               message: "更新失败， 失败原因：" + data,
@@ -259,7 +279,7 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: err,
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
         });
@@ -276,6 +296,12 @@ export default {
               type: "success"
             });
             this.renderUser();
+          } else if (data == "NO_AUTHORITY") {
+            this.$message({
+              message: "无权限操作",
+              type: "error"
+            });
+            this.$router.go(-1);
           } else {
             this.$message({
               message: "删除失败， 失败原因：" + data,
@@ -285,7 +311,7 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: err,
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
         });

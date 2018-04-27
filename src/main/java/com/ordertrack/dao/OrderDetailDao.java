@@ -13,6 +13,7 @@ import java.util.List;
 public interface OrderDetailDao extends JpaRepository<OrderDetail, Long> {
 
     List<OrderDetail> findByOrderId(Integer orderId);
+    OrderDetail findById(Integer id);
     int deleteByOrderId(Integer orderId);
 
     @Modifying

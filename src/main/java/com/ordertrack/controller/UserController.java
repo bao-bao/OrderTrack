@@ -3,6 +3,7 @@ package com.ordertrack.controller;
 /* Created by AMXPC on 2018/3/28. */
 
 import com.ordertrack.constant.ReturnCode;
+import com.ordertrack.constant.SecurityConstant;
 import com.ordertrack.entity.User;
 import com.ordertrack.pojo.*;
 import com.ordertrack.service.impl.UserServiceImpl;
@@ -11,8 +12,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @Controller
@@ -33,6 +38,12 @@ public class UserController {
             User user = userService.getUserInfo(username);
             user.setPassword("");
             resp.setCurrentUser(user);
+
+            RequestAttributes ra = RequestContextHolder.getRequestAttributes();
+            ServletRequestAttributes sra = (ServletRequestAttributes)ra;
+            HttpServletRequest re = sra.getRequest();
+            re.getSession().setAttribute(SecurityConstant.CURRENT_USER_LOGIN.getLabel(), user.getName());
+            re.getSession().setAttribute(SecurityConstant.CURRENT_AUTHORITY.getLabel(), user.getRole());
         }
         return resp;
     }
@@ -75,7 +86,7 @@ public class UserController {
 
     @ResponseBody
     @PostMapping("/updateSelf")
-    public ReturnCode addUser(@RequestBody UpdateSelfRequest request) {
+    public ReturnCode selfUpdate(@RequestBody UpdateSelfRequest request) {
         User user = request.getUser();
         String newPassword = request.getNewPassword();
         String username = user.getName();

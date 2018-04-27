@@ -23,8 +23,8 @@ export default {
   data: function() {
     return {
       ruleForm: {
-        username: '',
-        password: ''
+        username: "",
+        password: ""
       },
       rules: {
         username: [
@@ -39,37 +39,43 @@ export default {
       const self = this;
       self.$refs[formName].validate(valid => {
         if (valid) {
-          self.$api.post(self.$url.login, self.ruleForm).then(res => {
-            let data = res.data;
-            if (data.code == "SUCCESS") {
-              localStorage.setItem("ms_user", JSON.stringify(data.currentUser));
-              self.$router.push("/index");
-              this.$message({
-                message: "登录成功",
-                type: "success"
-              });
-            } else if (data.code == "INVALID_USERNAME") {
-              this.$message({
-                message: "用户名不存在",
-                type: "error"
-              });
-            } else if(data.code == "WRONG_PASSWORD") {
+          self.$api
+            .post(self.$url.login, self.ruleForm)
+            .then(res => {
+              let data = res.data;
+              if (data.code == "SUCCESS") {
+                localStorage.setItem(
+                  "ms_user",
+                  JSON.stringify(data.currentUser)
+                );
+                self.$router.push("/index");
                 this.$message({
-                message: "密码错误",
+                  message: "登录成功",
+                  type: "success"
+                });
+              } else if (data.code == "INVALID_USERNAME") {
+                this.$message({
+                  message: "用户名不存在",
+                  type: "error"
+                });
+              } else if (data.code == "WRONG_PASSWORD") {
+                this.$message({
+                  message: "密码错误",
+                  type: "error"
+                });
+              }
+            })
+            .catch(err => {
+              this.$message({
+                message: err.data.status + ": " + err.data.error,
                 type: "error"
               });
-            }
-          }).catch(err => {
-            this.$message({
-              message: err,
-              type: "error"
             });
-          });
         } else {
           this.$message({
             message: "参数错误",
             type: "error"
-          })
+          });
           return false;
         }
       });

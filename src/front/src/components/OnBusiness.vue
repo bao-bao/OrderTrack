@@ -81,7 +81,7 @@
       </el-table-column>
       <el-table-column prop="status" label="当前状态" min-width="100">
         <template slot-scope="scope">
-          <el-tag size="medium" :type="scope.row.status == 1 ? '' : scope.row.status == 0 ? 'warning' : 'success'">
+          <el-tag size="medium" :type="scope.row.status <= 1 ? '' : scope.row.status <= 4 ? 'warning' : 'success'">
             {{ showStatus(scope.row.status) }}</el-tag>
         </template>
       </el-table-column>
@@ -104,11 +104,11 @@
       :current-page.sync="currentPage" :page-size="pageSize" layout="total, prev, pager, next" :total="total">
       </el-pagination>
     </div>
-    <el-dialog :title="dialogFormTitle" :visible="dialogFormVisible" width="50%" :before-close="handleClose">
-      <el-form ref="form" :model="form">
+    <el-dialog :title="dialogFormTitle":visible="dialogFormVisible" width="50%" :before-close="handleClose">
+      <el-form ref="form" :model="form" :rules="rule">
         <el-row :gutter="20">
           <el-col :span="11">
-            <el-form-item label="客户名称" label-width="100px">
+            <el-form-item label="客户名称" prop="customName" label-width="100px">
               <el-input v-model="form.customName"></el-input>
             </el-form-item>
           </el-col>
@@ -118,22 +118,28 @@
             </el-form-item>
           </el-col>
           <el-col :span="11">
-            <el-form-item label="采购单号" label-width="100px">
+            <el-form-item label="采购单号" prop="purchaseId" label-width="100px">
               <el-input v-model="form.purchaseId"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="11">
-            <el-form-item label="销售合同号" label-width="100px">
+            <el-form-item label="销售合同号" prop="contractId" label-width="100px">
               <el-input v-model="form.contractId"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="11">
-            <el-form-item label="当前状态" label-width="100px">
+            <el-form-item label="当前状态" v-show="isUpdate" label-width="100px">
               <el-select v-model="form.status">
                 <el-option v-for="item in statusOption"
                 :key="item.value" :label="item.label" :value="item.value">
                 </el-option>
               </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="11" v-show="form.status > 3">
+            <el-form-item label="分工情况" label-width="100px">
+              <el-button size="mini" v-show="form.status == 4" @click="handleDivision(0, form)">重新分工</el-button>
+              <el-button size="mini" v-show="form.status == 5" @click="handleDivision(0, form)">分工情况</el-button>
             </el-form-item>
           </el-col>
           <el-col :span="22">
@@ -172,13 +178,24 @@ export default {
       form: {},
       statusOption: [
         { label: "准备", value: 0 },
-        { label: "接单", value: 1 }, 
+        { label: "接单", value: 1 },
         { label: "提货", value: 2 },
         { label: "分配", value: 3 },
         { label: "包装", value: 4 },
         { label: "结算", value: 5 },
         { label: "完成", value: 6 }
-      ]
+      ],
+      rule: {
+        customName: [
+          { required: true, message: "请输入客户名称", trigger: "blur" }
+        ],
+        purchaseId: [
+          { required: true, message: "请输入采购单号", trigger: "blur" }
+        ],
+        contractId: [
+          { required: true, message: "请输入销售合同号", trigger: "blur" }
+        ]
+      }
     };
   },
   methods: {
@@ -202,66 +219,123 @@ export default {
       );
     },
     handleEdit(index, row) {
-      this.isUpdate = true;
-      this.dialogFormTitle = "编辑订单信息";
-      this.form = JSON.parse(JSON.stringify(row));
-      this.dialogFormVisible = true;
+      let role = JSON.parse(localStorage.getItem("ms_user")).role;
+      if (role == 1) {
+        this.isUpdate = true;
+        this.dialogFormTitle = "编辑订单信息";
+        this.form = JSON.parse(JSON.stringify(row));
+        this.dialogFormVisible = true;
+      } else {
+        this.$message({
+          message: "无权限操作",
+          type: "error"
+        });
+      }
     },
     handleTake(index, row) {
-      this.$confirm("确认提交？")
-        .then(_ => {
-          row.status = 1;
-          this.form = JSON.parse(JSON.stringify(row));
-          this.doUpdate();
-          done();
-        })
-        .catch(_ => {});
+      let role = JSON.parse(localStorage.getItem("ms_user")).role;
+      if (role == 1) {
+        this.$confirm("确认提交？")
+          .then(_ => {
+            row.status = 1;
+            this.form = JSON.parse(JSON.stringify(row));
+            this.doUncheckUpdate();
+            done();
+          })
+          .catch(_ => {});
+      } else {
+        this.$message({
+          message: "无权限操作",
+          type: "error"
+        });
+      }
     },
     handleDown(index, row) {
-      this.$confirm("确认提交？")
-        .then(_ => {
-          row.status = 2;
-          this.form = JSON.parse(JSON.stringify(row));
-          this.doUpdate();
-          done();
-        })
-        .catch(_ => {});
+      let role = JSON.parse(localStorage.getItem("ms_user")).role;
+      if (role == 1) {
+        this.$confirm("确认提交？")
+          .then(_ => {
+            row.status = 2;
+            this.form = JSON.parse(JSON.stringify(row));
+            this.doUncheckUpdate();
+            done();
+          })
+          .catch(_ => {});
+      } else {
+        this.$message({
+          message: "无权限操作",
+          type: "error"
+        });
+      }
     },
     handlePickUp(index, row) {
-      this.$confirm("确认提交？")
-        .then(_ => {
-          row.status = 3;
-          this.form = JSON.parse(JSON.stringify(row));
-          this.doUpdate();
-          done();
-        })
-        .catch(_ => {});
+      let role = JSON.parse(localStorage.getItem("ms_user")).role;
+      if (role == 1 || role == 2) {
+        this.$confirm("确认提交？")
+          .then(_ => {
+            row.status = 3;
+            this.form = JSON.parse(JSON.stringify(row));
+            this.doUncheckUpdate();
+            done();
+          })
+          .catch(_ => {});
+      } else {
+        this.$message({
+          message: "无权限操作",
+          type: "error"
+        });
+      }
     },
     handleDivision(index, row) {
-      return this.$router.push({
-        name: "workDivision",
-        params: { id: row.orderId }
-      });
+      let role = JSON.parse(localStorage.getItem("ms_user")).role;
+      if (role == 1 || role == 3) {
+        return this.$router.push({
+          name: "workDivision",
+          params: { id: row.orderId }
+        });
+      } else {
+        this.$message({
+          message: "无权限操作",
+          type: "error"
+        });
+      }
     },
     handleCheck(index, row) {
-      this.$confirm("确认提交？")
-        .then(_ => {
-          row.status = 5;
-          this.form = JSON.parse(JSON.stringify(row));
-          this.doUpdate();
-          done();
-        })
-        .catch(_ => {});
+      let role = JSON.parse(localStorage.getItem("ms_user")).role;
+      if (role == 1 || role == 3) {
+        this.$confirm("确认提交？")
+          .then(_ => {
+            row.status = 5;
+            this.form = JSON.parse(JSON.stringify(row));
+            this.doUncheckUpdate();
+            this.doCheck(this.form.orderId);
+            done();
+          })
+          .catch(_ => {});
+      } else {
+        this.$message({
+          message: "无权限操作",
+          type: "error"
+        });
+      }
     },
     handleBalance(index, row) {
-      this.$confirm("确认提交？")
-        .then(_ => {
-          row.status = 6;
-          this.form = JSON.parse(JSON.stringify(row));
-          this.doUpdate();
-          done();
-        })
-        .catch(_ => {});
+      let role = JSON.parse(localStorage.getItem("ms_user")).role;
+      if (role == 1) {
+        this.$confirm("确认提交？")
+          .then(_ => {
+            row.status = 6;
+            this.form = JSON.parse(JSON.stringify(row));
+            this.doUncheckUpdate();
+            done();
+          })
+          .catch(_ => {});
+      } else {
+        this.$message({
+          message: "无权限操作",
+          type: "error"
+        });
+      }
     },
     handleDetail(index, row) {
       return this.$router.push({
@@ -270,11 +344,19 @@ export default {
       });
     },
     handleDelete(index, row) {
-      this.$confirm("确认删除？")
-        .then(_ => {
-          this.doDelete(index, row);
-        })
-        .catch(_ => {});
+      let role = JSON.parse(localStorage.getItem("ms_user")).role;
+      if (role == 1) {
+        this.$confirm("确认删除？")
+          .then(_ => {
+            this.doDelete(index, row);
+          })
+          .catch(_ => {});
+      } else {
+        this.$message({
+          message: "无权限操作",
+          type: "error"
+        });
+      }
     },
     handleClose(done) {
       this.$confirm("确认关闭？")
@@ -305,6 +387,12 @@ export default {
           if (data.code == "SUCCESS") {
             this.listData = data.list;
             this.initPagination(10);
+          } else if (data.code == "NO_AUTHORITY") {
+            this.$message({
+              message: "无权限操作",
+              type: "error"
+            });
+            this.$router.go(-1);
           } else {
             this.$message({
               message: "查询失败， 失败原因：" + data.code,
@@ -315,7 +403,7 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: JSON.stringify(err.data),
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
           loading.close();
@@ -337,6 +425,12 @@ export default {
           if (data.code == "SUCCESS") {
             this.listData = data.list;
             this.initPagination(10);
+          } else if (data.code == "NO_AUTHORITY") {
+            this.$message({
+              message: "无权限操作",
+              type: "error"
+            });
+            this.$router.go(-1);
           } else {
             this.$message({
               message: "查询失败， 失败原因：" + data.code,
@@ -347,62 +441,132 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: JSON.stringify(err.data),
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
           loading.close();
         });
     },
     addOrder() {
-      this.isUpdate = false;
-      this.dialogFormTitle = "新增订单信息";
-      this.form = {
-        customName: "",
-        purchaseId: "",
-        contractId: "",
-        totalBig: 0,
-        totalSmall: 0,
-        totalWeight: 0,
-        totalPrice: 0,
-        deliveryDate: new Date(),
-        picture: "",
-        status: 0
-      };
-      this.dialogFormVisible = true;
+      let role = JSON.parse(localStorage.getItem("ms_user")).role;
+      if (role == 1) {
+        this.isUpdate = false;
+        this.dialogFormTitle = "新增订单信息";
+        this.form = {
+          customName: "",
+          purchaseId: "",
+          contractId: "",
+          totalBig: 0,
+          totalSmall: 0,
+          totalWeight: 0,
+          totalPrice: 0,
+          deliveryDate: new Date(),
+          picture: "",
+          status: 0
+        };
+        this.dialogFormVisible = true;
+      } else {
+        this.$message({
+          message: "无权限操作",
+          type: "error"
+        });
+      }
     },
     doAdd() {
-      this.dialogFormVisible = false;
-      let params = this.form;
-      this.$api
-        .post(this.$url.addOrder, params)
-        .then(res => {
-          let data = res.data;
-          if (data == "SUCCESS") {
-            this.$message({
-              message: "添加成功",
-              type: "success"
+      this.$refs["form"].validate(valid => {
+        if (valid) {
+          this.dialogFormVisible = false;
+          let params = this.form;
+          this.$api
+            .post(this.$url.addOrder, params)
+            .then(res => {
+              let data = res.data;
+              if (data == "SUCCESS") {
+                this.$message({
+                  message: "添加成功",
+                  type: "success"
+                });
+                if (this.status != 0) {
+                  this.renderStatusOrder();
+                } else {
+                  this.renderOrder();
+                }
+              } else if (data == "NO_AUTHORITY") {
+                this.$message({
+                  message: "无权限操作",
+                  type: "error"
+                });
+                this.$router.go(-1);
+              } else {
+                this.$message({
+                  message: "添加失败， 失败原因：" + data,
+                  type: "error"
+                });
+              }
+            })
+            .catch(err => {
+              this.$message({
+                message: err.data.status + ": " + err.data.error,
+                type: "error"
+              });
             });
-            if(this.status != 0) {
-              this.renderStatusOrder();
-            } else {
-              this.renderOrder();
-            }
-          } else {
-            this.$message({
-              message: "添加失败， 失败原因：" + data,
-              type: "error"
-            });
-          }
-        })
-        .catch(err => {
+        } else {
           this.$message({
-            message: err,
-            type: "error"
+            message: "请输入必填项",
+            type: "warning"
           });
-        });
+          return false;
+        }
+      });
     },
     doUpdate() {
-      this.dialogFormVisible = false;
+      this.$refs["form"].validate(valid => {
+        if (valid) {
+          this.dialogFormVisible = false;
+          let params = this.form;
+          this.$api
+            .post(this.$url.updateOrder, params)
+            .then(res => {
+              let data = res.data;
+              if (data == "SUCCESS") {
+                this.$message({
+                  message: "更新成功",
+                  type: "success"
+                });
+                if (this.status != 0) {
+                  this.renderStatusOrder();
+                } else {
+                  this.renderOrder();
+                }
+              } else if (data == "NO_AUTHORITY") {
+                this.$message({
+                  message: "无权限操作",
+                  type: "error"
+                });
+                this.$router.go(-1);
+              } else {
+                this.$message({
+                  message: "更新失败， 失败原因：" + data,
+                  type: "error"
+                });
+              }
+            })
+            .catch(err => {
+              this.$message({
+                message: err.data.status + ": " + err.data.error,
+                type: "error"
+              });
+            });
+        } else {
+          this.$message({
+            message: "请输入必填项",
+            type: "warning"
+          });
+          return false;
+        }
+      });
+    },
+    doUncheckUpdate() {
       let params = this.form;
       this.$api
         .post(this.$url.updateOrder, params)
@@ -413,11 +577,17 @@ export default {
               message: "更新成功",
               type: "success"
             });
-            if(this.status != 0) {
+            if (this.status != 0) {
               this.renderStatusOrder();
             } else {
               this.renderOrder();
             }
+          } else if (data == "NO_AUTHORITY") {
+            this.$message({
+              message: "无权限操作",
+              type: "error"
+            });
+            this.$router.go(-1);
           } else {
             this.$message({
               message: "更新失败， 失败原因：" + data,
@@ -427,7 +597,7 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: err,
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
         });
@@ -443,11 +613,17 @@ export default {
               message: "删除成功",
               type: "success"
             });
-            if(this.status != 0) {
+            if (this.status != 0) {
               this.renderStatusOrder();
             } else {
               this.renderOrder();
             }
+          } else if (data == "NO_AUTHORITY") {
+            this.$message({
+              message: "无权限操作",
+              type: "error"
+            });
+            this.$router.go(-1);
           } else {
             this.$message({
               message: "删除失败， 失败原因：" + data,
@@ -457,7 +633,34 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: err,
+            message: err.data.status + ": " + err.data.error,
+            type: "error"
+          });
+        });
+    },
+    doCheck(oId) {
+      let params = {
+        orderId: oId
+      };
+      this.$api
+        .post(this.$url.checkWork, params)
+        .then(res => {
+          let data = res.data;
+          if (data == "SUCCESS") {
+            this.$message({
+              message: "更新成功",
+              type: "success"
+            });
+          } else {
+            this.$message({
+              message: "更新失败， 失败原因：" + data,
+              type: "error"
+            });
+          }
+        })
+        .catch(err => {
+          this.$message({
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
         });
@@ -478,7 +681,7 @@ export default {
   },
   beforeRouteEnter(to, from, next) {
     next(vm => {
-      if(vm.$route.params.status != undefined) {
+      if (vm.$route.params.status != undefined) {
         vm.status = vm.$route.params.status;
         vm.renderStatusOrder();
       } else {

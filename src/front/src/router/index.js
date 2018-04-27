@@ -24,6 +24,11 @@ export default new Router({
           component: resolve => require(["../components/Employee.vue"], resolve)
         },
         {
+          path: "/workrecord",
+          name: "workrecord",
+          component: resolve => require(["../components/WorkRecord.vue"], resolve)
+        },
+        {
           path: "/order",
           component: {template: "<router-view></router-view>"},
           children: [

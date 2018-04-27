@@ -76,14 +76,15 @@
       <el-table-column prop="totalPrice" label="总价值" min-width="140">
         <template slot-scope="scope">{{ scope.row.totalPrice.toFixed(2) }} 元</template>
       </el-table-column>
-      <el-table-column prop="status" label="当前状态" min-width="100">
+      <el-table-column prop="status" label="当前状态" min-width="90">
         <template slot-scope="scope">
           <el-tag size="medium" :type="scope.row.status == 1 ? '' : scope.row.status == 0 ? 'warning' : 'success'">
             {{ showStatus(scope.row.status) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" min-width="180">
+      <el-table-column label="操作" min-width="270">
         <template slot-scope="scope">
+          <el-button size="mini" @click="handleDivision(scope.$index, scope.row)">分工情况</el-button>
           <el-button size="mini" @click="handleDetail(scope.$index, scope.row)">详细信息</el-button>
           <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
         </template>
@@ -146,6 +147,20 @@ export default {
         val * this.pageSize
       );
     },
+    handleDivision(index, row) {
+      let role = JSON.parse(localStorage.getItem("ms_user")).role;
+      if (role == 1 || role == 3) {
+        return this.$router.push({
+          name: "workDivision",
+          params: { id: row.orderId }
+        });
+      } else {
+        this.$message({
+          message: "无权限操作",
+          type: "error"
+        });
+      }
+    },
     handleDetail(index, row) {
       return this.$router.push({
         name: "orderDetail",
@@ -153,11 +168,19 @@ export default {
       });
     },
     handleDelete(index, row) {
-      this.$confirm("确认删除？")
-        .then(_ => {
-          this.doDelete(index, row);
-        })
-        .catch(_ => {});
+      let role = JSON.parse(localStorage.getItem("ms_user")).role;
+      if (role == 1) {
+        this.$confirm("确认删除？")
+          .then(_ => {
+            this.doDelete(index, row);
+          })
+          .catch(_ => {});
+      } else {
+        this.$message({
+          message: "无权限操作",
+          type: "error"
+        });
+      }
     },
     handleClose(done) {
       this.$confirm("确认关闭？")
@@ -198,7 +221,7 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: JSON.stringify(err.data),
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
           loading.close();
@@ -225,7 +248,7 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: err,
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
         });

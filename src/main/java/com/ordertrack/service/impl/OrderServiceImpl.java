@@ -49,7 +49,7 @@ public class OrderServiceImpl implements OrderService {
         Page<Order> pageInfo = orderDao.findAll(Example.of(filter), new PageRequest(pageId, pageSize, Sort.Direction.ASC, "orderid"));
         ArrayList<Order> orderList = new ArrayList<>();
         for (Order order : pageInfo) {
-            if(order.getStatus() != OrderStatus.FINISH.getStatus()) {
+            if (order.getStatus() != OrderStatus.FINISH.getStatus()) {
                 orderList.add(order);
             }
         }
@@ -60,15 +60,15 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public List<Order> queryOrderListOnBusiness(String contractId, String customName, Long startDate, Long endDate) {
         int finishStatus = OrderStatus.FINISH.getStatus();
-        if(!contractId.equals("")) {
+        if (!contractId.equals("")) {
             return orderDao.findOrderByContractIdAndStatusLessThan(contractId, finishStatus);
-        } else if(customName.equals("") && startDate == 0) {
+        } else if (customName.equals("") && startDate == 0) {
             return orderDao.findByStatusLessThan(finishStatus);
-        } else if(customName.equals("") && startDate != 0) {
+        } else if (customName.equals("") && startDate != 0) {
             return orderDao.findOrderByOrderTimeBetweenAndStatusLessThan(new Timestamp(startDate), new Timestamp(endDate), finishStatus);
-        } else if(!customName.equals("") && startDate == 0) {
+        } else if (!customName.equals("") && startDate == 0) {
             return orderDao.findOrderByCustomNameContainingAndStatusLessThan(customName, finishStatus);
-        } else if(!customName.equals("") && startDate != 0) {
+        } else if (!customName.equals("") && startDate != 0) {
             return orderDao.findOrderByCustomNameContainingAndOrderTimeBetweenAndStatusLessThan(customName, new Timestamp(startDate), new Timestamp(endDate), finishStatus);
         } else {
             return Collections.emptyList();
@@ -81,7 +81,7 @@ public class OrderServiceImpl implements OrderService {
         Page<Order> pageInfo = orderDao.findAll(Example.of(filter), new PageRequest(pageId, pageSize, Sort.Direction.ASC, "orderid"));
         ArrayList<Order> orderList = new ArrayList<>();
         for (Order order : pageInfo) {
-            if(order.getStatus() == OrderStatus.FINISH.getStatus()) {
+            if (order.getStatus() == OrderStatus.FINISH.getStatus()) {
                 orderList.add(order);
             }
         }
@@ -91,15 +91,15 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<Order> queryOrderListHistory(String contractId, String customName, Long startDate, Long endDate) {
         int finishStatus = OrderStatus.FINISH.getStatus();
-        if(!contractId.equals("")) {
+        if (!contractId.equals("")) {
             return orderDao.findOrderByContractIdAndStatus(contractId, finishStatus);
-        } else if(customName.equals("") && startDate == 0) {
+        } else if (customName.equals("") && startDate == 0) {
             return orderDao.findOrderByStatus(finishStatus);
-        } else if(customName.equals("") && startDate != 0) {
+        } else if (customName.equals("") && startDate != 0) {
             return orderDao.findOrderByOrderTimeBetweenAndStatus(new Timestamp(startDate), new Timestamp(endDate), finishStatus);
-        } else if(!customName.equals("") && startDate == 0) {
+        } else if (!customName.equals("") && startDate == 0) {
             return orderDao.findOrderByCustomNameContainingAndStatus(customName, finishStatus);
-        } else if(!customName.equals("") && startDate != 0) {
+        } else if (!customName.equals("") && startDate != 0) {
             return orderDao.findOrderByCustomNameContainingAndOrderTimeBetweenAndStatus(customName, new Timestamp(startDate), new Timestamp(endDate), finishStatus);
         } else {
             return Collections.emptyList();
@@ -135,11 +135,16 @@ public class OrderServiceImpl implements OrderService {
     }
 
 
-
     @Override
     @Transactional
     public List<OrderDetail> queryOrderDetail(Integer orderId) {
         return orderDetailDao.findByOrderId(orderId);
+    }
+
+    @Override
+    @Transactional
+    public OrderDetail queryOrderDetailById(Integer orderId) {
+        return orderDetailDao.findById(orderId);
     }
 
     @Override
@@ -167,7 +172,7 @@ public class OrderServiceImpl implements OrderService {
         Double totalWeight = 0.0;
         Double totalPrice = 0.0;
         List<OrderDetail> details = orderDetailDao.findByOrderId(orderId);
-        for(OrderDetail detail : details) {
+        for (OrderDetail detail : details) {
             totalSmall += detail.getInnerCount();
             totalBig += detail.getOuterCount();
             totalPrice += detail.getProductPrice();
@@ -205,9 +210,9 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public ReturnCode addWorkRecord(List<WorkRecord> records, Integer detailId) {
         workRecordDao.deleteByOrderDetail(detailId);
-        for(int i = 0; i < records.size(); i++) {
+        for (int i = 0; i < records.size(); i++) {
             em.merge(records.get(i));
-            if(i % 30 == 0) {
+            if (i % 30 == 0) {
                 em.flush();
                 em.clear();
             }
@@ -218,8 +223,39 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
+    public ReturnCode deleteWorkRecord(WorkRecord workRecord) {
+        workRecordDao.delete(workRecord);
+        return ReturnCode.SUCCESS;
+    }
+
+    @Override
+    @Transactional
+    public List<WorkRecord> queryWorkRecordList(String name, Integer year, Integer month) {
+        if (name.equals("") && year == 0) {
+            return workRecordDao.findAll();
+        } else if (name.equals("") && year != 0) {
+            return workRecordDao.findWorkRecordByTime(year, month);
+        } else if (year == 0) {
+            return workRecordDao.findWorkRecordByWorker(name);
+        } else {
+            return workRecordDao.findWorkRecordByWorkerAndTime(name, year, month);
+        }
+    }
+
+    @Override
+    @Transactional
     public List<WorkRecord> queryDivisionDetail(int detailId) {
         return workRecordDao.findByOrderDetail(detailId);
+    }
+
+    @Override
+    @Transactional
+    public ReturnCode checkWork(int orderId) {
+        List<OrderDetail> orderDetails = queryOrderDetail(orderId);
+        for (OrderDetail detail : orderDetails) {
+            workRecordDao.updateIsFinishByOrderDetailId(detail.getId());
+        }
+        return ReturnCode.SUCCESS;
     }
 
     @Override

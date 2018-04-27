@@ -164,6 +164,12 @@ export default {
           if (data.code == "SUCCESS") {
             this.listData = data.list;
             this.initPagination(10);
+          } else if (data.code == "NO_AUTHORITY") {
+            this.$message({
+              message: "无权限操作",
+              type: "error"
+            });
+            this.$router.go(-1);
           } else {
             this.$message({
               message: "查询失败， 失败原因：" + data.code,
@@ -174,7 +180,7 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: JSON.stringify(err.data),
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
           loading.close();
@@ -200,6 +206,12 @@ export default {
               type: "success"
             });
             this.renderWorkRate();
+          } else if (data == "NO_AUTHORITY") {
+            this.$message({
+              message: "无权限操作",
+              type: "error"
+            });
+            this.$router.go(-1);
           } else {
             this.$message({
               message: "添加失败， 失败原因：" + data,
@@ -209,7 +221,7 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: err,
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
         });
@@ -227,6 +239,12 @@ export default {
               type: "success"
             });
             this.renderWorkRate();
+          } else if (data == "NO_AUTHORITY") {
+            this.$message({
+              message: "无权限操作",
+              type: "error"
+            });
+            this.$router.go(-1);
           } else {
             this.$message({
               message: "更新失败， 失败原因：" + data,
@@ -236,7 +254,7 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: err,
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
         });
@@ -253,6 +271,12 @@ export default {
               type: "success"
             });
             this.renderWorkRate();
+          } else if (data == "NO_AUTHORITY") {
+            this.$message({
+              message: "无权限操作",
+              type: "error"
+            });
+            this.$router.go(-1);
           } else {
             this.$message({
               message: "删除失败， 失败原因：" + data,
@@ -262,7 +286,7 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: err,
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
         });

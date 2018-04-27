@@ -17,7 +17,7 @@
           </el-col>
           <el-col :span="2" :offset="20" style="text-align:right">
             <el-form-item label-width="0px">
-                <el-button type="warning" icon="el-icon-circle-plus" @click="handleNext()">提交</el-button>
+                <el-button type="warning" icon="el-icon-circle-plus" v-show="order.status<5" @click="handleNext()">提交</el-button>
             </el-form-item>
           </el-col>
         </el-row>
@@ -60,7 +60,7 @@
             <el-form-item label="味道">
               <span>{{ props.row.smell }}</span>
             </el-form-item>
-            <el-form-item label="水果贴">
+            <el-form-item label="水果贴" style="width: 100%">
               <span>{{ props.row.fruitSticker }}</span>
             </el-form-item>
             <el-form-item label="备注" style="width: 100%">
@@ -115,9 +115,13 @@
           </el-col>
           <el-col :span="22">
             <el-form-item label="班组选择" label-width="100px">
-              <el-checkbox-group v-model="checkedWorker" @change="handleCheckedChange">
-                <el-checkbox v-for="worker in workers" :label="worker.name" :key="worker.name">
-                  {{worker.name}}</el-checkbox>
+              <el-checkbox-group v-model="checkedWorker" @change="handleCheckedChange" :disabled="order.status>4">
+                <el-row :gutter="0">
+                  <el-col v-for="worker in workers" :key="worker.name" style="width: 20%;text-align: center;">
+                    <el-checkbox :label="worker.name">
+                      {{worker.name}}</el-checkbox>
+                  </el-col>
+                </el-row>
               </el-checkbox-group>
             </el-form-item>
           </el-col>
@@ -125,18 +129,18 @@
             <el-row :gutter="20">
               <el-col :span="14">
                 <el-form-item label="班组名" label-width="100px">
-                    <el-input v-model="record.worker"></el-input>
+                    <el-input v-model="record.worker" disabled></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="8">
                 <el-form-item label="开始时间" label-width="100px">
-                  <el-date-picker v-model="record.startTime" type="datetime" format="yyyy-MM-dd HH:00:00" placeholder="选择日期时间">
+                  <el-date-picker v-model="record.startTime" :disabled="order.status>4" type="datetime" format="yyyy-MM-dd HH:00:00" placeholder="选择日期时间">
                   </el-date-picker>
                 </el-form-item>
               </el-col>
               <el-col :span="14">
                 <el-form-item label="工作量" label-width="100px">
-                    <el-input v-model.number="record.count" @change="handleCountChange(record)"></el-input>
+                    <el-input v-model.number="record.count" :disabled="order.status>4" @change="handleCountChange(record)"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="8">
@@ -181,7 +185,8 @@ export default {
       form: {
         list: [],
         detailId: 0
-      }
+      },
+      workRateOption: []
     };
   },
   methods: {
@@ -205,14 +210,22 @@ export default {
       );
     },
     handleEdit(index, row) {
-      this.form.list = [];
-      this.form.detailId = row.id;
-      this.dialogFormVisible = true;
-      this.currentSurplus = row.productWeight;
-      this.currentAllCount = row.productWeight;
-      this.currentPackType = row.packType;
-      this.checkedWorker = [];
-      this.renderDivisionDetail();
+      let role = JSON.parse(localStorage.getItem("ms_user")).role;
+      if (role == 1 || role == 3) {
+        this.form.list = [];
+        this.form.detailId = row.id;
+        this.dialogFormVisible = true;
+        this.currentSurplus = row.productWeight;
+        this.currentAllCount = row.productWeight;
+        this.currentPackType = row.packType;
+        this.checkedWorker = [];
+        this.renderDivisionDetail();
+      } else {
+        this.$message({
+          message: "无权限操作",
+          type: "error"
+        });
+      }
     },
     handleClose(done) {
       this.$confirm("确认关闭？")
@@ -298,7 +311,7 @@ export default {
     },
     rendeWorkRate() {
       let params = {
-        status: 1
+        status: 2
       };
       this.$api
         .post(this.$url.getWorkRateList, params)
@@ -306,6 +319,9 @@ export default {
           let data = res.data;
           if (data.code == "SUCCESS") {
             this.workRateOption = data.list;
+            console.log(this.workRateOption)
+          } else if (data.code == "NO_AUTHORITY") {
+            this.workRateOption = [];
           } else {
             this.$message({
               message: "查询失败， 失败原因：" + data.code,
@@ -315,7 +331,7 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: JSON.stringify(err.data),
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
         });
@@ -323,7 +339,7 @@ export default {
     renderWorker() {
       let params = {
         name: "",
-        role: 3
+        role: 4
       };
       this.$api
         .post(this.$url.getWorkerList, params)
@@ -331,7 +347,7 @@ export default {
           let data = res.data;
           if (data.code == "SUCCESS") {
             this.workers = data.list;
-          } else {
+          }else {
             this.$message({
               message: "查询失败， 失败原因：" + data.code,
               type: "error"
@@ -340,7 +356,7 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: JSON.stringify(err.data),
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
         });
@@ -365,7 +381,7 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: JSON.stringify(err.data),
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
         });
@@ -387,7 +403,13 @@ export default {
             this.listData = data.list;
             this.initPagination(6);
             this.renderOrder();
-          } else {
+          } else if (data.code == "NO_AUTHORITY") {
+            this.$message({
+              message: "无权限操作",
+              type: "error"
+            });
+            this.$router.go(-1);
+          }  else {
             this.$message({
               message: "查询失败， 失败原因：" + data.code,
               type: "error"
@@ -397,7 +419,7 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: JSON.stringify(err.data),
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
           loading.close();
@@ -433,7 +455,7 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: JSON.stringify(err.data),
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
           loading.close();
@@ -471,7 +493,7 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: err,
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
         });
@@ -498,7 +520,7 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: err,
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
         });

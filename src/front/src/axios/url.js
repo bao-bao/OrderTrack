@@ -41,6 +41,7 @@ export default {
 
   getOrderInfo: "/order/getOrderInfo",
   getOrderDetail: "/order/getOrderDetail",
+  getOrderDetailById: "/order/getOrderDetailById",
   addOrderDetail: "/order/addOrderDetail",
   updateOrderDetail: "/order/updateOrderDetail",
   deleteOrderDetail: "/order/deleteOrderDetail",
@@ -67,5 +68,8 @@ export default {
 
   /**工作分配**/
   addWorkRecord: "/order/addWorkRecord",
+  deleteWorkRecord: "/order/deleteWorkRecord",
+  getWorkRecordList: "/order/getWorkRecordList",
   getDivisionDetail: "/order/getDivisionDetail",
+  checkWork: "/order/checkWork",
 };

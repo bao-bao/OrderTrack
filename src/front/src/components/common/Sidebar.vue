@@ -23,54 +23,98 @@
 <script>
 export default {
   data() {
-    return {
-      items: [
-        {
-          icon: "el-icon-bell",
-          index: "/index",
-          title: "首页"
-        },
-        {
-          icon: "el-icon-document",
-          index: "/order",
-          title: "订单管理",
-          subs: [
-            {
-              index: "/onbusiness",
-              title: "生产中"
-            },
-            {
-              index: "/history",
-              title: "历史记录"
-            }
-          ]
-        },
-        {
-          icon: "el-icon-news",
-          index: "/employee",
-          title: "职员管理"
-        },
-        {
-          icon: "el-icon-star-off",
-          index: "/setting",
-          title: "其他配置",
-          subs: [
-            {
-              index: "/product",
-              title: "产品价格"
-            },
-            {
-              index: "/workRate",
-              title: "工作效率"
-            },
-            {
-              index: "/additive",
-              title: "添加物"
-            }
-          ]
-        }
-      ]
-    };
+    let user = JSON.parse(localStorage.getItem("ms_user"));
+    let role = user.role;
+    if (role == 1) {
+      return {
+        items: [
+          {
+            icon: "el-icon-bell",
+            index: "/index",
+            title: "首页"
+          },
+          {
+            icon: "el-icon-document",
+            index: "/order",
+            title: "订单管理",
+            subs: [
+              {
+                index: "/onbusiness",
+                title: "生产中"
+              },
+              {
+                index: "/history",
+                title: "历史记录"
+              }
+            ]
+          },
+          {
+            icon: "el-icon-news",
+            index: "/employee",
+            title: "职员管理"
+          },
+          {
+            icon: "el-icon-bell",
+            index: "/workrecord",
+            title: "工作记录"
+          },
+          {
+            icon: "el-icon-star-off",
+            index: "/setting",
+            title: "其他配置",
+            subs: [
+              {
+                index: "/product",
+                title: "产品价格"
+              },
+              {
+                index: "/workRate",
+                title: "工作效率"
+              },
+              {
+                index: "/additive",
+                title: "添加物"
+              }
+            ]
+          }
+        ]
+      };
+    } else if(role == 2 || role == 3) {
+      return {
+        items: [
+          {
+            icon: "el-icon-bell",
+            index: "/index",
+            title: "首页"
+          },
+          {
+            icon: "el-icon-document",
+            index: "/order",
+            title: "订单管理",
+            subs: [
+              {
+                index: "/onbusiness",
+                title: "生产中"
+              },
+              {
+                index: "/history",
+                title: "历史记录"
+              }
+            ]
+          }
+        ]
+      };
+    } else {
+      return {
+        items: [
+          {
+            icon: "el-icon-bell",
+            index: "/index",
+            title: "首页"
+          }
+        ]
+      };
+    }
   },
   computed: {
     onRoutes() {
@@ -92,5 +136,8 @@ export default {
 }
 .sidebar > ul {
   height: 100%;
+}
+.el-submenu .el-menu-item {
+  min-width: 100px;
 }
 </style>

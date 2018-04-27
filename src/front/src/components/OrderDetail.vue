@@ -121,10 +121,10 @@
       </el-pagination>
     </div>
     <el-dialog :title="dialogFormTitle" :visible="dialogFormVisible" width="70%" :before-close="handleClose">
-      <el-form ref="form" :model="form">
+      <el-form ref="form" :model="form" :rules="rule">
         <el-row :gutter="20">
           <el-col :span="22">
-            <el-form-item label="中文名称" label-width="100px">
+            <el-form-item label="中文名称" prop="chineseName" label-width="100px">
               <el-autocomplete :fetch-suggestions="querySearch" v-model="form.chineseName" @select="productSelect">
                 <i class="el-icon-edit el-input__icon" slot="suffix"></i>
                 <template slot-scope="props">
@@ -134,32 +134,32 @@
             </el-form-item>
           </el-col>
           <el-col :span="11">
-            <el-form-item label="产品净重" label-width="100px">
+            <el-form-item label="产品净重" prop="productWeight" label-width="100px">
               <el-input v-model="form.productWeight"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="11">
-            <el-form-item label="产品规格" label-width="100px">
+            <el-form-item label="产品规格" prop="productStandard" label-width="100px">
               <el-input v-model="form.productStandard"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="11">
-            <el-form-item label="内包装规格" label-width="100px">
+            <el-form-item label="内包装规格" prop="innerStandard" label-width="100px">
               <el-input v-model="form.innerStandard"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="11">
-            <el-form-item label="数量" label-width="100px">
+            <el-form-item label="数量" prop="innerCount" label-width="100px">
               <el-input v-model="form.innerCount"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="11">
-            <el-form-item label="外包装规格" label-width="100px">
+            <el-form-item label="外包装规格" prop="outerStandard" label-width="100px">
               <el-input v-model="form.outerStandard"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="11">
-            <el-form-item label="件数" label-width="100px">
+            <el-form-item label="件数" prop="outerCount" label-width="100px">
               <el-input v-model="form.outerCount"></el-input>
             </el-form-item>
           </el-col>
@@ -174,7 +174,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="11">
-            <el-form-item label="包装情况" label-width="100px">
+            <el-form-item label="包装情况" prop="packType" label-width="100px">
               <el-select v-model="form.packType">
                 <el-option v-for="item in workRateOption"
                 :key="item.id" :label="showPackLabel(item)" :value="item.id">
@@ -237,7 +237,33 @@ export default {
       order: {},
       product: [],
       additivePrice: 0,
-      form: {}
+      form: {},
+      rule: {
+        chineseName: [
+          { required: true, message: "请输入中文名称", trigger: "blur" }
+        ],
+        productWeight: [
+          { required: true, message: "请输入产品净重", trigger: "blur" }
+        ],
+        productStandard: [
+          { required: true, message: "请输入销售合同号", trigger: "blur" }
+        ],
+        innerStandard: [
+          { required: true, message: "请输入内包装规格", trigger: "blur" }
+        ],
+        innerCount: [
+          { required: true, message: "请输入内包装数量", trigger: "blur" }
+        ],
+        outerStandard: [
+          { required: true, message: "请输入外包装规格", trigger: "blur" }
+        ],
+        outerCount: [
+          { required: true, message: "请输入外包装件数", trigger: "blur" }
+        ],
+        packType: [
+          { required: true, message: "请选择包装情况", trigger: "blur" }
+        ]
+      }
     };
   },
   methods: {
@@ -261,19 +287,35 @@ export default {
       );
     },
     handleEdit(index, row) {
-      this.isUpdate = true;
-      this.dialogFormTitle = "编辑订单内容";
-      this.form = JSON.parse(JSON.stringify(row));
-      this.form.extra = JSON.parse(this.form.extra);
-      this.handleAdditiveChange(this.form.extra)
-      this.dialogFormVisible = true;
+      let role = JSON.parse(localStorage.getItem("ms_user")).role;
+      if (role == 1) {
+        this.isUpdate = true;
+        this.dialogFormTitle = "编辑订单内容";
+        this.form = JSON.parse(JSON.stringify(row));
+        this.form.extra = JSON.parse(this.form.extra);
+        this.handleAdditiveChange(this.form.extra);
+        this.dialogFormVisible = true;
+      } else {
+        this.$message({
+          message: "无权限操作",
+          type: "error"
+        });
+      }
     },
     handleDelete(index, row) {
-      this.$confirm("确认删除？")
-        .then(_ => {
-          this.doDelete(index, row);
-        })
-        .catch(_ => {});
+      let role = JSON.parse(localStorage.getItem("ms_user")).role;
+      if (role == 1) {
+        this.$confirm("确认删除？")
+          .then(_ => {
+            this.doDelete(index, row);
+          })
+          .catch(_ => {});
+      } else {
+        this.$message({
+          message: "无权限操作",
+          type: "error"
+        });
+      }
     },
     handleClose(done) {
       this.$confirm("确认关闭？")
@@ -287,7 +329,7 @@ export default {
       this.additivePrice = 0;
       val.forEach(element => {
         this.allAdditive.forEach(e => {
-          if(e.name == element) {
+          if (e.name == element) {
             this.additivePrice += e.price;
           }
         });
@@ -301,17 +343,16 @@ export default {
       var results = queryString
         ? products.filter(this.createFilter(queryString))
         : products;
-        results.forEach(element => {
-          element.show = element.name + " - " + element.price;
-          element.value = element.name;
-        });
+      results.forEach(element => {
+        element.show = element.name + " - " + element.price;
+        element.value = element.name;
+      });
       cb(results);
     },
     createFilter(queryString) {
       return product => {
         return (
-          product.name.toLowerCase().indexOf(queryString.toLowerCase()) ===
-          0
+          product.name.toLowerCase().indexOf(queryString.toLowerCase()) === 0
         );
       };
     },
@@ -329,6 +370,8 @@ export default {
           let data = res.data;
           if (data.code == "SUCCESS") {
             this.product = data.list;
+          } else if (data.code == "NO_AUTHORITY") {
+            this.product = [];
           } else {
             this.$message({
               message: "查询失败， 失败原因：" + data.code,
@@ -338,7 +381,7 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: JSON.stringify(err.data),
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
         });
@@ -353,6 +396,8 @@ export default {
           let data = res.data;
           if (data.code == "SUCCESS") {
             this.workRateOption = data.list;
+          } else if (data.code == "NO_AUTHORITY") {
+            this.workRateOption = [];
           } else {
             this.$message({
               message: "查询失败， 失败原因：" + data.code,
@@ -362,7 +407,7 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: JSON.stringify(err.data),
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
         });
@@ -388,7 +433,7 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: JSON.stringify(err.data),
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
         });
@@ -410,6 +455,12 @@ export default {
             this.listData = data.list;
             this.initPagination(6);
             this.renderOrder();
+          } else if (data.code == "NO_AUTHORITY") {
+            this.$message({
+              message: "无权限操作",
+              type: "error"
+            });
+            this.$router.go(-1);
           } else {
             this.$message({
               message: "查询失败， 失败原因：" + data.code,
@@ -420,7 +471,7 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: JSON.stringify(err.data),
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
           loading.close();
@@ -429,7 +480,7 @@ export default {
     renderAdditive() {
       let params = {
         status: 2
-      }
+      };
       this.$api
         .post(this.$url.getAdditiveList, params)
         .then(res => {
@@ -440,6 +491,9 @@ export default {
             data.list.forEach(element => {
               this.additiveOption.push(element.name);
             });
+          } else if (data.code == "NO_AUTHORITY") {
+            this.additiveOption = [];
+            this.allAdditive = [];
           } else {
             this.$message({
               message: "查询失败， 失败原因：" + data.code,
@@ -449,91 +503,134 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: JSON.stringify(err.data),
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
         });
     },
     addOrderDetail() {
-      this.isUpdate = false;
-      this.dialogFormTitle = "新增订单内容";
-      this.form = {
-        orderId: this.orderId,
-        chineseName: "",
-        productPrice: "",
-        productWeight: "",
-        productStandard: "",
-        innerStandard: "",
-        innerCount: "",
-        outerStandard: "",
-        outerCount: "",
-        smell: "",
-        extra: [],
-        fruitSticker: "",
-        additive: [],
-        remark: "",
-        isFinish: false,
-      };
-      this.dialogFormVisible = true;
+      let role = JSON.parse(localStorage.getItem("ms_user")).role;
+      if (role == 1) {
+        this.isUpdate = false;
+        this.dialogFormTitle = "新增订单内容";
+        this.form = {
+          orderId: this.orderId,
+          chineseName: "",
+          productPrice: "",
+          productWeight: "",
+          productStandard: "",
+          innerStandard: "",
+          innerCount: "",
+          outerStandard: "",
+          outerCount: "",
+          smell: "",
+          extra: [],
+          fruitSticker: "",
+          additive: [],
+          remark: "",
+          isFinish: false
+        };
+        this.dialogFormVisible = true;
+      } else {
+        this.$message({
+          message: "无权限操作",
+          type: "error"
+        });
+      }
     },
     doAdd() {
-      this.dialogFormVisible = false;
-      this.form.productPrice = (this.form.piecePirce + this.additivePrice) * this.form.productWeight;
-      this.form.extra = JSON.stringify(this.form.extra);
-      let params = this.form;
-      this.$api
-        .post(this.$url.addOrderDetail, params)
-        .then(res => {
-          let data = res.data;
-          if (data == "SUCCESS") {
-            this.$message({
-              message: "添加成功",
-              type: "success"
+      this.$refs["form"].validate(valid => {
+        if (valid) {
+          this.dialogFormVisible = false;
+          this.form.productPrice =
+            (this.form.piecePirce + this.additivePrice) *
+            this.form.productWeight;
+          this.form.extra = JSON.stringify(this.form.extra);
+          let params = this.form;
+          this.$api
+            .post(this.$url.addOrderDetail, params)
+            .then(res => {
+              let data = res.data;
+              if (data == "SUCCESS") {
+                this.$message({
+                  message: "添加成功",
+                  type: "success"
+                });
+                this.renderOrderDetail();
+              } else if (data == "NO_AUTHORITY") {
+                this.$message({
+                  message: "无权限操作",
+                  type: "error"
+                });
+                this.$router.go(-1);
+              } else {
+                this.$message({
+                  message: "添加失败， 失败原因：" + data,
+                  type: "error"
+                });
+              }
+            })
+            .catch(err => {
+              this.$message({
+                message: err.data.status + ": " + err.data.error,
+                type: "error"
+              });
             });
-            
-            this.renderOrderDetail();
-          } else {
-            this.$message({
-              message: "添加失败， 失败原因：" + data,
-              type: "error"
-            });
-          }
-        })
-        .catch(err => {
+        } else {
           this.$message({
-            message: err,
-            type: "error"
+            message: "请输入必填项",
+            type: "warning"
           });
-        });
+          return false;
+        }
+      });
     },
     doUpdate() {
-      this.dialogFormVisible = false;
-      this.form.productPrice = (this.form.piecePirce + this.additivePrice) * this.form.productWeight;
-      this.form.extra = JSON.stringify(this.form.extra);
-      let params = this.form;
-      this.$api
-        .post(this.$url.updateOrderDetail, params)
-        .then(res => {
-          let data = res.data;
-          if (data == "SUCCESS") {
-            this.$message({
-              message: "更新成功",
-              type: "success"
+      this.$refs["form"].validate(valid => {
+        if (valid) {
+          this.dialogFormVisible = false;
+          this.form.productPrice =
+            (this.form.piecePirce + this.additivePrice) *
+            this.form.productWeight;
+          this.form.extra = JSON.stringify(this.form.extra);
+          let params = this.form;
+          this.$api
+            .post(this.$url.updateOrderDetail, params)
+            .then(res => {
+              let data = res.data;
+              if (data == "SUCCESS") {
+                this.$message({
+                  message: "更新成功",
+                  type: "success"
+                });
+                this.renderOrderDetail();
+              } else if (data == "NO_AUTHORITY") {
+                this.$message({
+                  message: "无权限操作",
+                  type: "error"
+                });
+                this.$router.go(-1);
+              } else {
+                this.$message({
+                  message: "更新失败， 失败原因：" + data,
+                  type: "error"
+                });
+              }
+            })
+            .catch(err => {
+              this.$message({
+                message: err.data.status + ": " + err.data.error,
+                type: "error"
+              });
             });
-            this.renderOrderDetail();
-          } else {
-            this.$message({
-              message: "更新失败， 失败原因：" + data,
-              type: "error"
-            });
-          }
-        })
-        .catch(err => {
+        } else {
           this.$message({
-            message: err,
-            type: "error"
+            message: "请输入必填项",
+            type: "warning"
           });
-        });
+          return false;
+        }
+      });
     },
     doDelete(index, row) {
       let params = row;
@@ -547,6 +644,12 @@ export default {
               type: "success"
             });
             this.renderOrderDetail();
+          } else if (data == "NO_AUTHORITY") {
+            this.$message({
+              message: "无权限操作",
+              type: "error"
+            });
+            this.$router.go(-1);
           } else {
             this.$message({
               message: "删除失败， 失败原因：" + data,
@@ -556,7 +659,7 @@ export default {
         })
         .catch(err => {
           this.$message({
-            message: err,
+            message: err.data.status + ": " + err.data.error,
             type: "error"
           });
         });
@@ -580,7 +683,7 @@ export default {
     showPackLabel(item) {
       let str = item.standard + "kg";
       this.workRateTypeOption.forEach(element => {
-        if(element.value == item.type) {
+        if (element.value == item.type) {
           str += element.label;
         }
       });

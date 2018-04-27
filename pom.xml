@@ -5,7 +5,7 @@
 
     <groupId>com.ordertrack</groupId>
     <artifactId>OrderTrack</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>OrderTrack</name>
@@ -15,7 +15,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.0.0.RELEASE</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
 
     <properties>
@@ -63,6 +63,11 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.9.1</version>
         </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+        <version>1.2.47</version>
+    </dependency>
         <!-- jdbc connection pool -->
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -100,11 +105,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <!--  for server run
                 <configuration>
                     <executable>true</executable>
                 </configuration>
-                -->
             </plugin>
         </plugins>
     </build>

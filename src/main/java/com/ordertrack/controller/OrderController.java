@@ -95,6 +95,21 @@ public class OrderController {
     }
 
     @ResponseBody
+    @PostMapping("/getOrderDetailById")
+    public OrderDetailIdResponse getOrderDetailList(@RequestBody OrderDetailIdRequest request) {
+        OrderDetailIdResponse resp = new OrderDetailIdResponse();
+        Integer detailId = request.getDetailId();
+        OrderDetail detail = orderService.queryOrderDetailById(detailId);
+        if(detail != null) {
+            resp.setDetail(detail);
+            resp.setCode(ReturnCode.SUCCESS);
+        } else {
+            resp.setCode(ReturnCode.NO_DATA);
+        }
+        return resp;
+    }
+
+    @ResponseBody
     @PostMapping("/addOrderDetail")
     public ReturnCode addOrderDetail(@RequestBody OrderDetail orderDetail) {
         return orderService.addOrderDetail(orderDetail);
@@ -135,6 +150,25 @@ public class OrderController {
     }
 
     @ResponseBody
+    @PostMapping("/deleteWorkRecord")
+    public ReturnCode deleteWorkRecord(@RequestBody WorkRecord workRecord) {
+        return orderService.deleteWorkRecord(workRecord);
+    }
+
+    @ResponseBody
+    @PostMapping("/getWorkRecordList")
+    public ListResponse<WorkRecord> getWorkRecordList(@RequestBody WorkRecordListRequest request) {
+        ListResponse<WorkRecord> resp = new ListResponse<>();
+        String name = request.getName();
+        Integer year = request.getYear();
+        Integer month = request.getMonth();
+        List<WorkRecord> list = orderService.queryWorkRecordList(name, year, month);
+        resp.setList(list);
+        resp.setCode(ReturnCode.SUCCESS);
+        return resp;
+    }
+
+    @ResponseBody
     @PostMapping("/getDivisionDetail")
     public ListResponse<WorkRecord> getDivisionDetail(@RequestBody DivisionDetailRequest request) {
         ListResponse<WorkRecord> resp = new ListResponse<>();
@@ -143,5 +177,12 @@ public class OrderController {
         resp.setList(list);
         resp.setCode(ReturnCode.SUCCESS);
         return resp;
+    }
+
+    @ResponseBody
+    @PostMapping("/checkWork")
+    public ReturnCode checkWork(@RequestBody CheckWorkRequest request) {
+        Integer orderId = request.getOrderId();
+        return orderService.checkWork(orderId);
     }
 }
