@@ -210,6 +210,10 @@ export default {
       );
     },
     handleEdit(index, row) {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1 || role == 3) {
         this.form.list = [];

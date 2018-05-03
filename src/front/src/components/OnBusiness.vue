@@ -67,25 +67,25 @@
           <el-tag size="medium">{{ scope.row.orderId }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="customName" label="客户名称" min-width="130">
+      <el-table-column prop="customName" label="客户名称" min-width="120">
         <template slot-scope="scope">{{ scope.row.customName }}</template>
       </el-table-column>
       <el-table-column prop="deliveryDate" label="要求交货期" min-width="100">
         <template slot-scope="scope">{{ showDate(scope.row.deliveryDate) }}</template>
       </el-table-column>
-      <el-table-column prop="contractId" label="销售合同号" min-width="140">
+      <el-table-column prop="contractId" label="销售合同号" min-width="120">
         <template slot-scope="scope">{{ scope.row.contractId }}</template>
       </el-table-column>
       <el-table-column prop="totalPrice" label="总价值" min-width="100">
         <template slot-scope="scope">{{ scope.row.totalPrice.toFixed(2) }} 元</template>
       </el-table-column>
-      <el-table-column prop="status" label="当前状态" min-width="100">
+      <el-table-column prop="status" label="当前状态" min-width="90">
         <template slot-scope="scope">
           <el-tag size="medium" :type="scope.row.status <= 1 ? '' : scope.row.status <= 4 ? 'warning' : 'success'">
             {{ showStatus(scope.row.status) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" min-width="260">
+      <el-table-column label="操作" min-width="325">
         <template slot-scope="scope">
           <el-button size="mini" v-if="scope.row.status == 0" @click="handleTake(scope.$index, scope.row)">接单</el-button>
           <el-button size="mini" v-if="scope.row.status == 1" @click="handleDown(scope.$index, scope.row)">下发</el-button>
@@ -219,6 +219,10 @@ export default {
       );
     },
     handleEdit(index, row) {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
         this.isUpdate = true;
@@ -233,6 +237,10 @@ export default {
       }
     },
     handleTake(index, row) {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
         this.$confirm("确认提交？")
@@ -251,6 +259,10 @@ export default {
       }
     },
     handleDown(index, row) {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
         this.$confirm("确认提交？")
@@ -269,6 +281,10 @@ export default {
       }
     },
     handlePickUp(index, row) {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1 || role == 2) {
         this.$confirm("确认提交？")
@@ -287,6 +303,10 @@ export default {
       }
     },
     handleDivision(index, row) {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1 || role == 3) {
         return this.$router.push({
@@ -301,6 +321,10 @@ export default {
       }
     },
     handleCheck(index, row) {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1 || role == 3) {
         this.$confirm("确认提交？")
@@ -320,6 +344,10 @@ export default {
       }
     },
     handleBalance(index, row) {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
         this.$confirm("确认提交？")
@@ -344,6 +372,10 @@ export default {
       });
     },
     handleDelete(index, row) {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
         this.$confirm("确认删除？")
@@ -448,6 +480,10 @@ export default {
         });
     },
     addOrder() {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
         this.isUpdate = false;

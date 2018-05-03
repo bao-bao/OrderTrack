@@ -3,7 +3,7 @@
     <div class="crumbs">
       <el-breadcrumb separator="/">
         <el-breadcrumb-item><i class="el-icon-date"></i> 职员管理</el-breadcrumb-item>
-        <el-breadcrumb-item>职员列表</el-breadcrumb-item>
+        <el-breadcrumb-item>工作记录</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div>
@@ -388,7 +388,7 @@ export default {
   }
 };
 </script>
-<style>
+<style scoped>
 span + span {
   margin-left: 20px;
 }

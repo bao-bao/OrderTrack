@@ -64,7 +64,7 @@
           <el-tag size="medium">{{ scope.row.orderId }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="customName" label="客户名称" min-width="180">
+      <el-table-column prop="customName" label="客户名称" min-width="170">
         <template slot-scope="scope">{{ scope.row.customName }}</template>
       </el-table-column>
       <el-table-column prop="deliveryDate" label="要求交货期" min-width="150">
@@ -148,6 +148,10 @@ export default {
       );
     },
     handleDivision(index, row) {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1 || role == 3) {
         return this.$router.push({
@@ -168,6 +172,10 @@ export default {
       });
     },
     handleDelete(index, row) {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
         this.$confirm("确认删除？")

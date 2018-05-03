@@ -17,7 +17,7 @@
           </el-col>
           <el-col :span="18" :offset="1">
             <el-form-item label-width="0px">
-              <el-steps :active="order.status+1" finish-status="success">
+              <el-steps :active="order.status == 6 ? 7 : order.status" finish-status="success">
                 <el-step title="准备"></el-step>
                 <el-step title="接单"></el-step>
                 <el-step title="提货"></el-step>
@@ -287,6 +287,10 @@ export default {
       );
     },
     handleEdit(index, row) {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
         this.isUpdate = true;
@@ -303,6 +307,10 @@ export default {
       }
     },
     handleDelete(index, row) {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
         this.$confirm("确认删除？")
@@ -509,6 +517,10 @@ export default {
         });
     },
     addOrderDetail() {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
         this.isUpdate = false;

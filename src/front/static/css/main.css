@@ -13,6 +13,7 @@ body,
 body {
   font-family: "Helvetica Neue", Helvetica, "microsoft yahei", arial, STHeiTi,
     sans-serif;
+  background: #fff;
 }
 a {
   text-decoration: none;
@@ -184,5 +185,10 @@ textarea {
   border-left: solid #ccc 1px;
 }
 button {
-  font-family: "Helvetica Neue", Helvetica, "microsoft yahei", arial, STHeiTi, sans-serif
+  font-family: "Helvetica Neue", Helvetica, "microsoft yahei", arial, STHeiTi,
+    sans-serif;
+}
+td .el-form-item--small.el-form-item,.el-card .el-form-item--small.el-form-item {
+  margin-right: 0;
+  margin-bottom: 0;
 }

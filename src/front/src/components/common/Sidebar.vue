@@ -23,6 +23,10 @@
 <script>
 export default {
   data() {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
     let user = JSON.parse(localStorage.getItem("ms_user"));
     let role = user.role;
     if (role == 1) {
@@ -79,7 +83,7 @@ export default {
           }
         ]
       };
-    } else if(role == 2 || role == 3) {
+    } else if (role == 2 || role == 3) {
       return {
         items: [
           {

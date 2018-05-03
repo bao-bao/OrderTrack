@@ -3,7 +3,6 @@ package com.ordertrack.dao;
 /* Created by AMXPC on 2018/4/19. */
 
 import com.ordertrack.entity.WorkRecord;
-import org.omg.CORBA.INTERNAL;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

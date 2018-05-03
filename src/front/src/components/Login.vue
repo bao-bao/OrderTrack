@@ -10,9 +10,9 @@
                     <el-input type="password" placeholder="password" v-model="ruleForm.password" @keyup.enter.native="submitForm('ruleForm')"></el-input>
                 </el-form-item>
                 <div class="login-btn">
-                    <el-button type="primary" @click="submitForm('ruleForm')">登录</el-button>
+                    <el-button type="primary" :loading="isLoading" @click="submitForm('ruleForm')">登录</el-button>
                 </div>
-                <p style="font-size:12px;line-height:30px;color:#999;">Tips : 用户名和密码随便填。</p>
+                <p style="font-size:12px;line-height:30px;color:#999;">Tips : 默认密码123456</p>
             </el-form>
         </div>
     </div>
@@ -22,6 +22,7 @@
 export default {
   data: function() {
     return {
+      isLoading: false,
       ruleForm: {
         username: "",
         password: ""
@@ -37,6 +38,7 @@ export default {
   methods: {
     submitForm(formName) {
       const self = this;
+      self.isLoading = true;
       self.$refs[formName].validate(valid => {
         if (valid) {
           self.$api
@@ -79,6 +81,7 @@ export default {
           return false;
         }
       });
+      self.isLoading = false;
     }
   }
 };

@@ -140,6 +140,10 @@ export default {
     handleDayChanged() {},
     handleMonthChanged() {},
     handleDivisionCheck() {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1 || role == 3) {
         this.$router.push({ name: "status", params: { status: 3 } });
@@ -151,6 +155,10 @@ export default {
       }
     },
     handlePickUpCheck() {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1 || role == 2) {
         this.$router.push({ name: "status", params: { status: 2 } });
@@ -162,6 +170,10 @@ export default {
       }
     },
     handleHistoryCheck() {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1 || role == 2 || role == 3) {
         this.$router.push({name: 'history'});
@@ -173,6 +185,10 @@ export default {
       }
     },
     handleProductCheck() {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
         this.$router.push({name: 'product'});
@@ -184,6 +200,10 @@ export default {
       }
     },
     handleBusinessCheck() {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1 || role == 2 || role == 3) {
         this.$router.push({name: 'onBusiness'});
@@ -195,6 +215,10 @@ export default {
       }
     },
     handleEmployeeCheck() {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
         this.$router.push({name: 'Employee'});
