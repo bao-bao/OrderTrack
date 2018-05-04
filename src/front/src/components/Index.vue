@@ -17,7 +17,7 @@
                <div class="summary-content" style="color: #09c">{{operateCount}}</div>
               </el-col>
               <el-col :span="6" class="separator">
-                <div class="summary-top">已暂停</div>
+                <div class="summary-top">已延迟</div>
                 <div class="summary-content" style="color: #f00">{{pauseCount}}</div>
               </el-col>
               <el-col :span="6" class="separator">
@@ -34,7 +34,12 @@
           <div>
             <el-row :gutter="20">
               <el-col :span="4" class="quick-content">
-                <el-badge :value="divisionCount" :hidden="divisionCount == 0">
+                <el-badge :value="takeCount" :hidden="takeCount == 0">
+                  <el-button @click="handleTakeCheck">接单</el-button>
+                </el-badge>
+              </el-col>
+              <el-col :span="4" class="quick-content">
+                <el-badge :value="divisionCount" class="item" :hidden="divisionCount == 0">
                   <el-button @click="handleDivisionCheck">分工</el-button>
                 </el-badge>
               </el-col>
@@ -44,20 +49,25 @@
                 </el-badge>
               </el-col>
               <el-col :span="4" class="quick-content">
+                <el-badge :value="balanceCount" class="item" :hidden="balanceCount == 0">
+                  <el-button @click="handleBalanceCheck">结算</el-button>
+                </el-badge>
+              </el-col>
+              <!-- <el-col :span="4" class="quick-content">
                 <el-badge :value="0" class="item" hidden>
                   <el-button @click="handleHistoryCheck">查看历史</el-button>
                 </el-badge>
-              </el-col>
+              </el-col> -->
               <el-col :span="4" class="quick-content">
                 <el-badge :value="0" class="item" hidden>
                   <el-button @click="handleProductCheck">产品管理</el-button>
                 </el-badge>
               </el-col>
-              <el-col :span="4" class="quick-content">
+              <!-- <el-col :span="4" class="quick-content">
                 <el-badge :value="0" class="item" hidden>
                   <el-button @click="handleBusinessCheck">订单管理</el-button>
                 </el-badge>
-              </el-col>
+              </el-col> -->
               <el-col :span="4" class="quick-content">
                 <el-badge :value="0" class="item" hidden>
                   <el-button @click="handleEmployeeCheck">职员管理</el-button>
@@ -94,8 +104,10 @@ export default {
       operateCount: 0,
       pauseCount: 0,
       totalCount: 0,
+      takeCount: 0,
       divisionCount: 0,
       pickUpCount: 0,
+      balanceCount: 0,
       lineChart: {
         xAxis: {
           type: "category",
@@ -139,6 +151,21 @@ export default {
     },
     handleDayChanged() {},
     handleMonthChanged() {},
+    handleTakeCheck() {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
+      let role = JSON.parse(localStorage.getItem("ms_user")).role;
+      if (role == 1 || role == 3) {
+        this.$router.push({ name: "status", params: { status: 1 } });
+      } else {
+        this.$message({
+          message: "无权限操作",
+          type: "error"
+        });
+      }
+    },
     handleDivisionCheck() {
     if (localStorage.getItem("ms_user") == null) {
       this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
@@ -146,7 +173,7 @@ export default {
     }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1 || role == 3) {
-        this.$router.push({ name: "status", params: { status: 3 } });
+        this.$router.push({ name: "status", params: { status: 2 } });
       } else {
         this.$message({
           message: "无权限操作",
@@ -161,7 +188,7 @@ export default {
     }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1 || role == 2) {
-        this.$router.push({ name: "status", params: { status: 2 } });
+        this.$router.push({ name: "status", params: { status: 3 } });
       } else {
         this.$message({
           message: "无权限操作",
@@ -169,14 +196,14 @@ export default {
         });
       }
     },
-    handleHistoryCheck() {
+    handleBalanceCheck() {
     if (localStorage.getItem("ms_user") == null) {
       this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
       return;
     }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
-      if (role == 1 || role == 2 || role == 3) {
-        this.$router.push({name: 'history'});
+      if (role == 1 || role == 2) {
+        this.$router.push({ name: "status", params: { status: 5 } });
       } else {
         this.$message({
           message: "无权限操作",
@@ -184,6 +211,21 @@ export default {
         });
       }
     },
+    // handleHistoryCheck() {
+    // if (localStorage.getItem("ms_user") == null) {
+    //   this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+    //   return;
+    // }
+    //   let role = JSON.parse(localStorage.getItem("ms_user")).role;
+    //   if (role == 1 || role == 2 || role == 3) {
+    //     this.$router.push({name: 'history'});
+    //   } else {
+    //     this.$message({
+    //       message: "无权限操作",
+    //       type: "error"
+    //     });
+    //   }
+    // },
     handleProductCheck() {
     if (localStorage.getItem("ms_user") == null) {
       this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
@@ -199,21 +241,21 @@ export default {
         });
       }
     },
-    handleBusinessCheck() {
-    if (localStorage.getItem("ms_user") == null) {
-      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
-      return;
-    }
-      let role = JSON.parse(localStorage.getItem("ms_user")).role;
-      if (role == 1 || role == 2 || role == 3) {
-        this.$router.push({name: 'onBusiness'});
-      } else {
-        this.$message({
-          message: "无权限操作",
-          type: "error"
-        });
-      }
-    },
+    // handleBusinessCheck() {
+    // if (localStorage.getItem("ms_user") == null) {
+    //   this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+    //   return;
+    // }
+    //   let role = JSON.parse(localStorage.getItem("ms_user")).role;
+    //   if (role == 1 || role == 2 || role == 3) {
+    //     this.$router.push({name: 'onBusiness'});
+    //   } else {
+    //     this.$message({
+    //       message: "无权限操作",
+    //       type: "error"
+    //     });
+    //   }
+    // },
     handleEmployeeCheck() {
     if (localStorage.getItem("ms_user") == null) {
       this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
@@ -244,8 +286,12 @@ export default {
             this.operateCount = data.operateCount;
             this.pauseCount = data.pauseCount;
             this.totalCount = data.totalCount;
+            console.log(data.takeCount);
+            this.takeCount = data.takeCount;
+            console.log(this.takeCount);
             this.divisionCount = data.divisionCount;
             this.pickUpCount = data.pickUpCount;
+            this.balanceCount = data.balanceCount;
             this.calendarEvents = data.eventList;
             this.lineChart.xAxis.data = [];
             this.lineChart.series[0].data = [];

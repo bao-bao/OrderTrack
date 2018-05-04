@@ -15,20 +15,19 @@
                 <el-button type="primary" icon="el-icon-arrow-left" @click="goBack()">返回</el-button>
             </el-form-item>
           </el-col>
-          <el-col :span="18" :offset="1">
+          <el-col :span="20">
             <el-form-item label-width="0px">
-              <el-steps :active="order.status == 6 ? 7 : order.status" finish-status="success">
-                <el-step title="准备"></el-step>
-                <el-step title="接单"></el-step>
-                <el-step title="提货"></el-step>
-                <el-step title="分配"></el-step>
-                <el-step title="包装"></el-step>
-                <el-step title="验收"></el-step>
-                <el-step title="完成"></el-step>
+              <el-steps :active="order.status" finish-status="success" align-center>
+                <el-step title="准备" :description="showDateTime(order.createTime)"></el-step>
+                <el-step title="接单" :description="showDateTime(order.takeTime)"></el-step>
+                <el-step title="分配" :description="showDateTime(order.divisionTime)"></el-step>
+                <el-step title="提货" :description="showDateTime(order.pickUpTime)"></el-step>
+                <el-step title="验收" :description="showDateTime(order.checkTime)"></el-step>
+                <el-step title="完成" :description="showDateTime(order.finishTime)"></el-step>
               </el-steps>
             </el-form-item>
           </el-col>
-          <el-col :span="2" :offset="1" style="text-align:right">
+          <el-col :span="2" style="text-align:right">
             <el-form-item label-width="0px">
                 <el-button type="warning" icon="el-icon-circle-plus" :disabled="isFinish" @click="addOrderDetail()">新增</el-button>
             </el-form-item>
@@ -121,7 +120,7 @@
       </el-pagination>
     </div>
     <el-dialog :title="dialogFormTitle" :visible="dialogFormVisible" width="70%" :before-close="handleClose">
-      <el-form ref="form" :model="form" :rules="rule">
+      <el-form ref="form" :model="form">
         <el-row :gutter="20">
           <el-col :span="22">
             <el-form-item label="中文名称" prop="chineseName" label-width="100px">
@@ -182,6 +181,11 @@
               </el-select>
             </el-form-item>
           </el-col>
+          <el-col :span="11">
+            <el-form-item label="批量导入" label-width="100px" v-show="!isUpdate">
+              <el-input v-model="mutiple"></el-input>
+            </el-form-item>
+          </el-col>
           <el-col :span="22">
             <el-form-item label="额外添加" label-width="100px">
               <el-checkbox-group v-model="form.extra" @change="handleAdditiveChange">
@@ -224,15 +228,16 @@ export default {
         customName: "",
         daterange: null
       },
+      mutiple: "",
       allAdditive: [],
       additiveOption: [],
       workRateOption: [],
       workRateTypeOption: [
-        { label: "全部", value: 0 },
-        { label: "纸箱", value: 1 },
-        { label: "托盘", value: 2 },
-        { label: "桶", value: 3 },
-        { label: "其他", value: 4 }
+        { label: "袋", value: 1 },
+        { label: "纸箱", value: 2 },
+        { label: "托盘", value: 3 },
+        { label: "桶", value: 4 },
+        { label: "其他", value: 5 }
       ],
       order: {},
       product: [],
@@ -287,10 +292,10 @@ export default {
       );
     },
     handleEdit(index, row) {
-    if (localStorage.getItem("ms_user") == null) {
-      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
-      return;
-    }
+      if (localStorage.getItem("ms_user") == null) {
+        this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+        return;
+      }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
         this.isUpdate = true;
@@ -307,10 +312,10 @@ export default {
       }
     },
     handleDelete(index, row) {
-    if (localStorage.getItem("ms_user") == null) {
-      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
-      return;
-    }
+      if (localStorage.getItem("ms_user") == null) {
+        this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+        return;
+      }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
         this.$confirm("确认删除？")
@@ -344,7 +349,11 @@ export default {
       });
     },
     goBack() {
-      this.$router.go(-1);
+      if (this.status != 0) {
+        this.$router.push("/index");
+      } else {
+        this.$router.go(-1);
+      }
     },
     querySearch(queryString, cb) {
       var products = this.product;
@@ -365,7 +374,7 @@ export default {
       };
     },
     productSelect(item) {
-      this.form.piecePirce = item.price;
+      this.form.piecePrice = item.price;
       this.form.name = item.name;
     },
     renderProduct() {
@@ -431,7 +440,7 @@ export default {
           if (data.code == "SUCCESS") {
             this.order = data.order;
             this.order.totalPrice = this.order.totalPrice.toFixed(2);
-            this.isFinish = this.order.status == 6;
+            this.isFinish = this.order.status == 5;
           } else {
             this.$message({
               message: "查询失败， 失败原因：" + data.code,
@@ -517,10 +526,10 @@ export default {
         });
     },
     addOrderDetail() {
-    if (localStorage.getItem("ms_user") == null) {
-      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
-      return;
-    }
+      if (localStorage.getItem("ms_user") == null) {
+        this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+        return;
+      }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
         this.isUpdate = false;
@@ -531,17 +540,20 @@ export default {
           productPrice: "",
           productWeight: "",
           productStandard: "",
+          piecePrice: "",
           innerStandard: "",
           innerCount: "",
           outerStandard: "",
           outerCount: "",
           smell: "",
           extra: [],
+          packType: this.workRateOption[0].id,
           fruitSticker: "",
           additive: [],
           remark: "",
           isFinish: false
         };
+        this.mutiple = "";
         this.dialogFormVisible = true;
       } else {
         this.$message({
@@ -553,14 +565,40 @@ export default {
     doAdd() {
       this.$refs["form"].validate(valid => {
         if (valid) {
+          if (this.form.innerCount == "") {
+            this.form.innerCount = 0;
+          }
+          if (this.form.outerCount == "") {
+            this.form.outerCount = 0;
+          }
+          if (this.form.productPrice == "") {
+            this.form.productPrice = 0;
+          }
+          if (this.form.productWeight == "") {
+            this.form.productWeight = 0;
+          }
+          if (this.form.piecePrice == "") {
+            this.form.piecePrice = 0;
+          }
           this.dialogFormVisible = false;
           this.form.productPrice =
-            (this.form.piecePirce + this.additivePrice) *
+            (this.form.piecePrice + this.additivePrice) *
             this.form.productWeight;
           this.form.extra = JSON.stringify(this.form.extra);
-          let params = this.form;
+          let params = {};
+          let url = "";
+          if (this.mutiple != "") {
+            url = this.$url.addOrderDetailBatch;
+            params = {
+              detail: this.form,
+              count: this.mutiple
+            };
+          } else {
+            url = this.$url.addOrderDetail;
+            params = this.form;
+          }
           this.$api
-            .post(this.$url.addOrderDetail, params)
+            .post(url, params)
             .then(res => {
               let data = res.data;
               if (data == "SUCCESS") {
@@ -596,13 +634,14 @@ export default {
           return false;
         }
       });
+      this.mutiple = "";
     },
     doUpdate() {
       this.$refs["form"].validate(valid => {
         if (valid) {
           this.dialogFormVisible = false;
           this.form.productPrice =
-            (this.form.piecePirce + this.additivePrice) *
+            (this.form.piecePrice + this.additivePrice) *
             this.form.productWeight;
           this.form.extra = JSON.stringify(this.form.extra);
           let params = this.form;
@@ -680,6 +719,13 @@ export default {
       let date = new Date(timestamp);
       return date.toLocaleDateString();
     },
+    showDateTime(timestamp) {
+      if (timestamp == null) {
+        return "";
+      }
+      let date = new Date(timestamp);
+      return this.dateFormat(date, "yyyy-MM-dd HH:mm:ss");
+    },
     showAdditive(str) {
       let show = "";
       let arr = JSON.parse(str);
@@ -700,6 +746,35 @@ export default {
         }
       });
       return str;
+    },
+    dateFormat(date, fmt) {
+      var o = {
+        "M+": date.getMonth() + 1, //月份
+        "d+": date.getDate(), //日
+        "h+": date.getHours() % 12 == 0 ? 12 : date.getHours() % 12, //小时
+        "H+": date.getHours(), //小时
+        "m+": date.getMinutes(), //分
+        "s+": date.getSeconds(), //秒
+        "q+": Math.floor((date.getMonth() + 3) / 3), //季度
+        S: date.getMilliseconds() //毫秒
+      };
+      if (/(y+)/.test(fmt)) {
+        fmt = fmt.replace(
+          RegExp.$1,
+          (date.getFullYear() + "").substr(4 - RegExp.$1.length)
+        );
+      }
+      for (var k in o) {
+        if (new RegExp("(" + k + ")").test(fmt)) {
+          fmt = fmt.replace(
+            RegExp.$1,
+            RegExp.$1.length == 1
+              ? o[k]
+              : ("00" + o[k]).substr(("" + o[k]).length)
+          );
+        }
+      }
+      return fmt;
     }
   },
   beforeRouteEnter(to, from, next) {
@@ -717,5 +792,9 @@ export default {
 <style>
 .el-autocomplete {
   width: 100%;
+}
+.el-step.is-center .el-step__description {
+  padding-left: 0;
+  padding-right: 0;
 }
 </style>

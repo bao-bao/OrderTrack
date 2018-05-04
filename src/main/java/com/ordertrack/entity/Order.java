@@ -54,4 +54,19 @@ public class Order {
 
     @Column(name = "createtime")
     private Timestamp createTime;
+
+    @Column(name = "taketime")
+    private Timestamp takeTime;
+
+    @Column(name = "divisiontime")
+    private Timestamp divisionTime;
+
+    @Column(name = "pickuptime")
+    private Timestamp pickUpTime;
+
+    @Column(name = "checktime")
+    private Timestamp checkTime;
+
+    @Column(name = "finishtime")
+    private Timestamp finishTime;
 }

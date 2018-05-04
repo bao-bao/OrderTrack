@@ -43,8 +43,11 @@ export default {
   getOrderDetail: "/order/getOrderDetail",
   getOrderDetailById: "/order/getOrderDetailById",
   addOrderDetail: "/order/addOrderDetail",
+  addOrderDetailBatch: "/order/addOrderDetailBatch",
   updateOrderDetail: "/order/updateOrderDetail",
   deleteOrderDetail: "/order/deleteOrderDetail",
+
+  checkPickUp: "/order/checkPickUp",
 
   getOrderHistory: "/order/getOrderHistory",
 

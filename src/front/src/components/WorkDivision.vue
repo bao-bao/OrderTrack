@@ -247,7 +247,8 @@ export default {
             tag = element.isFinish && tag;
           });
           if (tag) {
-            this.order.status = 4;
+            this.order.status = 3;
+            this.order.divisionTime = new Date().getTime();
             this.updateOrderStatus();
             setTimeout(() => {
               this.$router.push({

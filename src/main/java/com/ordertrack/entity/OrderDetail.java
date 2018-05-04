@@ -23,7 +23,7 @@ public class OrderDetail {
     private String chineseName;
 
     @Column(name = "piecepirce")
-    private Double piecePirce;
+    private Double piecePrice;
 
     @Column(name = "productprice")
     private Double productPrice;

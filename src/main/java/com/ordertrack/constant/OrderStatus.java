@@ -4,9 +4,9 @@ package com.ordertrack.constant;
 
 public enum OrderStatus {
     NEW(1),
-    PICKING_UP(2),
+    TAKE(2),
     DISTRIBUTING(3),
-    PACKAGING(4),
+    PICKING_UP(4),
     BALANCING(5),
     FINISH(6);
 

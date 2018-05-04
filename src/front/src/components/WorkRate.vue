@@ -3,7 +3,7 @@
     <div class="crumbs">
       <el-breadcrumb separator="/">
         <el-breadcrumb-item><i class="el-icon-date"></i> 其他配置</el-breadcrumb-item>
-        <el-breadcrumb-item>工作效率</el-breadcrumb-item>
+        <el-breadcrumb-item>包装</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div>
@@ -20,7 +20,7 @@
           </el-col>
           <el-col :span="4">
             <el-button type="primary" style="margin-left:20px"
-            icon="el-icon-search" @click="renderWorkRate()">搜索</el-button>
+            icon="el-icon-search" @click="renderWorkRate(false)">搜索</el-button>
           </el-col>
           <el-col :span="4" :offset="10" style="text-align:right">
             <el-button type="warning" icon="el-icon-circle-plus" @click="addWorkRate()">新增</el-button>
@@ -34,14 +34,17 @@
           <el-tag size="medium">{{ scope.row.id }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="standard" label="规格" min-width="180">
+      <el-table-column prop="standard" label="规格" min-width="140">
         <template slot-scope="scope">{{ scope.row.standard }} kg</template>
       </el-table-column>
-      <el-table-column prop="type" label="单位" min-width="180">
+      <el-table-column prop="type" label="单位" min-width="140">
         <template slot-scope="scope">{{ showType(scope.row.type) }}</template>
       </el-table-column>
-      <el-table-column prop="count" label="工作量（吨）" min-width="180">
+      <el-table-column prop="count" label="工作量（吨）" min-width="140">
         <template slot-scope="scope">{{ scope.row.count }}</template>
+      </el-table-column>
+      <el-table-column prop="number" label="剩余数量" min-width="180">
+        <template slot-scope="scope">{{ scope.row.number }}</template>
       </el-table-column>
       <el-table-column prop="isActive" label="是否使用" min-width="100">
         <template slot-scope="scope">
@@ -50,8 +53,9 @@
           </el-switch>
         </template>
       </el-table-column>
-      <el-table-column label="操作" min-width="140">
+      <el-table-column label="操作" min-width="170">
         <template slot-scope="scope">
+          <el-button size="mini" @click="handleUpdate(scope.$index, scope.row)">购进</el-button>
           <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
         </template>
       </el-table-column>
@@ -86,6 +90,21 @@
         <el-button type="primary" @click="doAdd()">确 定</el-button>
       </div>
     </el-dialog>
+    <el-dialog title="购进包装" :visible="buyFormVisible" width="30%">
+      <el-form ref="buyForm" :model="form">
+        <el-row :gutter="20">
+          <el-col :span="22">
+            <el-form-item label="购进数量" label-width="80px">
+              <el-input v-model.number="buyNumber"></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="buyFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="doUpdate(form)">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -94,6 +113,7 @@ export default {
   data: function() {
     return {
       dialogFormVisible: false,
+      buyFormVisible: false,
       tableData: [],
       listData: [],
       currentPage: 1,
@@ -108,19 +128,22 @@ export default {
         { label: "被禁用", value: 0 }
       ],
       typeOption: [
-        { label: "纸箱", value: 1 },
-        { label: "托盘", value: 2 },
-        { label: "桶", value: 3 },
-        { label: "其他", value: 4 }
+        { label: "袋", value: 1 },
+        { label: "纸箱", value: 2 },
+        { label: "托盘", value: 3 },
+        { label: "桶", value: 4 },
+        { label: "其他", value: 5 }
       ],
       filterOption: [
         { label: "全部", value: 0 },
-        { label: "纸箱", value: 1 },
-        { label: "托盘", value: 2 },
-        { label: "桶", value: 3 },
-        { label: "其他", value: 4 }
+        { label: "袋", value: 1 },
+        { label: "纸箱", value: 2 },
+        { label: "托盘", value: 3 },
+        { label: "桶", value: 4 },
+        { label: "其他", value: 5 }
       ],
-      form: {}
+      form: {},
+      buyNumber: 0
     };
   },
   methods: {
@@ -131,7 +154,7 @@ export default {
       this.tableData = this.listData.slice(
         (this.currentPage - 1) * size,
         this.currentPage * size
-      );
+      )
     },
     handleSizeChange(val) {
       this.initPagination(val);
@@ -150,7 +173,7 @@ export default {
         })
         .catch(_ => {});
     },
-    renderWorkRate() {
+    renderWorkRate(rePage) {
       const loading = this.$loading({
         lock: true,
         text: "Loading",
@@ -163,7 +186,11 @@ export default {
           let data = res.data;
           if (data.code == "SUCCESS") {
             this.listData = data.list;
-            this.initPagination(10);
+            if(rePage) {
+              this.initPagination(10);
+            } else {
+              this.handleCurrentChange(this.currentPage);
+            }
           } else if (data.code == "NO_AUTHORITY") {
             this.$message({
               message: "无权限操作",
@@ -186,9 +213,15 @@ export default {
           loading.close();
         });
     },
+    handleUpdate(index, row) {
+      this.form = JSON.parse(JSON.stringify(row));
+      this.buyNumber = 0;
+      this.buyFormVisible = true;
+    },
     addWorkRate() {
       this.form = {
         name: "",
+        number: 0,
         isActive: true
       };
       this.dialogFormVisible = true;
@@ -205,7 +238,7 @@ export default {
               message: "添加成功",
               type: "success"
             });
-            this.renderWorkRate();
+            this.renderWorkRate(false);
           } else if (data == "NO_AUTHORITY") {
             this.$message({
               message: "无权限操作",
@@ -227,7 +260,9 @@ export default {
         });
     },
     doUpdate(row) {
-      this.dialogFormVisible = false;
+      row.number += this.buyNumber;
+      this.buyNumber = 0;
+      this.buyFormVisible = false;
       let params = row;
       this.$api
         .post(this.$url.updateWorkRate, params)
@@ -238,7 +273,7 @@ export default {
               message: "更新成功",
               type: "success"
             });
-            this.renderWorkRate();
+            this.renderWorkRate(false);
           } else if (data == "NO_AUTHORITY") {
             this.$message({
               message: "无权限操作",
@@ -270,7 +305,7 @@ export default {
               message: "删除成功",
               type: "success"
             });
-            this.renderWorkRate();
+            this.renderWorkRate(false);
           } else if (data == "NO_AUTHORITY") {
             this.$message({
               message: "无权限操作",
@@ -304,7 +339,7 @@ export default {
   beforeRouteEnter(to, from, next) {
     next(vm => {
       vm.filterData.status = 2;
-      vm.renderWorkRate();
+      vm.renderWorkRate(true);
     });
   }
 };

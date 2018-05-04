@@ -31,6 +31,8 @@ public interface OrderDao extends JpaRepository<Order, Long> {
     List<Order> findOrderByCustomNameContainingAndOrderTimeBetweenAndStatusLessThan(String customName, Timestamp startTime, Timestamp endTime, Integer status);
     List<Order> findOrderByCustomNameContainingAndOrderTimeBetweenAndStatus(String customName, Timestamp startTime, Timestamp endTime, Integer status);
 
+    List<Order> findOrderByDeliveryDateBeforeAndStatusNot(Timestamp now, Integer finish);
+
     List<Order> findByStatusBetween(Integer min, Integer max);
     List<Order> findByStatusLessThan(Integer status);
     List<Order> findOrderByStatus(Integer status);

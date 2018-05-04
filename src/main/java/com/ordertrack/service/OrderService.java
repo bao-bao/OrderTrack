@@ -6,6 +6,7 @@ import com.ordertrack.constant.ReturnCode;
 import com.ordertrack.entity.Order;
 import com.ordertrack.entity.OrderDetail;
 import com.ordertrack.entity.WorkRecord;
+import com.ordertrack.pojo.PackageCheckResponse;
 
 import java.util.List;
 
@@ -21,11 +22,14 @@ public interface OrderService {
     ReturnCode deleteOrder(Order order);
     List<Order> queryOrderListByStatus(Integer status);
 
+    PackageCheckResponse checkPickUp(Integer orderId);
+
     boolean orderCheck(Order order);
 
     List<OrderDetail> queryOrderDetail(Integer orderId);
     OrderDetail queryOrderDetailById(Integer detailId);
     ReturnCode addOrderDetail(OrderDetail orderDetail);
+    ReturnCode addOrderDetailBatch(OrderDetail detail, Integer count);
     ReturnCode updateOrderDetail(OrderDetail orderDetail);
     ReturnCode deleteOrderDetail(OrderDetail orderDetail);
 
@@ -39,8 +43,10 @@ public interface OrderService {
     Integer getOperateCount();
     Integer getPauseCount();
     Integer getTotalCount();
+    Integer getTakeCount();
     Integer getDivisionCount();
     Integer getPickUpCount();
+    Integer getBalanceCount();
     List<Order> getOnBusinessList();
     List getLastYearList();
 }

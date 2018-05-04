@@ -40,7 +40,7 @@
         </el-row>
       </el-form>
     </div>
-    <el-table show-header border :data="tableData" style="width: 100%; text-align: center">
+    <el-table show-header border :data="tableData" style="width: 100%; text-align: center" :row-class-name="tableRowClassName">
       <el-table-column type="expand">
         <template slot-scope="props">
           <el-form label-position="left" inline class="demo-table-expand">
@@ -81,16 +81,15 @@
       </el-table-column>
       <el-table-column prop="status" label="当前状态" min-width="90">
         <template slot-scope="scope">
-          <el-tag size="medium" :type="scope.row.status <= 1 ? '' : scope.row.status <= 4 ? 'warning' : 'success'">
+          <el-tag size="medium" :type="scope.row.status <= 2 ? '' : scope.row.status <= 4 ? 'warning' : 'success'">
             {{ showStatus(scope.row.status) }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="操作" min-width="325">
         <template slot-scope="scope">
-          <el-button size="mini" v-if="scope.row.status == 0" @click="handleTake(scope.$index, scope.row)">接单</el-button>
-          <el-button size="mini" v-if="scope.row.status == 1" @click="handleDown(scope.$index, scope.row)">下发</el-button>
-          <el-button size="mini" v-if="scope.row.status == 2" @click="handlePickUp(scope.$index, scope.row)">提货</el-button>
-          <el-button size="mini" v-if="scope.row.status == 3" @click="handleDivision(scope.$index, scope.row)">分工</el-button>
+          <el-button size="mini" v-if="scope.row.status == 0" @click="handleDown(scope.$index, scope.row)">下发</el-button>
+          <el-button size="mini" v-if="scope.row.status == 2" @click="handleDivision(scope.$index, scope.row)">分配</el-button>
+          <el-button size="mini" v-if="scope.row.status == 3" @click="handlePickUp(scope.$index, scope.row)">提货</el-button>
           <el-button size="mini" v-if="scope.row.status == 4" @click="handleCheck(scope.$index, scope.row)">验收</el-button>
           <el-button size="mini" v-if="scope.row.status == 5" @click="handleBalance(scope.$index, scope.row)">结算</el-button>
           <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
@@ -105,7 +104,7 @@
       </el-pagination>
     </div>
     <el-dialog :title="dialogFormTitle":visible="dialogFormVisible" width="50%" :before-close="handleClose">
-      <el-form ref="form" :model="form" :rules="rule">
+      <el-form ref="form" :model="form">
         <el-row :gutter="20">
           <el-col :span="11">
             <el-form-item label="客户名称" prop="customName" label-width="100px">
@@ -138,8 +137,8 @@
           </el-col>
           <el-col :span="11" v-show="form.status > 3">
             <el-form-item label="分工情况" label-width="100px">
-              <el-button size="mini" v-show="form.status == 4" @click="handleDivision(0, form)">重新分工</el-button>
-              <el-button size="mini" v-show="form.status == 5" @click="handleDivision(0, form)">分工情况</el-button>
+              <el-button size="mini" v-show="form.status == 4" @click="handleDivision(0, form)">重新分配</el-button>
+              <el-button size="mini" v-show="form.status == 5 || form.status == 6" @click="handleDivision(0, form)">分工情况</el-button>
             </el-form-item>
           </el-col>
           <el-col :span="22">
@@ -178,11 +177,11 @@ export default {
       form: {},
       statusOption: [
         { label: "准备", value: 0 },
-        { label: "接单", value: 1 },
-        { label: "提货", value: 2 },
-        { label: "分配", value: 3 },
-        { label: "包装", value: 4 },
-        { label: "结算", value: 5 },
+        { label: "接单中", value: 1 },
+        { label: "已接单", value: 2 },
+        { label: "待提货", value: 3 },
+        { label: "待验收", value: 4 },
+        { label: "待结算", value: 5 },
         { label: "完成", value: 6 }
       ],
       rule: {
@@ -219,10 +218,10 @@ export default {
       );
     },
     handleEdit(index, row) {
-    if (localStorage.getItem("ms_user") == null) {
-      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
-      return;
-    }
+      if (localStorage.getItem("ms_user") == null) {
+        this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+        return;
+      }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
         this.isUpdate = true;
@@ -236,11 +235,11 @@ export default {
         });
       }
     },
-    handleTake(index, row) {
-    if (localStorage.getItem("ms_user") == null) {
-      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
-      return;
-    }
+    handleDown(index, row) {
+      if (localStorage.getItem("ms_user") == null) {
+        this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+        return;
+      }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
         this.$confirm("确认提交？")
@@ -258,55 +257,11 @@ export default {
         });
       }
     },
-    handleDown(index, row) {
-    if (localStorage.getItem("ms_user") == null) {
-      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
-      return;
-    }
-      let role = JSON.parse(localStorage.getItem("ms_user")).role;
-      if (role == 1) {
-        this.$confirm("确认提交？")
-          .then(_ => {
-            row.status = 2;
-            this.form = JSON.parse(JSON.stringify(row));
-            this.doUncheckUpdate();
-            done();
-          })
-          .catch(_ => {});
-      } else {
-        this.$message({
-          message: "无权限操作",
-          type: "error"
-        });
-      }
-    },
-    handlePickUp(index, row) {
-    if (localStorage.getItem("ms_user") == null) {
-      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
-      return;
-    }
-      let role = JSON.parse(localStorage.getItem("ms_user")).role;
-      if (role == 1 || role == 2) {
-        this.$confirm("确认提交？")
-          .then(_ => {
-            row.status = 3;
-            this.form = JSON.parse(JSON.stringify(row));
-            this.doUncheckUpdate();
-            done();
-          })
-          .catch(_ => {});
-      } else {
-        this.$message({
-          message: "无权限操作",
-          type: "error"
-        });
-      }
-    },
     handleDivision(index, row) {
-    if (localStorage.getItem("ms_user") == null) {
-      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
-      return;
-    }
+      if (localStorage.getItem("ms_user") == null) {
+        this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+        return;
+      }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1 || role == 3) {
         return this.$router.push({
@@ -320,16 +275,38 @@ export default {
         });
       }
     },
+    handlePickUp(index, row) {
+      if (localStorage.getItem("ms_user") == null) {
+        this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+        return;
+      }
+      let role = JSON.parse(localStorage.getItem("ms_user")).role;
+      if (role == 1 || role == 2) {
+        this.$confirm("确认提交？")
+          .then(_ => {
+            this.form = JSON.parse(JSON.stringify(row));
+            this.doCheckPickUp(this.form.orderId);
+            done();
+          })
+          .catch(_ => {});
+      } else {
+        this.$message({
+          message: "无权限操作",
+          type: "error"
+        });
+      }
+    },
     handleCheck(index, row) {
-    if (localStorage.getItem("ms_user") == null) {
-      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
-      return;
-    }
+      if (localStorage.getItem("ms_user") == null) {
+        this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+        return;
+      }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1 || role == 3) {
         this.$confirm("确认提交？")
           .then(_ => {
             row.status = 5;
+            row.checkTime = new Date().getTime();
             this.form = JSON.parse(JSON.stringify(row));
             this.doUncheckUpdate();
             this.doCheck(this.form.orderId);
@@ -344,15 +321,16 @@ export default {
       }
     },
     handleBalance(index, row) {
-    if (localStorage.getItem("ms_user") == null) {
-      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
-      return;
-    }
+      if (localStorage.getItem("ms_user") == null) {
+        this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+        return;
+      }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
         this.$confirm("确认提交？")
           .then(_ => {
             row.status = 6;
+            row.finishTime = new Date().getTime();
             this.form = JSON.parse(JSON.stringify(row));
             this.doUncheckUpdate();
             done();
@@ -366,16 +344,34 @@ export default {
       }
     },
     handleDetail(index, row) {
+      if (row.status == 1) {
+        if (localStorage.getItem("ms_user") == null) {
+          this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+          return;
+        }
+        let role = JSON.parse(localStorage.getItem("ms_user")).role;
+        if (role == 1 || role == 2) {
+          row.status = 2;
+          row.takeTime = new Date().getTime();
+          this.form = JSON.parse(JSON.stringify(row));
+          this.doUncheckUpdate();
+        } else {
+          this.$message({
+            message: "无权限操作",
+            type: "error"
+          });
+        }
+      }
       return this.$router.push({
         name: "orderDetail",
         params: { id: row.orderId }
       });
     },
     handleDelete(index, row) {
-    if (localStorage.getItem("ms_user") == null) {
-      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
-      return;
-    }
+      if (localStorage.getItem("ms_user") == null) {
+        this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+        return;
+      }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
         this.$confirm("确认删除？")
@@ -480,10 +476,10 @@ export default {
         });
     },
     addOrder() {
-    if (localStorage.getItem("ms_user") == null) {
-      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
-      return;
-    }
+      if (localStorage.getItem("ms_user") == null) {
+        this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+        return;
+      }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
         this.isUpdate = false;
@@ -701,6 +697,43 @@ export default {
           });
         });
     },
+    doCheckPickUp(oId) {
+      let params = {
+        orderId: oId
+      };
+      this.$api
+        .post(this.$url.checkPickUp, params)
+        .then(res => {
+          let data = res.data;
+          if (data.code == "SUCCESS") {
+            this.$message({
+              message: "更新成功",
+              type: "success"
+            });
+            this.form.status = 4;
+            this.form.pickUpTime = new Date().getTime();
+            this.doUncheckUpdate();
+          } else if (data.code == "NO_ENOUGH_PACKAGE") {
+            this.$notify({
+              title: "包装数量不足",
+              message: data.message,
+              type: "warning",
+              dangerouslyUseHTMLString: true
+            });
+          } else {
+            this.$message({
+              message: "更新失败， 失败原因：" + data,
+              type: "error"
+            });
+          }
+        })
+        .catch(err => {
+          this.$message({
+            message: err.data.status + ": " + err.data.error,
+            type: "error"
+          });
+        });
+    },
     showStatus(status) {
       let label = "";
       this.statusOption.forEach(element => {
@@ -713,6 +746,15 @@ export default {
     showDate(timestamp) {
       let date = new Date(timestamp);
       return date.toLocaleDateString();
+    },
+    tableRowClassName({ row, rowIndex }) {
+      let now = new Date().getTime();
+      if (row.deliveryDate < now) {
+        return "dangrous-row";
+      } else if (row.deliveryDate - now < 3600 * 24 * 3 * 1000) {
+        return "warning-row";
+      }
+      return "";
     }
   },
   beforeRouteEnter(to, from, next) {
@@ -727,3 +769,12 @@ export default {
   }
 };
 </script>
+<style>
+.el-table .warning-row {
+  background: rgb(253, 249, 241);
+}
+
+.el-table .dangrous-row {
+  background: #fcf2f2;
+}
+</style>

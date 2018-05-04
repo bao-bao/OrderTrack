@@ -24,6 +24,9 @@ public class WorkRate {
     @Column(name = "type")
     private Integer type;
 
+    @Column(name = "number")
+    private Integer number;
+
     @Column(name = "isactive")
     private Boolean isActive;
 }

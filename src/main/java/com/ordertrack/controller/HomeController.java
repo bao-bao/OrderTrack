@@ -35,8 +35,10 @@ public class HomeController {
         resp.setOperateCount(orderService.getOperateCount());
         resp.setPauseCount(orderService.getPauseCount());
         resp.setTotalCount(orderService.getTotalCount());
+        resp.setTakeCount(orderService.getTakeCount());
         resp.setDivisionCount(orderService.getDivisionCount());
         resp.setPickUpCount(orderService.getPickUpCount());
+        resp.setBalanceCount(orderService.getBalanceCount());
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
         ArrayList<OrderEvent> eventList = new ArrayList<>();

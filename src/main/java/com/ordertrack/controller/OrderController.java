@@ -116,6 +116,14 @@ public class OrderController {
     }
 
     @ResponseBody
+    @PostMapping("/addOrderDetailBatch")
+    public ReturnCode addOrderDetailBatch(@RequestBody OrderDetailBatchRequest request) {
+        OrderDetail detail = request.getDetail();
+        Integer count = request.getCount();
+        return orderService.addOrderDetailBatch(detail, count);
+    }
+
+    @ResponseBody
     @PostMapping("/updateOrderDetail")
     public ReturnCode updateOrderDetail(@RequestBody OrderDetail orderDetail) {
         return orderService.updateOrderDetail(orderDetail);
@@ -185,4 +193,12 @@ public class OrderController {
         Integer orderId = request.getOrderId();
         return orderService.checkWork(orderId);
     }
+
+    @ResponseBody
+    @PostMapping("/checkPickUp")
+    public PackageCheckResponse checkPickUp(@RequestBody CheckPickUpRequest request) {
+        Integer orderId = request.getOrderId();
+        return orderService.checkPickUp(orderId);
+    }
+
 }

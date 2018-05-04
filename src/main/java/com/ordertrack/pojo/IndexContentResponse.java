@@ -11,8 +11,10 @@ public class IndexContentResponse {
     private int operateCount;
     private int pauseCount;
     private int totalCount;
+    private int takeCount;
     private int divisionCount;
     private int pickUpCount;
+    private int balanceCount;
     private List<OrderEvent> eventList;
     private List<VolumeResponse> volume;
     private ReturnCode code;
@@ -53,6 +55,15 @@ public class IndexContentResponse {
         return this;
     }
 
+    public int getTakeCount() {
+        return takeCount;
+    }
+
+    public IndexContentResponse setTakeCount(int takeCount) {
+        this.takeCount = takeCount;
+        return this;
+    }
+
     public int getDivisionCount() {
         return divisionCount;
     }
@@ -68,6 +79,15 @@ public class IndexContentResponse {
 
     public IndexContentResponse setPickUpCount(int pickUpCount) {
         this.pickUpCount = pickUpCount;
+        return this;
+    }
+
+    public int getBalanceCount() {
+        return balanceCount;
+    }
+
+    public IndexContentResponse setBalanceCount(int balanceCount) {
+        this.balanceCount = balanceCount;
         return this;
     }
 

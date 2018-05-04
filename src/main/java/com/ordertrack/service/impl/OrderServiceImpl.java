@@ -3,14 +3,17 @@ package com.ordertrack.service.impl;
 /* Created by AMXPC on 2018/4/8. */
 
 import com.ordertrack.constant.OrderStatus;
+import com.ordertrack.constant.PackageType;
 import com.ordertrack.constant.ReturnCode;
 import com.ordertrack.dao.OrderDao;
 import com.ordertrack.dao.OrderDetailDao;
 import com.ordertrack.dao.WorkRecordDao;
 import com.ordertrack.entity.Order;
 import com.ordertrack.entity.OrderDetail;
+import com.ordertrack.entity.WorkRate;
 import com.ordertrack.entity.WorkRecord;
 import com.ordertrack.pojo.MonthVolume;
+import com.ordertrack.pojo.PackageCheckResponse;
 import com.ordertrack.service.OrderService;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
@@ -34,6 +37,8 @@ public class OrderServiceImpl implements OrderService {
     private OrderDetailDao orderDetailDao;
     @Resource
     private WorkRecordDao workRecordDao;
+    @Resource
+    private SettingServiceImpl settingService;
     @PersistenceContext
     private EntityManager em;
 
@@ -163,6 +168,16 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
+    public ReturnCode addOrderDetailBatch(OrderDetail detail, Integer count) {
+        for (int i = 0; i < count; i++) {
+            detail.setId(0);
+            addOrderDetail(detail);
+        }
+        return ReturnCode.SUCCESS;
+    }
+
+    @Override
+    @Transactional
     public ReturnCode updateOrderDetail(OrderDetail orderDetail) {
         orderDetailDao.saveAndFlush(orderDetail);
         Integer orderId = orderDetail.getOrderId();
@@ -260,6 +275,51 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
+    public PackageCheckResponse checkPickUp(Integer orderId) {
+        PackageCheckResponse resp = new PackageCheckResponse();
+        boolean tag = true;
+        String message = "";
+        Map<Integer, Integer> packageNeed = new HashMap<>();
+        List<OrderDetail> orderDetails = queryOrderDetail(orderId);
+        List<WorkRate> workRates = settingService.queryWorkRateList(1);
+        for (OrderDetail detail : orderDetails) {
+            int packId = detail.getPackType();
+            int packNumber = detail.getInnerCount();
+            packageNeed.merge(packId, packNumber, (a, b) -> b + a);
+        }
+        for (Map.Entry<Integer, Integer> map : packageNeed.entrySet()) {
+            for (WorkRate workRate : workRates) {
+                if (map.getKey() == workRate.getId()) {
+                    if (map.getValue() < workRate.getNumber()) {
+                        break;
+                    } else {
+                        tag = false;
+                        message += workRate.getStandard() + "kg " + PackageType.getName(workRate.getType()) + "： 现有" + workRate.getNumber() + "个， 需求" + map.getValue() + "个<br>";
+                        break;
+                    }
+                }
+            }
+        }
+        if (tag) {
+            for (Map.Entry<Integer, Integer> map : packageNeed.entrySet()) {
+                for (WorkRate workRate : workRates) {
+                    if (map.getKey() == workRate.getId()) {
+                        workRate.setNumber(workRate.getNumber() - map.getValue());
+                        settingService.updateWorkRate(workRate);
+                    }
+                }
+            }
+            resp.setCode(ReturnCode.SUCCESS);
+        } else {
+            resp.setCode(ReturnCode.NO_ENOUGH_PACKAGE);
+            resp.setMessage(message);
+
+        }
+        return resp;
+    }
+
+    @Override
+    @Transactional
     public Integer getBusinessCount() {
         return orderDao.findByStatusLessThan(OrderStatus.FINISH.getStatus()).size();
     }
@@ -267,13 +327,13 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public Integer getOperateCount() {
-        return orderDao.findByStatusBetween(OrderStatus.PICKING_UP.getStatus(), OrderStatus.DISTRIBUTING.getStatus()).size();
+        return orderDao.findByStatusBetween(OrderStatus.NEW.getStatus(), OrderStatus.PICKING_UP.getStatus()).size();
     }
 
     @Override
     @Transactional
     public Integer getPauseCount() {
-        return 0;
+        return orderDao.findOrderByDeliveryDateBeforeAndStatusNot(new Timestamp(new Date().getTime()), OrderStatus.FINISH.getStatus()).size();
     }
 
     @Override
@@ -284,13 +344,25 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
+    public Integer getTakeCount() {
+        return orderDao.findOrderByStatus(OrderStatus.NEW.getStatus()).size();
+    }
+
+    @Override
+    @Transactional
     public Integer getDivisionCount() {
-        return orderDao.findOrderByStatus(OrderStatus.DISTRIBUTING.getStatus()).size();
+        return orderDao.findOrderByStatus(OrderStatus.TAKE.getStatus()).size();
     }
 
     @Override
     @Transactional
     public Integer getPickUpCount() {
+        return orderDao.findOrderByStatus(OrderStatus.DISTRIBUTING.getStatus()).size();
+    }
+
+    @Override
+    @Transactional
+    public Integer getBalanceCount() {
         return orderDao.findOrderByStatus(OrderStatus.PICKING_UP.getStatus()).size();
     }
 

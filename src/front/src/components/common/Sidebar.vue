@@ -73,7 +73,7 @@ export default {
               },
               {
                 index: "/workRate",
-                title: "工作效率"
+                title: "包装"
               },
               {
                 index: "/additive",
