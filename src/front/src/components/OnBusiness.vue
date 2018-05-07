@@ -350,11 +350,13 @@ export default {
           return;
         }
         let role = JSON.parse(localStorage.getItem("ms_user")).role;
-        if (role == 1 || role == 2) {
+        if (role == 2) {
           row.status = 2;
           row.takeTime = new Date().getTime();
           this.form = JSON.parse(JSON.stringify(row));
           this.doUncheckUpdate();
+        } else if(role == 1) {
+          
         } else {
           this.$message({
             message: "无权限操作",
