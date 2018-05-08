@@ -42,7 +42,7 @@
               <span>{{ order.customName }}</span>
             </el-form-item>
             <el-form-item label="总价值">
-              <span>{{ order.totalPrice }} 元</span>
+              <span>{{ showPrice(order.totalPrice) }} 元</span>
             </el-form-item>
             <el-form-item label="要求交货期">
               <span>{{ showDate(order.deliveryDate) }}</span>
@@ -64,7 +64,7 @@
         <template slot-scope="props">
           <el-form label-position="left" inline class="demo-table-expand">
             <el-form-item label="内包装规格">
-              <span>{{ props.row.innerStandard }}</span>
+              <span>{{ showPackageStandard(props.row.innerStandard) }}</span>
             </el-form-item>
             <el-form-item label="数量">
               <span>{{ props.row.innerCount }} 件</span>
@@ -73,7 +73,7 @@
               <span>{{ props.row.smell }}</span>
             </el-form-item>
             <el-form-item label="外包装规格">
-              <span>{{ props.row.outerStandard }}</span>
+              <span>{{ showPackageStandard(props.row.outerStandard) }}</span>
             </el-form-item>
             <el-form-item label="件数">
               <span>{{ props.row.outerCount }} 件</span>
@@ -96,7 +96,7 @@
         <template slot-scope="scope">{{ scope.row.chineseName }}</template>
       </el-table-column>
       <el-table-column prop="productPrice" label="产品总价" min-width="130">
-        <template slot-scope="scope">{{ scope.row.productPrice }} 元</template>
+        <template slot-scope="scope">{{ showPrice(scope.row.productPrice) }} 元</template>
       </el-table-column>
       <el-table-column prop="productWeight" label="产品净重" min-width="130">
         <template slot-scope="scope">{{ scope.row.productWeight }} kg</template>
@@ -144,7 +144,11 @@
           </el-col>
           <el-col :span="11">
             <el-form-item label="内包装规格" prop="innerStandard" label-width="100px">
-              <el-input v-model="form.innerStandard"></el-input>
+              <el-select v-model="form.innerStandard">
+                <el-option v-for="item in innerStandard"
+                :key="item.id" :label="item.standard" :value="item.id">
+                </el-option>
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="11">
@@ -154,7 +158,11 @@
           </el-col>
           <el-col :span="11">
             <el-form-item label="外包装规格" prop="outerStandard" label-width="100px">
-              <el-input v-model="form.outerStandard"></el-input>
+              <el-select v-model="form.outerStandard">
+                <el-option v-for="item in outerStandard"
+                :key="item.id" :label="item.standard" :value="item.id">
+                </el-option>
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="11">
@@ -176,7 +184,7 @@
             <el-form-item label="包装情况" prop="packType" label-width="100px">
               <el-select v-model="form.packType">
                 <el-option v-for="item in workRateOption"
-                :key="item.id" :label="showPackLabel(item)" :value="item.id">
+                :key="item.id" :label="item.standard" :value="item.id">
                 </el-option>
               </el-select>
             </el-form-item>
@@ -232,15 +240,10 @@ export default {
       allAdditive: [],
       additiveOption: [],
       workRateOption: [],
-      workRateTypeOption: [
-        { label: "袋", value: 1 },
-        { label: "纸箱", value: 2 },
-        { label: "托盘", value: 3 },
-        { label: "桶", value: 4 },
-        { label: "其他", value: 5 }
-      ],
       order: {},
       product: [],
+      innerStandard: [],
+      outerStandard: [],
       additivePrice: 0,
       form: {},
       rule: {
@@ -286,6 +289,7 @@ export default {
     },
     handleCurrentChange(val) {
       this.currentPage = val;
+      this.total = this.listData.length;
       this.tableData = this.listData.slice(
         (val - 1) * this.pageSize,
         val * this.pageSize
@@ -318,7 +322,7 @@ export default {
       }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
-        this.$confirm("确认删除？")
+        this.$confirm("确认删除？此操作会同时删除相关的工作记录！")
           .then(_ => {
             this.doDelete(index, row);
           })
@@ -403,6 +407,60 @@ export default {
           });
         });
     },
+    renderInnerStandard() {
+      let params = {
+        status: 1,
+        type: 1
+      };
+      this.$api
+        .post(this.$url.getPackageList, params)
+        .then(res => {
+          let data = res.data;
+          if (data.code == "SUCCESS") {
+            this.innerStandard = data.list;
+          } else if (data.code == "NO_AUTHORITY") {
+            this.innerStandard = [];
+          } else {
+            this.$message({
+              message: "查询失败， 失败原因：" + data.code,
+              type: "error"
+            });
+          }
+        })
+        .catch(err => {
+          this.$message({
+            message: err.data.status + ": " + err.data.error,
+            type: "error"
+          });
+        });
+    },
+    renderOuterStandard() {
+      let params = {
+        status: 1,
+        type: 0
+      };
+      this.$api
+        .post(this.$url.getPackageList, params)
+        .then(res => {
+          let data = res.data;
+          if (data.code == "SUCCESS") {
+            this.outerStandard = data.list;
+          } else if (data.code == "NO_AUTHORITY") {
+            this.outerStandard = [];
+          } else {
+            this.$message({
+              message: "查询失败， 失败原因：" + data.code,
+              type: "error"
+            });
+          }
+        })
+        .catch(err => {
+          this.$message({
+            message: err.data.status + ": " + err.data.error,
+            type: "error"
+          });
+        });
+    },
     rendeWorkRate() {
       let params = {
         status: 1
@@ -455,7 +513,7 @@ export default {
           });
         });
     },
-    renderOrderDetail() {
+    renderOrderDetail(rePage) {
       const loading = this.$loading({
         lock: true,
         text: "Loading",
@@ -470,7 +528,14 @@ export default {
           let data = res.data;
           if (data.code == "SUCCESS") {
             this.listData = data.list;
-            this.initPagination(6);
+            if(rePage) {
+              this.initPagination(6);
+            } else {
+              if(this.listData.length % this.pageSize == 0) {
+                this.currentPage -= 1;
+              }
+              this.handleCurrentChange(this.currentPage);
+            }
             this.renderOrder();
           } else if (data.code == "NO_AUTHORITY") {
             this.$message({
@@ -532,29 +597,39 @@ export default {
       }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
-        this.isUpdate = false;
-        this.dialogFormTitle = "新增订单内容";
-        this.form = {
-          orderId: this.orderId,
-          chineseName: "",
-          productPrice: "",
-          productWeight: "",
-          productStandard: "",
-          piecePrice: "",
-          innerStandard: "",
-          innerCount: "",
-          outerStandard: "",
-          outerCount: "",
-          smell: "",
-          extra: [],
-          packType: this.workRateOption[0].id,
-          fruitSticker: "",
-          additive: [],
-          remark: "",
-          isFinish: false
-        };
-        this.mutiple = "";
-        this.dialogFormVisible = true;
+        if (this.product.length == 0) {
+          this.$message({
+            message: "请先导入产品信息，否则价格会计算错误",
+            type: "warning"
+          });
+        }
+        if (this.workRateOption.length == 0) {
+          this.$message({ message: "请先导入包装信息", type: "warning" });
+        } else {
+          this.isUpdate = false;
+          this.dialogFormTitle = "新增订单内容";
+          this.form = {
+            orderId: this.orderId,
+            chineseName: "",
+            productPrice: "",
+            productWeight: "",
+            productStandard: "",
+            piecePrice: "",
+            innerStandard: "",
+            innerCount: "",
+            outerStandard: "",
+            outerCount: "",
+            smell: "",
+            extra: [],
+            packType: this.workRateOption[0].id,
+            fruitSticker: "",
+            additive: [],
+            remark: "",
+            isFinish: false
+          };
+          this.mutiple = "";
+          this.dialogFormVisible = true;
+        }
       } else {
         this.$message({
           message: "无权限操作",
@@ -606,7 +681,7 @@ export default {
                   message: "添加成功",
                   type: "success"
                 });
-                this.renderOrderDetail();
+                this.renderOrderDetail(false);
               } else if (data == "NO_AUTHORITY") {
                 this.$message({
                   message: "无权限操作",
@@ -654,7 +729,7 @@ export default {
                   message: "更新成功",
                   type: "success"
                 });
-                this.renderOrderDetail();
+                this.renderOrderDetail(false);
               } else if (data == "NO_AUTHORITY") {
                 this.$message({
                   message: "无权限操作",
@@ -694,7 +769,7 @@ export default {
               message: "删除成功",
               type: "success"
             });
-            this.renderOrderDetail();
+            this.renderOrderDetail(false);
           } else if (data == "NO_AUTHORITY") {
             this.$message({
               message: "无权限操作",
@@ -738,14 +813,24 @@ export default {
         return show.substring(0, show.length - 1);
       }
     },
-    showPackLabel(item) {
-      let str = item.standard + "kg";
-      this.workRateTypeOption.forEach(element => {
-        if (element.value == item.type) {
-          str += element.label;
+    showPackageStandard(id) {
+      let show = "";
+      this.innerStandard.forEach(element => {
+        if (element.id == id) {
+          show = element.standard;
         }
       });
-      return str;
+      if (show == "") {
+        this.outerStandard.forEach(element => {
+          if (element.id == id) {
+            show = element.standard;
+          }
+        });
+      }
+      return show;
+    },
+    showPrice(num) {
+      return JSON.parse(localStorage.getItem("ms_user")).role == 1 ? num : "-";
     },
     dateFormat(date, fmt) {
       var o = {
@@ -782,8 +867,10 @@ export default {
       vm.orderId = vm.$route.params.id;
       vm.renderAdditive();
       vm.renderProduct();
+      vm.renderInnerStandard();
+      vm.renderOuterStandard();
       vm.rendeWorkRate();
-      vm.renderOrderDetail();
+      vm.renderOrderDetail(true);
     });
   }
 };

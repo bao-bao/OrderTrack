@@ -72,6 +72,10 @@ export default new Router({
               component: resolve => require(["../components/WorkRate.vue"], resolve)
             },
             {
+              path: "package",
+              component: resolve => require(["../components/Package.vue"], resolve)
+            },
+            {
               path: "product",
               name: "product",
               component: resolve => require(["../components/Product.vue"], resolve)

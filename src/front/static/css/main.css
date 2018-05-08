@@ -12,8 +12,12 @@ body,
 }
 body {
   font-family: "Helvetica Neue", Helvetica, "microsoft yahei", arial, STHeiTi,
-    sans-serif;
+    sans-serif !important;
   background: #fff;
+}
+input {
+  font-family: "Helvetica Neue", Helvetica, "microsoft yahei", arial, STHeiTi,
+    sans-serif !important;
 }
 a {
   text-decoration: none;

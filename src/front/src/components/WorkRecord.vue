@@ -18,14 +18,14 @@
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="6">
+          <el-col :span="7">
             <el-form-item label="时间" label-width="60px">
               <el-date-picker v-model="filterData.month" type="month" value-format="yyyy-MM" placeholder="选择月份"></el-date-picker>
             </el-form-item>
           </el-col>
           <el-col :span="4">
             <el-button type="primary" style="margin-left:20px"
-            icon="el-icon-search" @click="renderWorkRecord()">搜索</el-button>
+            icon="el-icon-search" @click="renderWorkRecord(true)">搜索</el-button>
           </el-col>
         </el-row>
       </el-form>
@@ -36,16 +36,19 @@
           <el-tag size="medium">{{ scope.row.id }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="worker" label="班组名称" min-width="180">
+      <el-table-column prop="worker" label="班组名称" min-width="150">
         <template slot-scope="scope">{{ scope.row.worker }}</template>
       </el-table-column>
-      <el-table-column prop="detailId" label="工作量" min-width="150">
+      <el-table-column prop="detailId" label="工作量" min-width="80">
         <template slot-scope="scope">{{ scope.row.count }} kg</template>
       </el-table-column>
-      <el-table-column prop="type" label="包装类型" min-width="150">
+      <el-table-column prop="startTime" label="开始时间" min-width="160">
+        <template slot-scope="scope">{{ showDate(scope.row.startTime) }}</template>
+      </el-table-column>
+      <el-table-column prop="type" label="包装类型" min-width="100">
         <template slot-scope="scope">{{ showPackLabel(scope.row.type) }}</template>
       </el-table-column>
-      <el-table-column prop="isFinish" label="是否完成" min-width="100">
+      <el-table-column prop="isFinish" label="是否完成" min-width="80">
         <template slot-scope="scope"><i :class="[ scope.row.isFinish ? 'fa fa-check icon-b' : 'fa fa-times icon-a' ]"></i></template>
       </el-table-column>
       <el-table-column label="操作" min-width="140">
@@ -90,17 +93,17 @@
           </el-col>
           <el-col :span="11">
             <el-form-item label="内包装规格：" prop="innerStandard" label-width="120px">
-              <span>{{form.innerStandard}}</span>
+              <span>{{ showPackageStandard(form.innerStandard) }}</span>
             </el-form-item>
           </el-col>
           <el-col :span="11">
             <el-form-item label="外包装规格：" prop="outerStandard" label-width="120px">
-              <span>{{form.outerStandard}}</span>
+              <span>{{ showPackageStandard(form.outerStandard) }}</span>
             </el-form-item>
           </el-col>
           <el-col :span="11">
             <el-form-item label="味道：" label-width="120px">
-              <span>{{form.smell}}</span>
+              <span>{{ form.smell }}</span>
             </el-form-item>
           </el-col>
           <el-col :span="11">
@@ -149,13 +152,7 @@ export default {
       form: {},
       workerOption: [],
       workRateOption: [],
-      workRateTypeOption: [
-        { label: "全部", value: 0 },
-        { label: "纸箱", value: 1 },
-        { label: "托盘", value: 2 },
-        { label: "桶", value: 3 },
-        { label: "其他", value: 4 }
-      ]
+      packageStandard: [],
     };
   },
   methods: {
@@ -173,6 +170,7 @@ export default {
     },
     handleCurrentChange(val) {
       this.currentPage = val;
+      this.total = this.listData.length;
       this.tableData = this.listData.slice(
         (val - 1) * this.pageSize,
         val * this.pageSize
@@ -214,7 +212,7 @@ export default {
         });
     },
     handleDelete(index, row) {
-      this.$confirm("确认删除？")
+      this.$confirm("确认删除？此操作会导致在历史记录的分工情况出现错误！")
         .then(_ => {
           this.doDelete(index, row);
         })
@@ -228,7 +226,7 @@ export default {
         })
         .catch(_ => {});
     },
-    renderWorkRecord() {
+    renderWorkRecord(rePage) {
       let cal =
         this.filterData.month == null ? "" : this.filterData.month.split("-");
       let params = {
@@ -242,13 +240,47 @@ export default {
           let data = res.data;
           if (data.code == "SUCCESS") {
             this.listData = data.list;
-            this.initPagination(10);
+            if(rePage) {
+              this.initPagination(10);
+            } else {
+              if(this.listData.length % this.pageSize == 0) {
+                this.currentPage -= 1;
+              }
+              this.handleCurrentChange(this.currentPage);
+            }
           } else if (data.code == "NO_AUTHORITY") {
             this.$message({
               message: "无权限操作",
               type: "error"
             });
             this.$router.go(-1);
+          } else {
+            this.$message({
+              message: "查询失败， 失败原因：" + data.code,
+              type: "error"
+            });
+          }
+        })
+        .catch(err => {
+          this.$message({
+            message: err.data.status + ": " + err.data.error,
+            type: "error"
+          });
+        });
+    },
+    renderPackageStandard() {
+      let params = {
+        status: 1,
+        type: 2
+      };
+      this.$api
+        .post(this.$url.getPackageList, params)
+        .then(res => {
+          let data = res.data;
+          if (data.code == "SUCCESS") {
+            this.packageStandard = data.list;
+          } else if (data.code == "NO_AUTHORITY") {
+            this.packageStandard = [];
           } else {
             this.$message({
               message: "查询失败， 失败原因：" + data.code,
@@ -338,7 +370,7 @@ export default {
               message: "删除成功",
               type: "success"
             });
-            this.renderWorkRecord();
+            this.renderWorkRecord(false);
           } else if (data == "NO_AUTHORITY") {
             this.$message({
               message: "无权限操作",
@@ -359,6 +391,10 @@ export default {
           });
         });
     },
+    showDate(timestamp) {
+      let date = new Date(timestamp);
+      return date.toLocaleString();
+    },
     showPackLabel(id) {
       let item;
       this.workRateOption.forEach(element => {
@@ -369,21 +405,25 @@ export default {
       if (item == undefined) {
         return "";
       } else {
-        let str = item.standard + "kg ";
-        this.workRateTypeOption.forEach(element => {
-          if (element.value == item.type) {
-            str += element.label;
-          }
-        });
-        return str;
+        return item.standard;
       }
+    },
+    showPackageStandard(id) {
+      let show = "";
+      this.packageStandard.forEach(element => {
+        if(element.id == id) {
+          show = element.standard;
+        }
+      });
+      return show;
     }
   },
   beforeRouteEnter(to, from, next) {
     next(vm => {
       vm.renderUser();
       vm.rendeWorkRate();
-      vm.renderWorkRecord();
+      vm.renderPackageStandard();
+      vm.renderWorkRecord(true);
     });
   }
 };

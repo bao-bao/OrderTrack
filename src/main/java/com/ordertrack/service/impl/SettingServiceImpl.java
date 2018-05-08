@@ -4,11 +4,13 @@ package com.ordertrack.service.impl;
 
 import com.ordertrack.constant.ReturnCode;
 import com.ordertrack.dao.AdditiveDao;
+import com.ordertrack.dao.PackageDao;
 import com.ordertrack.dao.ProductDao;
 import com.ordertrack.dao.WorkRateDao;
 import com.ordertrack.entity.Additive;
 import com.ordertrack.entity.Product;
 import com.ordertrack.entity.WorkRate;
+import com.ordertrack.entity.Package;
 import com.ordertrack.service.SettingService;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,8 @@ public class SettingServiceImpl implements SettingService {
     private WorkRateDao workRateDao;
     @Resource
     private ProductDao productDao;
+    @Resource
+    private PackageDao packageDao;
 
     @Override
     @Transactional
@@ -127,6 +131,41 @@ public class SettingServiceImpl implements SettingService {
     @Transactional
     public ReturnCode deleteProduct(Product product) {
         productDao.delete(product);
+        return ReturnCode.SUCCESS;
+    }
+
+    @Override
+    public List<Package> queryPackageList(Integer status, Integer type) {
+        if(status == 2) {
+            if(type == 2) {
+                return packageDao.findAll();
+            } else {
+                return packageDao.findByType(type);
+            }
+        } else {
+            if(type == 2) {
+                return packageDao.findByIsActive(status == 1);
+            } else {
+                return packageDao.findByIsActiveAndType(status == 1, type);
+            }
+        }
+    }
+
+    @Override
+    public ReturnCode addPackage(Package pack) {
+        packageDao.save(pack);
+        return ReturnCode.SUCCESS;
+    }
+
+    @Override
+    public ReturnCode updatePackage(Package pack) {
+        packageDao.saveAndFlush(pack);
+        return ReturnCode.SUCCESS;
+    }
+
+    @Override
+    public ReturnCode deletePackage(Package pack) {
+        packageDao.delete(pack);
         return ReturnCode.SUCCESS;
     }
 }

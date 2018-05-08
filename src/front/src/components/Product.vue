@@ -20,7 +20,7 @@
           </el-col>
           <el-col :span="4">
             <el-button type="primary" style="margin-left:20px"
-            icon="el-icon-search" @click="renderProduct()">搜索</el-button>
+            icon="el-icon-search" @click="renderProduct(true)">搜索</el-button>
           </el-col>
           <el-col :span="4" :offset="10" style="text-align:right">
             <el-button type="warning" icon="el-icon-circle-plus" @click="addProduct()">新增</el-button>
@@ -115,6 +115,7 @@ export default {
     },
     handleCurrentChange(val) {
       this.currentPage = val;
+      this.total = this.listData.length;
       this.tableData = this.listData.slice(
         (val - 1) * this.pageSize,
         val * this.pageSize
@@ -127,7 +128,7 @@ export default {
         })
         .catch(_ => {});
     },
-    renderProduct() {
+    renderProduct(rePage) {
       const loading = this.$loading({
         lock: true,
         text: "Loading",
@@ -140,7 +141,14 @@ export default {
           let data = res.data;
           if (data.code == "SUCCESS") {
             this.listData = data.list;
-            this.initPagination(10);
+            if(rePage) {
+              this.initPagination(10);
+            } else {
+              if(this.listData.length % this.pageSize == 0) {
+                this.currentPage -= 1;
+              }
+              this.handleCurrentChange(this.currentPage);
+            }
           } else if (data.code == "NO_AUTHORITY") {
             this.$message({
               message: "无权限操作",
@@ -183,7 +191,7 @@ export default {
               message: "添加成功",
               type: "success"
             });
-            this.renderProduct();
+            this.renderProduct(false);
           } else if (data == "NO_AUTHORITY") {
             this.$message({
               message: "无权限操作",
@@ -216,7 +224,7 @@ export default {
               message: "更新成功",
               type: "success"
             });
-            this.renderProduct();
+            this.renderProduct(false);
           } else if (data == "NO_AUTHORITY") {
             this.$message({
               message: "无权限操作",
@@ -248,7 +256,7 @@ export default {
               message: "删除成功",
               type: "success"
             });
-            this.renderProduct();
+            this.renderProduct(false);
           } else if (data == "NO_AUTHORITY") {
             this.$message({
               message: "无权限操作",
@@ -273,7 +281,7 @@ export default {
   beforeRouteEnter(to, from, next) {
     next(vm => {
       vm.filterData.status = 2;
-      vm.renderProduct();
+      vm.renderProduct(true);
     });
   }
 };

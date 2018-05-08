@@ -52,7 +52,7 @@
         <template slot-scope="props">
           <el-form label-position="left" inline class="demo-table-expand">
             <el-form-item label="外包装规格">
-              <span>{{ props.row.outerStandard }}</span>
+              <span>{{ showPackageStandard(props.row.outerStandard) }}</span>
             </el-form-item>
             <el-form-item label="件数">
               <span>{{ props.row.outerCount }} 件</span>
@@ -81,7 +81,7 @@
         <template slot-scope="scope">{{ scope.row.productWeight }} kg</template>
       </el-table-column>
       <el-table-column prop="innerStandard" label="包装规格" min-width="130">
-        <template slot-scope="scope">{{ scope.row.innerStandard }}</template>
+        <template slot-scope="scope">{{ showPackageStandard(scope.row.innerStandard) }}</template>
       </el-table-column>
       <el-table-column prop="innerCount" label="数量" min-width="130">
         <template slot-scope="scope">{{ scope.row.innerCount }}</template>
@@ -178,6 +178,7 @@ export default {
       },
       order: {},
       workers: [],
+      packageStandard: [],
       checkedWorker: [],
       currentPackType: 0,
       currentAllCount: 0,
@@ -204,6 +205,7 @@ export default {
     },
     handleCurrentChange(val) {
       this.currentPage = val;
+      this.total = this.listData.length;
       this.tableData = this.listData.slice(
         (val - 1) * this.pageSize,
         val * this.pageSize
@@ -274,9 +276,10 @@ export default {
           }
         });
         this.form.list = newList;
+        this.currentSurplus = this.currentAllCount;
         this.form.list.forEach(element => {
           if (element.count != "") {
-            this.currentSurplus = this.currentAllCount - element.count;
+            this.currentSurplus -= element.count;
           }
         });
       } else {
@@ -324,9 +327,35 @@ export default {
           let data = res.data;
           if (data.code == "SUCCESS") {
             this.workRateOption = data.list;
-            console.log(this.workRateOption)
           } else if (data.code == "NO_AUTHORITY") {
             this.workRateOption = [];
+          } else {
+            this.$message({
+              message: "查询失败， 失败原因：" + data.code,
+              type: "error"
+            });
+          }
+        })
+        .catch(err => {
+          this.$message({
+            message: err.data.status + ": " + err.data.error,
+            type: "error"
+          });
+        });
+    },
+    renderPackageStandard() {
+      let params = {
+        status: 1,
+        type: 2
+      };
+      this.$api
+        .post(this.$url.getPackageList, params)
+        .then(res => {
+          let data = res.data;
+          if (data.code == "SUCCESS") {
+            this.packageStandard = data.list;
+          } else if (data.code == "NO_AUTHORITY") {
+            this.packageStandard = [];
           } else {
             this.$message({
               message: "查询失败， 失败原因：" + data.code,
@@ -391,7 +420,7 @@ export default {
           });
         });
     },
-    renderOrderDetail() {
+    renderOrderDetail(rePage) {
       const loading = this.$loading({
         lock: true,
         text: "Loading",
@@ -406,7 +435,14 @@ export default {
           let data = res.data;
           if (data.code == "SUCCESS") {
             this.listData = data.list;
-            this.initPagination(6);
+            if(rePage) {
+              this.initPagination(6);
+            } else {
+              if(this.listData.length % this.pageSize == 0) {
+                this.currentPage -= 1;
+              }
+              this.handleCurrentChange(this.currentPage);
+            }
             this.renderOrder();
           } else if (data.code == "NO_AUTHORITY") {
             this.$message({
@@ -488,7 +524,7 @@ export default {
               message: "添加成功",
               type: "success"
             });
-            this.renderOrderDetail();
+            this.renderOrderDetail(false);
           } else {
             this.$message({
               message: "添加失败， 失败原因：" + data,
@@ -545,6 +581,15 @@ export default {
         });
         return show.substring(0, show.length - 1);
       }
+    },
+    showPackageStandard(id) {
+      let show = "";
+      this.packageStandard.forEach(element => {
+        if(element.id == id) {
+          show = element.standard;
+        }
+      });
+      return show;
     }
   },
   beforeRouteEnter(to, from, next) {
@@ -552,7 +597,8 @@ export default {
       vm.orderId = vm.$route.params.id;
       vm.renderWorker();
       vm.rendeWorkRate();
-      vm.renderOrderDetail();
+      vm.renderPackageStandard();
+      vm.renderOrderDetail(true);
     });
   }
 };

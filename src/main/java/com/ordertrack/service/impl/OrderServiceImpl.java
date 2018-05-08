@@ -10,6 +10,7 @@ import com.ordertrack.dao.OrderDetailDao;
 import com.ordertrack.dao.WorkRecordDao;
 import com.ordertrack.entity.Order;
 import com.ordertrack.entity.OrderDetail;
+import com.ordertrack.entity.Package;
 import com.ordertrack.entity.WorkRate;
 import com.ordertrack.entity.WorkRecord;
 import com.ordertrack.pojo.MonthVolume;
@@ -134,7 +135,10 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public ReturnCode deleteOrder(Order order) {
-        orderDetailDao.deleteByOrderId(order.getOrderId());
+        List<OrderDetail> details = orderDetailDao.findByOrderId(order.getOrderId());
+        for(OrderDetail detail : details) {
+            deleteOrderDetail(detail);
+        }
         orderDao.delete(order);
         return ReturnCode.SUCCESS;
     }
@@ -211,6 +215,7 @@ public class OrderServiceImpl implements OrderService {
         order.setTotalBig(order.getTotalBig() - orderDetail.getOuterCount());
         order.setTotalPrice(order.getTotalPrice() - orderDetail.getProductPrice());
         order.setTotalWeight(order.getTotalWeight() - orderDetail.getProductWeight());
+        workRecordDao.deleteByOrderDetail(orderDetail.getId());
         orderDao.saveAndFlush(order);
         return ReturnCode.SUCCESS;
     }
@@ -278,41 +283,42 @@ public class OrderServiceImpl implements OrderService {
     public PackageCheckResponse checkPickUp(Integer orderId) {
         PackageCheckResponse resp = new PackageCheckResponse();
         boolean tag = true;
-        String message = "";
+        StringBuilder message = new StringBuilder();
         Map<Integer, Integer> packageNeed = new HashMap<>();
         List<OrderDetail> orderDetails = queryOrderDetail(orderId);
-        List<WorkRate> workRates = settingService.queryWorkRateList(1);
+        List<Package> packages = settingService.queryPackageList(1, 2);
         for (OrderDetail detail : orderDetails) {
-            int packId = detail.getPackType();
-            int packNumber = detail.getInnerCount();
-            packageNeed.merge(packId, packNumber, (a, b) -> b + a);
+            int outerPackId = detail.getOuterStandard();
+            int outerPackNumber = detail.getOuterCount();
+            int innerPackId = detail.getInnerStandard();
+            int innerPackNumber = detail.getInnerCount();
+            packageNeed.merge(outerPackId, outerPackNumber, (a, b) -> b + a);
+            packageNeed.merge(innerPackId, innerPackNumber, (a, b) -> b + a);
         }
         for (Map.Entry<Integer, Integer> map : packageNeed.entrySet()) {
-            for (WorkRate workRate : workRates) {
-                if (map.getKey() == workRate.getId()) {
-                    if (map.getValue() < workRate.getNumber()) {
-                        break;
-                    } else {
+            for (Package pack : packages) {
+                if (map.getKey() == pack.getId()) {
+                    if (map.getValue() > pack.getNumber()) {
                         tag = false;
-                        message += workRate.getStandard() + "kg " + PackageType.getName(workRate.getType()) + "： 现有" + workRate.getNumber() + "个， 需求" + map.getValue() + "个<br>";
-                        break;
+                        message.append(pack.getStandard()).append("： 现有").append(pack.getNumber()).append("个， 需求").append(map.getValue()).append("个<br>");
                     }
+                    break;
                 }
             }
         }
         if (tag) {
             for (Map.Entry<Integer, Integer> map : packageNeed.entrySet()) {
-                for (WorkRate workRate : workRates) {
-                    if (map.getKey() == workRate.getId()) {
-                        workRate.setNumber(workRate.getNumber() - map.getValue());
-                        settingService.updateWorkRate(workRate);
+                for (Package pack : packages) {
+                    if (map.getKey() == pack.getId()) {
+                        pack.setNumber(pack.getNumber() - map.getValue());
+                        settingService.updatePackage(pack);
                     }
                 }
             }
             resp.setCode(ReturnCode.SUCCESS);
         } else {
             resp.setCode(ReturnCode.NO_ENOUGH_PACKAGE);
-            resp.setMessage(message);
+            resp.setMessage(message.toString());
 
         }
         return resp;

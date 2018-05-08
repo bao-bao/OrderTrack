@@ -32,7 +32,7 @@
           </el-col>
           <el-col :span="2">
             <el-button type="primary" style="margin-left:20px"
-            icon="el-icon-search" @click="renderOrder()">搜索</el-button>
+            icon="el-icon-search" @click="renderOrder(true)">搜索</el-button>
           </el-col>
           <el-col :span="2" :offset="2" style="text-align:right">
             <el-button type="warning" :v-show="status==0" icon="el-icon-circle-plus" @click="addOrder()">新增</el-button>
@@ -77,7 +77,7 @@
         <template slot-scope="scope">{{ scope.row.contractId }}</template>
       </el-table-column>
       <el-table-column prop="totalPrice" label="总价值" min-width="100">
-        <template slot-scope="scope">{{ scope.row.totalPrice.toFixed(2) }} 元</template>
+        <template slot-scope="scope">{{ showPrice(scope.row.totalPrice.toFixed(2)) }} 元</template>
       </el-table-column>
       <el-table-column prop="status" label="当前状态" min-width="90">
         <template slot-scope="scope">
@@ -212,6 +212,7 @@ export default {
     },
     handleCurrentChange(val) {
       this.currentPage = val;
+      this.total = this.listData.length;
       this.tableData = this.listData.slice(
         (val - 1) * this.pageSize,
         val * this.pageSize
@@ -350,7 +351,8 @@ export default {
           return;
         }
         let role = JSON.parse(localStorage.getItem("ms_user")).role;
-        if (role == 2) {
+        console.log(role);
+        if (role == 3) {
           row.status = 2;
           row.takeTime = new Date().getTime();
           this.form = JSON.parse(JSON.stringify(row));
@@ -376,7 +378,7 @@ export default {
       }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
-        this.$confirm("确认删除？")
+        this.$confirm("确认删除？此操作会同时删除相关订单详细信息！")
           .then(_ => {
             this.doDelete(index, row);
           })
@@ -396,7 +398,7 @@ export default {
         })
         .catch(_ => {});
     },
-    renderOrder() {
+    renderOrder(rePage) {
       const loading = this.$loading({
         lock: true,
         text: "Loading",
@@ -416,7 +418,14 @@ export default {
           let data = res.data;
           if (data.code == "SUCCESS") {
             this.listData = data.list;
-            this.initPagination(10);
+            if(rePage) {
+              this.initPagination(10);
+            } else {
+              if(this.listData.length % this.pageSize == 0) {
+                this.currentPage -= 1;
+              }
+              this.handleCurrentChange(this.currentPage);
+            }
           } else if (data.code == "NO_AUTHORITY") {
             this.$message({
               message: "无权限操作",
@@ -439,7 +448,7 @@ export default {
           loading.close();
         });
     },
-    renderStatusOrder() {
+    renderStatusOrder(rePage) {
       const loading = this.$loading({
         lock: true,
         text: "Loading",
@@ -454,7 +463,14 @@ export default {
           let data = res.data;
           if (data.code == "SUCCESS") {
             this.listData = data.list;
-            this.initPagination(10);
+            if(rePage) {
+              this.initPagination(10);
+            } else {
+              if(this.listData.length % this.pageSize == 0) {
+                this.currentPage -= 1;
+              }
+              this.handleCurrentChange(this.currentPage);
+            }
           } else if (data.code == "NO_AUTHORITY") {
             this.$message({
               message: "无权限操作",
@@ -521,9 +537,9 @@ export default {
                   type: "success"
                 });
                 if (this.status != 0) {
-                  this.renderStatusOrder();
+                  this.renderStatusOrder(false);
                 } else {
-                  this.renderOrder();
+                  this.renderOrder(false);
                 }
               } else if (data == "NO_AUTHORITY") {
                 this.$message({
@@ -568,9 +584,9 @@ export default {
                   type: "success"
                 });
                 if (this.status != 0) {
-                  this.renderStatusOrder();
+                  this.renderStatusOrder(false);
                 } else {
-                  this.renderOrder();
+                  this.renderOrder(false);
                 }
               } else if (data == "NO_AUTHORITY") {
                 this.$message({
@@ -612,9 +628,9 @@ export default {
               type: "success"
             });
             if (this.status != 0) {
-              this.renderStatusOrder();
+              this.renderStatusOrder(false);
             } else {
-              this.renderOrder();
+              this.renderOrder(false);
             }
           } else if (data == "NO_AUTHORITY") {
             this.$message({
@@ -648,9 +664,9 @@ export default {
               type: "success"
             });
             if (this.status != 0) {
-              this.renderStatusOrder();
+              this.renderStatusOrder(false);
             } else {
-              this.renderOrder();
+              this.renderOrder(false);
             }
           } else if (data == "NO_AUTHORITY") {
             this.$message({
@@ -749,6 +765,9 @@ export default {
       let date = new Date(timestamp);
       return date.toLocaleDateString();
     },
+    showPrice(num) {
+      return JSON.parse(localStorage.getItem("ms_user")).role == 1 ? num : "-";
+    },
     tableRowClassName({ row, rowIndex }) {
       let now = new Date().getTime();
       if (row.deliveryDate < now) {
@@ -763,9 +782,9 @@ export default {
     next(vm => {
       if (vm.$route.params.status != undefined) {
         vm.status = vm.$route.params.status;
-        vm.renderStatusOrder();
+        vm.renderStatusOrder(true);
       } else {
-        vm.renderOrder();
+        vm.renderOrder(true);
       }
     });
   }

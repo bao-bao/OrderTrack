@@ -6,6 +6,7 @@ import com.ordertrack.constant.ReturnCode;
 import com.ordertrack.entity.Additive;
 import com.ordertrack.entity.Product;
 import com.ordertrack.entity.WorkRate;
+import com.ordertrack.entity.Package;
 
 import java.util.List;
 
@@ -26,4 +27,9 @@ public interface SettingService {
     ReturnCode addProduct(Product product);
     ReturnCode updateProduct(Product product);
     ReturnCode deleteProduct(Product product);
+
+    List<Package> queryPackageList(Integer status, Integer type);
+    ReturnCode addPackage(Package pack);
+    ReturnCode updatePackage(Package pack);
+    ReturnCode deletePackage(Package pack);
 }

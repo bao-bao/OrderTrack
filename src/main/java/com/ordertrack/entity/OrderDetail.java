@@ -35,13 +35,13 @@ public class OrderDetail {
     private String productStandard;
 
     @Column(name = "innerstandard")
-    private String innerStandard;
+    private Integer innerStandard;
 
     @Column(name = "innercount")
     private Integer innerCount;
 
     @Column(name = "outerstandard")
-    private String outerStandard;
+    private Integer outerStandard;
 
     @Column(name = "outercount")
     private Integer outerCount;

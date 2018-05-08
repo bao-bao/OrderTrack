@@ -69,6 +69,11 @@ export default {
   updateProduct: "/setting/updateProduct",
   deleteProduct: "/setting/deleteProduct",
 
+  getPackageList: "/setting/getPackageList",
+  addPackage: "/setting/addPackage",
+  updatePackage: "/setting/updatePackage",
+  deletePackage: "/setting/deletePackage",
+
   /**工作分配**/
   addWorkRecord: "/order/addWorkRecord",
   deleteWorkRecord: "/order/deleteWorkRecord",

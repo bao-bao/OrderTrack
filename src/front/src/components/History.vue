@@ -32,7 +32,7 @@
           </el-col>
           <el-col :span="2">
             <el-button type="primary" style="margin-left:20px"
-            icon="el-icon-search" @click="renderOrder()">搜索</el-button>
+            icon="el-icon-search" @click="renderOrder(true)">搜索</el-button>
           </el-col>
         </el-row>
       </el-form>
@@ -74,7 +74,7 @@
         <template slot-scope="scope">{{ scope.row.contractId }}</template>
       </el-table-column>
       <el-table-column prop="totalPrice" label="总价值" min-width="140">
-        <template slot-scope="scope">{{ scope.row.totalPrice.toFixed(2) }} 元</template>
+        <template slot-scope="scope">{{ showPrice(scope.row.totalPrice.toFixed(2)) }} 元</template>
       </el-table-column>
       <el-table-column prop="status" label="当前状态" min-width="90">
         <template slot-scope="scope">
@@ -142,6 +142,7 @@ export default {
     },
     handleCurrentChange(val) {
       this.currentPage = val;
+      this.total = this.listData.length;
       this.tableData = this.listData.slice(
         (val - 1) * this.pageSize,
         val * this.pageSize
@@ -198,7 +199,7 @@ export default {
         })
         .catch(_ => {});
     },
-    renderOrder() {
+    renderOrder(rePage) {
       const loading = this.$loading({
         lock: true,
         text: "Loading",
@@ -218,7 +219,14 @@ export default {
           let data = res.data;
           if (data.code == "SUCCESS") {
             this.listData = data.list;
-            this.initPagination(10);
+            if(rePage) {
+              this.initPagination(10);
+            } else {
+              if(this.listData.length % this.pageSize == 0) {
+                this.currentPage -= 1;
+              }
+              this.handleCurrentChange(this.currentPage);
+            }
           } else {
             this.$message({
               message: "查询失败， 失败原因：" + data.code,
@@ -246,7 +254,7 @@ export default {
               message: "删除成功",
               type: "success"
             });
-            this.renderOrder();
+            this.renderOrder(false);
           } else {
             this.$message({
               message: "删除失败， 失败原因：" + data,
@@ -270,6 +278,9 @@ export default {
       });
       return label;
     },
+    showPrice(num) {
+      return JSON.parse(localStorage.getItem("ms_user")).role == 1 ? num : "-";
+    },
     showDate(timestamp) {
       let date = new Date(timestamp);
       return date.toLocaleDateString();
@@ -277,7 +288,7 @@ export default {
   },
   beforeRouteEnter(to, from, next) {
     next(vm => {
-      vm.renderOrder();
+      vm.renderOrder(true);
     });
   }
 };
