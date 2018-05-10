@@ -322,7 +322,7 @@ export default {
       }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
-        this.$confirm("确认删除？此操作会同时删除相关的工作记录！")
+        this.$confirm("此操作会同时删除相关的工作记录！","确认删除？")
           .then(_ => {
             this.doDelete(index, row);
           })
@@ -528,10 +528,10 @@ export default {
           let data = res.data;
           if (data.code == "SUCCESS") {
             this.listData = data.list;
-            if(rePage) {
+            if (rePage) {
               this.initPagination(6);
             } else {
-              if(this.listData.length % this.pageSize == 0) {
+              if (this.listData.length % this.pageSize == 0) {
                 this.currentPage -= 1;
               }
               this.handleCurrentChange(this.currentPage);
@@ -655,52 +655,60 @@ export default {
           if (this.form.piecePrice == "") {
             this.form.piecePrice = 0;
           }
-          this.dialogFormVisible = false;
-          this.form.productPrice =
-            (this.form.piecePrice + this.additivePrice) *
-            this.form.productWeight;
-          this.form.extra = JSON.stringify(this.form.extra);
-          let params = {};
-          let url = "";
-          if (this.mutiple != "") {
-            url = this.$url.addOrderDetailBatch;
-            params = {
-              detail: this.form,
-              count: this.mutiple
-            };
-          } else {
-            url = this.$url.addOrderDetail;
-            params = this.form;
+          if (this.form.piecePrice == 0) {
+            this.$confirm(
+              "如有需要请在“中文名称”的下拉框中选择；不需要请忽略","未设置产品单价？"
+            )
+              .then(_ => {
+                this.dialogFormVisible = false;
+                this.form.productPrice =
+                  (this.form.piecePrice + this.additivePrice) *
+                  this.form.productWeight;
+                this.form.extra = JSON.stringify(this.form.extra);
+                let params = {};
+                let url = "";
+                if (this.mutiple != "") {
+                  url = this.$url.addOrderDetailBatch;
+                  params = {
+                    detail: this.form,
+                    count: this.mutiple
+                  };
+                } else {
+                  url = this.$url.addOrderDetail;
+                  params = this.form;
+                }
+                this.$api
+                  .post(url, params)
+                  .then(res => {
+                    let data = res.data;
+                    if (data == "SUCCESS") {
+                      this.$message({
+                        message: "添加成功",
+                        type: "success"
+                      });
+                      this.renderOrderDetail(false);
+                    } else if (data == "NO_AUTHORITY") {
+                      this.$message({
+                        message: "无权限操作",
+                        type: "error"
+                      });
+                      this.$router.go(-1);
+                    } else {
+                      this.$message({
+                        message: "添加失败， 失败原因：" + data,
+                        type: "error"
+                      });
+                    }
+                  })
+                  .catch(err => {
+                    this.$message({
+                      message: err.data.status + ": " + err.data.error,
+                      type: "error"
+                    });
+                  });
+              })
+              .catch(_ => {});
           }
-          this.$api
-            .post(url, params)
-            .then(res => {
-              let data = res.data;
-              if (data == "SUCCESS") {
-                this.$message({
-                  message: "添加成功",
-                  type: "success"
-                });
-                this.renderOrderDetail(false);
-              } else if (data == "NO_AUTHORITY") {
-                this.$message({
-                  message: "无权限操作",
-                  type: "error"
-                });
-                this.$router.go(-1);
-              } else {
-                this.$message({
-                  message: "添加失败， 失败原因：" + data,
-                  type: "error"
-                });
-              }
-            })
-            .catch(err => {
-              this.$message({
-                message: err.data.status + ": " + err.data.error,
-                type: "error"
-              });
-            });
         } else {
           this.$message({
             message: "请输入必填项",
@@ -714,41 +722,49 @@ export default {
     doUpdate() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          this.dialogFormVisible = false;
-          this.form.productPrice =
-            (this.form.piecePrice + this.additivePrice) *
-            this.form.productWeight;
-          this.form.extra = JSON.stringify(this.form.extra);
-          let params = this.form;
-          this.$api
-            .post(this.$url.updateOrderDetail, params)
-            .then(res => {
-              let data = res.data;
-              if (data == "SUCCESS") {
-                this.$message({
-                  message: "更新成功",
-                  type: "success"
-                });
-                this.renderOrderDetail(false);
-              } else if (data == "NO_AUTHORITY") {
-                this.$message({
-                  message: "无权限操作",
-                  type: "error"
-                });
-                this.$router.go(-1);
-              } else {
-                this.$message({
-                  message: "更新失败， 失败原因：" + data,
-                  type: "error"
-                });
-              }
-            })
-            .catch(err => {
-              this.$message({
-                message: err.data.status + ": " + err.data.error,
-                type: "error"
-              });
-            });
+          if (this.form.piecePrice == 0) {
+            this.$confirm(
+              "如有需要请在“中文名称”的下拉框中选择；不需要请忽略","未设置产品单价？"
+            )
+              .then(_ => {
+                this.dialogFormVisible = false;
+                this.form.productPrice =
+                  (this.form.piecePrice + this.additivePrice) *
+                  this.form.productWeight;
+                this.form.extra = JSON.stringify(this.form.extra);
+                let params = this.form;
+                this.$api
+                  .post(this.$url.updateOrderDetail, params)
+                  .then(res => {
+                    let data = res.data;
+                    if (data == "SUCCESS") {
+                      this.$message({
+                        message: "更新成功",
+                        type: "success"
+                      });
+                      this.renderOrderDetail(false);
+                    } else if (data == "NO_AUTHORITY") {
+                      this.$message({
+                        message: "无权限操作",
+                        type: "error"
+                      });
+                      this.$router.go(-1);
+                    } else {
+                      this.$message({
+                        message: "更新失败， 失败原因：" + data,
+                        type: "error"
+                      });
+                    }
+                  })
+                  .catch(err => {
+                    this.$message({
+                      message: err.data.status + ": " + err.data.error,
+                      type: "error"
+                    });
+                  });
+              })
+              .catch(_ => {});
+          }
         } else {
           this.$message({
             message: "请输入必填项",

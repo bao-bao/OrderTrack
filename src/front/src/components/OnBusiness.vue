@@ -135,9 +135,9 @@
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="11" v-show="form.status > 3">
+          <el-col :span="11" v-show="form.status > 2">
             <el-form-item label="分工情况" label-width="100px">
-              <el-button size="mini" v-show="form.status == 4" @click="handleDivision(0, form)">重新分配</el-button>
+              <el-button size="mini" v-show="form.status == 3 || form.status == 4" @click="handleDivision(0, form)">重新分配</el-button>
               <el-button size="mini" v-show="form.status == 5 || form.status == 6" @click="handleDivision(0, form)">分工情况</el-button>
             </el-form-item>
           </el-col>
@@ -378,7 +378,7 @@ export default {
       }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
-        this.$confirm("确认删除？此操作会同时删除相关订单详细信息！")
+        this.$confirm("此操作会同时删除相关订单详细信息！", "确认删除？")
           .then(_ => {
             this.doDelete(index, row);
           })

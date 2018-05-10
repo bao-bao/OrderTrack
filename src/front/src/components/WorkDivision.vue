@@ -145,7 +145,7 @@
               </el-col>
               <el-col :span="8">
                 <el-form-item label="预计耗时" label-width="100px">
-                    <span>{{ record.spand }} 小时</span>
+                    <span>{{ showTime(record.spand) }}</span>
                 </el-form-item>
               </el-col>
             </el-row>
@@ -581,6 +581,19 @@ export default {
         });
         return show.substring(0, show.length - 1);
       }
+    },
+    showTime(time) {
+      let str = "";
+      let hour, minute;
+      if (time > 1) {
+        hour = time.toFixed(0);
+        minute = ((time - hour) * 60).toFixed(0);
+        str = hour + "小时" + minute + "分钟";
+      } else {
+        minute = (time * 60).toFixed(0);
+        str = minute + "分钟";
+      }
+      return str;
     },
     showPackageStandard(id) {
       let show = "";

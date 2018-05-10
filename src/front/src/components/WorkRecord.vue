@@ -42,6 +42,9 @@
       <el-table-column prop="detailId" label="工作量" min-width="80">
         <template slot-scope="scope">{{ scope.row.count }} kg</template>
       </el-table-column>
+      <el-table-column prop="spand" label="预计耗时" min-width="100">
+        <template slot-scope="scope">{{ showTime(scope.row.spand) }}</template>
+      </el-table-column>
       <el-table-column prop="startTime" label="开始时间" min-width="160">
         <template slot-scope="scope">{{ showDate(scope.row.startTime) }}</template>
       </el-table-column>
@@ -152,7 +155,7 @@ export default {
       form: {},
       workerOption: [],
       workRateOption: [],
-      packageStandard: [],
+      packageStandard: []
     };
   },
   methods: {
@@ -212,7 +215,7 @@ export default {
         });
     },
     handleDelete(index, row) {
-      this.$confirm("确认删除？此操作会导致在历史记录的分工情况出现错误！")
+      this.$confirm("此操作会导致在历史记录的分工情况出现错误！", "确认删除？")
         .then(_ => {
           this.doDelete(index, row);
         })
@@ -240,10 +243,10 @@ export default {
           let data = res.data;
           if (data.code == "SUCCESS") {
             this.listData = data.list;
-            if(rePage) {
+            if (rePage) {
               this.initPagination(10);
             } else {
-              if(this.listData.length % this.pageSize == 0) {
+              if (this.listData.length % this.pageSize == 0) {
                 this.currentPage -= 1;
               }
               this.handleCurrentChange(this.currentPage);
@@ -391,6 +394,19 @@ export default {
           });
         });
     },
+    showTime(time) {
+      let str = "";
+      let hour, minute;
+      if (time > 1) {
+        hour = time.toFixed(0);
+        minute = ((time - hour) * 60).toFixed(0);
+        str = hour + "小时" + minute + "分钟";
+      } else {
+        minute = (time * 60).toFixed(0);
+        str = minute + "分钟";
+      }
+      return str;
+    },
     showDate(timestamp) {
       let date = new Date(timestamp);
       return date.toLocaleString();
@@ -411,7 +427,7 @@ export default {
     showPackageStandard(id) {
       let show = "";
       this.packageStandard.forEach(element => {
-        if(element.id == id) {
+        if (element.id == id) {
           show = element.standard;
         }
       });
