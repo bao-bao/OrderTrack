@@ -23,3 +23,9 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+src/main/resources/static/
+src/front/static/css/theme-green/
+src/front/static/js/vendor.dll.js
+out/
+*.gz
+*.log
