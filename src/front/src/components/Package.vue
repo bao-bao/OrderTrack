@@ -49,8 +49,11 @@
       <el-table-column prop="type" label="类型" min-width="140">
         <template slot-scope="scope">{{ showType(scope.row.type) }}</template>
       </el-table-column>
-      <el-table-column prop="number" label="剩余数量" min-width="180">
+      <el-table-column prop="number" label="剩余数量" min-width="140">
         <template slot-scope="scope">{{ scope.row.number }}</template>
+      </el-table-column>
+      <el-table-column prop="price" label="价格" min-width="140">
+        <template slot-scope="scope">{{ scope.row.price }} 元/个</template>
       </el-table-column>
       <el-table-column prop="isActive" label="是否使用" min-width="100">
         <template slot-scope="scope">
@@ -71,12 +74,15 @@
       :current-page.sync="currentPage" :page-size="pageSize" layout="total, prev, pager, next" :total="total">
       </el-pagination>
     </div>
-    <el-dialog title="新增工作量" :visible="dialogFormVisible" width="30%">
+    <el-dialog title="新增包装" :visible="dialogFormVisible" width="30%">
       <el-form ref="form" :model="form">
         <el-row :gutter="20">
           <el-col :span="22">
             <el-form-item label="规格" label-width="80px">
               <el-input v-model="form.standard"></el-input>
+            </el-form-item>
+            <el-form-item label="价格" label-width="80px">
+              <el-input v-model="form.price"></el-input>
             </el-form-item>
             <el-form-item label="类型" label-width="80px">
               <el-select v-model="form.type">
@@ -188,7 +194,7 @@ export default {
             if(rePage) {
               this.initPagination(10);
             } else {
-              if(this.listData.length % this.pageSize == 0) {
+              if(this.listData.length % this.pageSize == 0 && this.currentPage != 1) {
                 this.currentPage -= 1;
               }
               this.handleCurrentChange(this.currentPage);
@@ -225,6 +231,7 @@ export default {
         standard: "",
         type: 0,
         number: 0,
+        price: "",
         isActive: true
       };
       this.dialogFormVisible = true;

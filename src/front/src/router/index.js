@@ -53,6 +53,11 @@ export default new Router({
               component: resolve => require(["../components/WorkDivision.vue"], resolve)
             },
             {
+              path: "car/:id",
+              name: "car",
+              component: resolve => require(["../components/Car.vue"], resolve)
+            },
+            {
               path: "detail/:id",
               name: "orderDetail",
               component: resolve => require(["../components/OrderDetail.vue"], resolve)

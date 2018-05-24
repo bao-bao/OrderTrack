@@ -67,6 +67,9 @@ public class Order {
     @Column(name = "checktime")
     private Timestamp checkTime;
 
+    @Column(name = "cartime")
+    private Timestamp carTime;
+
     @Column(name = "finishtime")
     private Timestamp finishTime;
 }

@@ -246,7 +246,7 @@ export default {
             if (rePage) {
               this.initPagination(10);
             } else {
-              if (this.listData.length % this.pageSize == 0) {
+              if (this.listData.length % this.pageSize == 0 && this.currentPage != 1) {
                 this.currentPage -= 1;
               }
               this.handleCurrentChange(this.currentPage);

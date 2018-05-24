@@ -8,7 +8,8 @@ public enum OrderStatus {
     DISTRIBUTING(3),
     PICKING_UP(4),
     BALANCING(5),
-    FINISH(6);
+    CAR(6),
+    FINISH(7);
 
     private int status;
 

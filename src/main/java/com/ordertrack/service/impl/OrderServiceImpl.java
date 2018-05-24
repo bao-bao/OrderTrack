@@ -3,16 +3,13 @@ package com.ordertrack.service.impl;
 /* Created by AMXPC on 2018/4/8. */
 
 import com.ordertrack.constant.OrderStatus;
-import com.ordertrack.constant.PackageType;
 import com.ordertrack.constant.ReturnCode;
+import com.ordertrack.dao.CarDao;
 import com.ordertrack.dao.OrderDao;
 import com.ordertrack.dao.OrderDetailDao;
 import com.ordertrack.dao.WorkRecordDao;
-import com.ordertrack.entity.Order;
-import com.ordertrack.entity.OrderDetail;
+import com.ordertrack.entity.*;
 import com.ordertrack.entity.Package;
-import com.ordertrack.entity.WorkRate;
-import com.ordertrack.entity.WorkRecord;
 import com.ordertrack.pojo.MonthVolume;
 import com.ordertrack.pojo.PackageCheckResponse;
 import com.ordertrack.service.OrderService;
@@ -38,6 +35,8 @@ public class OrderServiceImpl implements OrderService {
     private OrderDetailDao orderDetailDao;
     @Resource
     private WorkRecordDao workRecordDao;
+    @Resource
+    private CarDao carDao;
     @Resource
     private SettingServiceImpl settingService;
     @PersistenceContext
@@ -326,6 +325,33 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
+    public List<Car> queryCarInfo(Integer orderId) {
+            return carDao.findByOrderId(orderId);
+    }
+
+    @Override
+    @Transactional
+    public ReturnCode addCarInfo(Car car) {
+        carDao.save(car);
+        return ReturnCode.SUCCESS;
+    }
+
+    @Override
+    @Transactional
+    public ReturnCode updateCarInfo(Car car) {
+        carDao.saveAndFlush(car);
+        return ReturnCode.SUCCESS;
+    }
+
+    @Override
+    @Transactional
+    public ReturnCode deleteCarInfo(Car car) {
+        carDao.delete(car);
+        return ReturnCode.SUCCESS;
+    }
+
+    @Override
+    @Transactional
     public Integer getBusinessCount() {
         return orderDao.findByStatusLessThan(OrderStatus.FINISH.getStatus()).size();
     }
@@ -387,7 +413,7 @@ public class OrderServiceImpl implements OrderService {
         Query query = em.createNativeQuery("select orderid, totalprice, month(deliverydate)" +
                 " from corder where ((year(deliverydate)=?1-1 and month(deliverydate)>?2)" +
                 " or (year(deliverydate)=?1 and month(deliverydate)<=?2))" +
-                " and status=6" +
+                " and status=7" +
                 " group by month(deliverydate)", MonthVolume.class);
         query.setParameter(1, year);
         query.setParameter(2, month);

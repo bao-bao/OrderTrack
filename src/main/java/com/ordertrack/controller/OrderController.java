@@ -4,6 +4,7 @@ package com.ordertrack.controller;
 
 import com.ordertrack.constant.OrderStatus;
 import com.ordertrack.constant.ReturnCode;
+import com.ordertrack.entity.Car;
 import com.ordertrack.entity.Order;
 import com.ordertrack.entity.OrderDetail;
 import com.ordertrack.entity.WorkRecord;
@@ -201,4 +202,32 @@ public class OrderController {
         return orderService.checkPickUp(orderId);
     }
 
+    @ResponseBody
+    @PostMapping("/getCarInfo")
+    public ListResponse<Car> getCarInfo(@RequestBody CarListRequest request) {
+        ListResponse<Car> resp = new ListResponse<>();
+        Integer orderId = request.getOrderId();
+        List<Car> orderList = orderService.queryCarInfo(orderId);
+        resp.setList(orderList);
+        resp.setCode(ReturnCode.SUCCESS);
+        return resp;
+    }
+
+    @ResponseBody
+    @PostMapping("/addCar")
+    public ReturnCode addCar(@RequestBody Car car) {
+        return orderService.addCarInfo(car);
+    }
+
+    @ResponseBody
+    @PostMapping("/updateCar")
+    public ReturnCode updateCar(@RequestBody Car car) {
+        return orderService.updateCarInfo(car);
+    }
+
+    @ResponseBody
+    @PostMapping("/deleteCar")
+    public ReturnCode deleteCar(@RequestBody Car car) {
+        return orderService.deleteCarInfo(car);
+    }
 }

@@ -80,4 +80,10 @@ export default {
   getWorkRecordList: "/order/getWorkRecordList",
   getDivisionDetail: "/order/getDivisionDetail",
   checkWork: "/order/checkWork",
+
+  /**装车**/
+  getCarInfo: "/order/getCarInfo",
+  addCar: "/order/addCar",
+  updateCar: "/order/updateCar",
+  deleteCar: "/order/deleteCar",
 };

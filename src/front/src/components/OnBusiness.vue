@@ -92,6 +92,7 @@
           <el-button size="mini" v-if="scope.row.status == 3" @click="handlePickUp(scope.$index, scope.row)">提货</el-button>
           <el-button size="mini" v-if="scope.row.status == 4" @click="handleCheck(scope.$index, scope.row)">验收</el-button>
           <el-button size="mini" v-if="scope.row.status == 5" @click="handleBalance(scope.$index, scope.row)">结算</el-button>
+          <el-button size="mini" v-if="scope.row.status == 6" @click="handleCar(scope.$index, scope.row)">装车</el-button>
           <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
           <el-button size="mini" @click="handleDetail(scope.$index, scope.row)">详细信息</el-button>
           <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
@@ -138,7 +139,7 @@
           <el-col :span="11" v-show="form.status > 2">
             <el-form-item label="分工情况" label-width="100px">
               <el-button size="mini" v-show="form.status == 3 || form.status == 4" @click="handleDivision(0, form)">重新分配</el-button>
-              <el-button size="mini" v-show="form.status == 5 || form.status == 6" @click="handleDivision(0, form)">分工情况</el-button>
+              <el-button size="mini" v-show="form.status > 4" @click="handleDivision(0, form)">分工情况</el-button>
             </el-form-item>
           </el-col>
           <el-col :span="22">
@@ -182,7 +183,8 @@ export default {
         { label: "待提货", value: 3 },
         { label: "待验收", value: 4 },
         { label: "待结算", value: 5 },
-        { label: "完成", value: 6 }
+        { label: "待装车", value: 6 },
+        { label: "完成", value: 7 }
       ],
       rule: {
         customName: [
@@ -344,6 +346,24 @@ export default {
         });
       }
     },
+    handleCar(index, row) {
+      if (localStorage.getItem("ms_user") == null) {
+        this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+        return;
+      }
+      let role = JSON.parse(localStorage.getItem("ms_user")).role;
+      if (role == 1) {
+        return this.$router.push({
+          name: "car",
+          params: { id: row.orderId }
+        });
+      } else {
+        this.$message({
+          message: "无权限操作",
+          type: "error"
+        });
+      }
+    },
     handleDetail(index, row) {
       if (row.status == 1) {
         if (localStorage.getItem("ms_user") == null) {
@@ -351,14 +371,12 @@ export default {
           return;
         }
         let role = JSON.parse(localStorage.getItem("ms_user")).role;
-        console.log(role);
         if (role == 3) {
           row.status = 2;
           row.takeTime = new Date().getTime();
           this.form = JSON.parse(JSON.stringify(row));
           this.doUncheckUpdate();
-        } else if(role == 1) {
-          
+        } else if (role == 1) {
         } else {
           this.$message({
             message: "无权限操作",
@@ -418,10 +436,10 @@ export default {
           let data = res.data;
           if (data.code == "SUCCESS") {
             this.listData = data.list;
-            if(rePage) {
+            if (rePage) {
               this.initPagination(10);
             } else {
-              if(this.listData.length % this.pageSize == 0) {
+              if (this.listData.length % this.pageSize == 0 && this.currentPage != 1) {
                 this.currentPage -= 1;
               }
               this.handleCurrentChange(this.currentPage);
@@ -463,10 +481,10 @@ export default {
           let data = res.data;
           if (data.code == "SUCCESS") {
             this.listData = data.list;
-            if(rePage) {
+            if (rePage) {
               this.initPagination(10);
             } else {
-              if(this.listData.length % this.pageSize == 0) {
+              if (this.listData.length % this.pageSize == 0 && this.currentPage != 1) {
                 this.currentPage -= 1;
               }
               this.handleCurrentChange(this.currentPage);

@@ -286,9 +286,7 @@ export default {
             this.operateCount = data.operateCount;
             this.pauseCount = data.pauseCount;
             this.totalCount = data.totalCount;
-            console.log(data.takeCount);
             this.takeCount = data.takeCount;
-            console.log(this.takeCount);
             this.divisionCount = data.divisionCount;
             this.pickUpCount = data.pickUpCount;
             this.balanceCount = data.balanceCount;

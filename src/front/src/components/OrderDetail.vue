@@ -23,6 +23,7 @@
                 <el-step title="分配" :description="showDateTime(order.divisionTime)"></el-step>
                 <el-step title="提货" :description="showDateTime(order.pickUpTime)"></el-step>
                 <el-step title="验收" :description="showDateTime(order.checkTime)"></el-step>
+                <el-step title="装车" :description="showDateTime(order.carTime)"></el-step>
                 <el-step title="完成" :description="showDateTime(order.finishTime)"></el-step>
               </el-steps>
             </el-form-item>
@@ -322,7 +323,7 @@ export default {
       }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1) {
-        this.$confirm("此操作会同时删除相关的工作记录！","确认删除？")
+        this.$confirm("此操作会同时删除相关的工作记录！", "确认删除？")
           .then(_ => {
             this.doDelete(index, row);
           })
@@ -353,11 +354,7 @@ export default {
       });
     },
     goBack() {
-      if (this.status != 0) {
-        this.$router.push("/index");
-      } else {
         this.$router.go(-1);
-      }
     },
     querySearch(queryString, cb) {
       var products = this.product;
@@ -531,7 +528,7 @@ export default {
             if (rePage) {
               this.initPagination(6);
             } else {
-              if (this.listData.length % this.pageSize == 0) {
+              if (this.listData.length % this.pageSize == 0 && this.currentPage != 1) {
                 this.currentPage -= 1;
               }
               this.handleCurrentChange(this.currentPage);
@@ -638,8 +635,29 @@ export default {
       }
     },
     doAdd() {
+      if (this.form.innerStandard == "" || this.form.outerStandard == "") {
+        this.$message({
+          message: "请选择包装规格",
+          type: "error"
+        });
+        return;
+      }
       this.$refs["form"].validate(valid => {
         if (valid) {
+          // 计算包装价格
+          let innerPackPrice = 0;
+          let outerPackPrice = 0;
+          this.innerStandard.forEach(element => {
+            if (element.id == this.form.innerStandard) {
+              innerPackPrice = element.price;
+            }
+          });
+          this.outerStandard.forEach(element => {
+            if (element.id == this.form.outerStandard) {
+              outerPackPrice = element.price;
+            }
+          });
+          // 检验数量为空的值
           if (this.form.innerCount == "") {
             this.form.innerCount = 0;
           }
@@ -657,13 +675,17 @@ export default {
           }
           if (this.form.piecePrice == 0) {
             this.$confirm(
-              "如有需要请在“中文名称”的下拉框中选择；不需要请忽略","未设置产品单价？"
+              "如有需要请在“中文名称”下拉框中选择；不需要请忽略此提示。未设置产品单价将无法进行批量导入！",
+              "未设置产品单价？",
             )
               .then(_ => {
                 this.dialogFormVisible = false;
+                // 计算总价 = （产品+添加）*总重+外包装+内包装
                 this.form.productPrice =
                   (this.form.piecePrice + this.additivePrice) *
-                  this.form.productWeight;
+                    this.form.productWeight +
+                  innerPackPrice * this.form.innerCount +
+                  outerPackPrice * this.form.outerCount;
                 this.form.extra = JSON.stringify(this.form.extra);
                 let params = {};
                 let url = "";
@@ -708,6 +730,55 @@ export default {
                   });
               })
               .catch(_ => {});
+          } else {
+            this.dialogFormVisible = false;
+            this.form.productPrice =
+              (this.form.piecePrice + this.additivePrice) *
+                this.form.productWeight +
+              innerPackPrice * this.form.innerCount +
+              outerPackPrice * this.form.outerCount;
+            this.form.extra = JSON.stringify(this.form.extra);
+            let params = {};
+            let url = "";
+            if (this.mutiple != "") {
+              url = this.$url.addOrderDetailBatch;
+              params = {
+                detail: this.form,
+                count: this.mutiple
+              };
+            } else {
+              url = this.$url.addOrderDetail;
+              params = this.form;
+            }
+            this.$api
+              .post(url, params)
+              .then(res => {
+                let data = res.data;
+                if (data == "SUCCESS") {
+                  this.$message({
+                    message: "添加成功",
+                    type: "success"
+                  });
+                  this.renderOrderDetail(false);
+                } else if (data == "NO_AUTHORITY") {
+                  this.$message({
+                    message: "无权限操作",
+                    type: "error"
+                  });
+                  this.$router.go(-1);
+                } else {
+                  this.$message({
+                    message: "添加失败， 失败原因：" + data,
+                    type: "error"
+                  });
+                }
+              })
+              .catch(err => {
+                this.$message({
+                  message: err.data.status + ": " + err.data.error,
+                  type: "error"
+                });
+              });
           }
         } else {
           this.$message({
@@ -722,15 +793,30 @@ export default {
     doUpdate() {
       this.$refs["form"].validate(valid => {
         if (valid) {
+          let innerPackPrice = 0;
+          let outerPackPrice = 0;
+          this.innerStandard.forEach(element => {
+            if (element.id == this.form.innerStandard) {
+              innerPackPrice = element.price;
+            }
+          });
+          this.outerStandard.forEach(element => {
+            if (element.id == this.form.outerStandard) {
+              outerPackPrice = element.price;
+            }
+          });
           if (this.form.piecePrice == 0) {
             this.$confirm(
-              "如有需要请在“中文名称”的下拉框中选择；不需要请忽略","未设置产品单价？"
+              "如有需要请在“中文名称”的下拉框中选择；不需要请忽略",
+              "未设置产品单价？"
             )
               .then(_ => {
                 this.dialogFormVisible = false;
                 this.form.productPrice =
                   (this.form.piecePrice + this.additivePrice) *
-                  this.form.productWeight;
+                    this.form.productWeight +
+                  innerPackPrice * this.form.innerCount +
+                  outerPackPrice * this.form.outerCount;
                 this.form.extra = JSON.stringify(this.form.extra);
                 let params = this.form;
                 this.$api
@@ -764,6 +850,44 @@ export default {
                   });
               })
               .catch(_ => {});
+          } else {
+            this.dialogFormVisible = false;
+            this.form.productPrice =
+              (this.form.piecePrice + this.additivePrice) *
+                this.form.productWeight +
+              innerPackPrice * this.form.innerCount +
+              outerPackPrice * this.form.outerCount;
+            this.form.extra = JSON.stringify(this.form.extra);
+            let params = this.form;
+            this.$api
+              .post(this.$url.updateOrderDetail, params)
+              .then(res => {
+                let data = res.data;
+                if (data == "SUCCESS") {
+                  this.$message({
+                    message: "更新成功",
+                    type: "success"
+                  });
+                  this.renderOrderDetail(false);
+                } else if (data == "NO_AUTHORITY") {
+                  this.$message({
+                    message: "无权限操作",
+                    type: "error"
+                  });
+                  this.$router.go(-1);
+                } else {
+                  this.$message({
+                    message: "更新失败， 失败原因：" + data,
+                    type: "error"
+                  });
+                }
+              })
+              .catch(err => {
+                this.$message({
+                  message: err.data.status + ": " + err.data.error,
+                  type: "error"
+                });
+              });
           }
         } else {
           this.$message({

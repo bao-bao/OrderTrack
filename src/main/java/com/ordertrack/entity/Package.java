@@ -21,6 +21,9 @@ public class Package {
     @Column(name = "type")
     private Integer type;
 
+    @Column(name = "price")
+    private Double price;
+
     @Column(name = "number")
     private Integer number;
 

@@ -3,6 +3,7 @@ package com.ordertrack.service;
 /* Created by AMXPC on 2018/4/8. */
 
 import com.ordertrack.constant.ReturnCode;
+import com.ordertrack.entity.Car;
 import com.ordertrack.entity.Order;
 import com.ordertrack.entity.OrderDetail;
 import com.ordertrack.entity.WorkRecord;
@@ -38,6 +39,11 @@ public interface OrderService {
     List<WorkRecord> queryWorkRecordList(String name, Integer year, Integer month);
     List<WorkRecord> queryDivisionDetail(int detailId);
     ReturnCode checkWork(int orderId);
+
+    ReturnCode addCarInfo(Car car);
+    ReturnCode deleteCarInfo(Car car);
+    ReturnCode updateCarInfo(Car car);
+    List<Car> queryCarInfo(Integer orderId);
 
     Integer getBusinessCount();
     Integer getOperateCount();

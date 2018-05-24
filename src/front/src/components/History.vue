@@ -50,10 +50,13 @@
             <el-form-item label="大件数合计">
               <span>{{ props.row.totalBig }} 件</span>
             </el-form-item>
-            <el-form-item label="采购单号">
-              <template slot-scope="scope">{{ scope.row.purchaseId }}</template>
+            <el-form-item label="销售合同号">
+              <span>{{ props.row.contractId }}</span>
             </el-form-item>
-            <el-form-item label="包装图片" style="width: 100%">
+            <el-form-item label="采购单号">
+              <span>{{ props.row.purchaseId }}</span>
+            </el-form-item>
+            <el-form-item label="包装图片">
               <span>{{ props.row.picture }}</span>
             </el-form-item>
           </el-form>
@@ -70,9 +73,6 @@
       <el-table-column prop="deliveryDate" label="要求交货期" min-width="150">
         <template slot-scope="scope">{{ showDate(scope.row.deliveryDate) }}</template>
       </el-table-column>
-      <el-table-column prop="contractId" label="销售合同号" min-width="150">
-        <template slot-scope="scope">{{ scope.row.contractId }}</template>
-      </el-table-column>
       <el-table-column prop="totalPrice" label="总价值" min-width="140">
         <template slot-scope="scope">{{ showPrice(scope.row.totalPrice.toFixed(2)) }} 元</template>
       </el-table-column>
@@ -82,9 +82,10 @@
             {{ showStatus(scope.row.status) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" min-width="270">
+      <el-table-column label="操作" min-width="350">
         <template slot-scope="scope">
           <el-button size="mini" @click="handleDivision(scope.$index, scope.row)">分工情况</el-button>
+          <el-button size="mini" @click="handleCar(scope.$index, scope.row)">装车情况</el-button>
           <el-button size="mini" @click="handleDetail(scope.$index, scope.row)">详细信息</el-button>
           <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
         </template>
@@ -122,8 +123,9 @@ export default {
         { label: "提货", value: 2 },
         { label: "分配", value: 3 },
         { label: "包装", value: 4 },
-        { label: "结算", value: 5 },
-        { label: "完成", value: 6 }
+        { label: "验收", value: 5 },
+        { label: "装车", value: 6 },
+        { label: "完成", value: 7 }
       ]
     };
   },
@@ -157,6 +159,24 @@ export default {
       if (role == 1 || role == 3) {
         return this.$router.push({
           name: "workDivision",
+          params: { id: row.orderId }
+        });
+      } else {
+        this.$message({
+          message: "无权限操作",
+          type: "error"
+        });
+      }
+    },
+    handleCar(index, row) {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
+      let role = JSON.parse(localStorage.getItem("ms_user")).role;
+      if (role == 1) {
+        return this.$router.push({
+          name: "car",
           params: { id: row.orderId }
         });
       } else {
@@ -222,7 +242,7 @@ export default {
             if(rePage) {
               this.initPagination(10);
             } else {
-              if(this.listData.length % this.pageSize == 0) {
+              if(this.listData.length % this.pageSize == 0 && this.currentPage != 1) {
                 this.currentPage -= 1;
               }
               this.handleCurrentChange(this.currentPage);
