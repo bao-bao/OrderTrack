@@ -24,6 +24,7 @@
                 <el-step title="提货" :description="showDateTime(order.pickUpTime)"></el-step>
                 <el-step title="验收" :description="showDateTime(order.checkTime)"></el-step>
                 <el-step title="装车" :description="showDateTime(order.carTime)"></el-step>
+                <el-step title="运费" :description="showDateTime(order.carFeeTime)"></el-step>
                 <el-step title="完成" :description="showDateTime(order.finishTime)"></el-step>
               </el-steps>
             </el-form-item>
@@ -43,7 +44,10 @@
               <span>{{ order.customName }}</span>
             </el-form-item>
             <el-form-item label="总价值">
-              <span>{{ showPrice(order.totalPrice) }} 元</span>
+            <el-tooltip placement="top" :disabled="authCheck()"
+             :content="'产品' + order.totalPrice + '元 + 包装' + order.packagePrice + '元 + 装车' + order.carPrice + '元'">
+              <span>{{ showPrice(parseFloat(order.totalPrice) + parseFloat(order.packagePrice) + parseFloat(order.carPrice)) }} 元</span>
+            </el-tooltip>
             </el-form-item>
             <el-form-item label="要求交货期">
               <span>{{ showDate(order.deliveryDate) }}</span>
@@ -97,7 +101,12 @@
         <template slot-scope="scope">{{ scope.row.chineseName }}</template>
       </el-table-column>
       <el-table-column prop="productPrice" label="产品总价" min-width="130">
-        <template slot-scope="scope">{{ showPrice(scope.row.productPrice) }} 元</template>
+        <template slot-scope="scope">
+          <el-tooltip placement="top" :disabled="authCheck()"
+           :content="'产品' + scope.row.productPrice.toFixed(2) + '元 + 包装' + scope.row.packagePrice.toFixed(2) + '元 + 装车' + scope.row.carPrice.toFixed(2) + '元'">
+            <span>{{ showPrice((scope.row.productPrice + scope.row.packagePrice + scope.row.carPrice).toFixed(2)) }} 元</span>
+          </el-tooltip>
+        </template>
       </el-table-column>
       <el-table-column prop="productWeight" label="产品净重" min-width="130">
         <template slot-scope="scope">{{ scope.row.productWeight }} kg</template>
@@ -296,6 +305,18 @@ export default {
         val * this.pageSize
       );
     },
+    authCheck() {
+      if (localStorage.getItem("ms_user") == null) {
+        this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+        return;
+      }
+      let role = JSON.parse(localStorage.getItem("ms_user")).role;
+      if (role == 1) {
+        return false;
+      } else {
+        return true;
+      }
+    },
     handleEdit(index, row) {
       if (localStorage.getItem("ms_user") == null) {
         this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
@@ -354,7 +375,7 @@ export default {
       });
     },
     goBack() {
-        this.$router.go(-1);
+      this.$router.go(-1);
     },
     querySearch(queryString, cb) {
       var products = this.product;
@@ -406,6 +427,7 @@ export default {
     },
     renderInnerStandard() {
       let params = {
+        standard: "",
         status: 1,
         type: 1
       };
@@ -433,6 +455,7 @@ export default {
     },
     renderOuterStandard() {
       let params = {
+        standard: "",
         status: 1,
         type: 0
       };
@@ -528,7 +551,10 @@ export default {
             if (rePage) {
               this.initPagination(6);
             } else {
-              if (this.listData.length % this.pageSize == 0 && this.currentPage != 1) {
+              if (
+                this.listData.length % this.pageSize == 0 &&
+                this.currentPage != 1
+              ) {
                 this.currentPage -= 1;
               }
               this.handleCurrentChange(this.currentPage);
@@ -612,6 +638,8 @@ export default {
             productWeight: "",
             productStandard: "",
             piecePrice: "",
+            packagePrice: "",
+            carPrice: "",
             innerStandard: "",
             innerCount: "",
             outerStandard: "",
@@ -667,6 +695,12 @@ export default {
           if (this.form.productPrice == "") {
             this.form.productPrice = 0;
           }
+          if (this.form.packagePrice == "") {
+            this.form.packagePrice = 0;
+          }
+          if (this.form.carPrice == "") {
+            this.form.carPrice = 0;
+          }
           if (this.form.productWeight == "") {
             this.form.productWeight = 0;
           }
@@ -676,14 +710,15 @@ export default {
           if (this.form.piecePrice == 0) {
             this.$confirm(
               "如有需要请在“中文名称”下拉框中选择；不需要请忽略此提示。未设置产品单价将无法进行批量导入！",
-              "未设置产品单价？",
+              "未设置产品单价？"
             )
               .then(_ => {
                 this.dialogFormVisible = false;
                 // 计算总价 = （产品+添加）*总重+外包装+内包装
                 this.form.productPrice =
                   (this.form.piecePrice + this.additivePrice) *
-                    this.form.productWeight +
+                  this.form.productWeight;
+                this.form.packagePrice =
                   innerPackPrice * this.form.innerCount +
                   outerPackPrice * this.form.outerCount;
                 this.form.extra = JSON.stringify(this.form.extra);
@@ -734,7 +769,8 @@ export default {
             this.dialogFormVisible = false;
             this.form.productPrice =
               (this.form.piecePrice + this.additivePrice) *
-                this.form.productWeight +
+              this.form.productWeight;
+            this.form.packagePrice =
               innerPackPrice * this.form.innerCount +
               outerPackPrice * this.form.outerCount;
             this.form.extra = JSON.stringify(this.form.extra);
@@ -814,7 +850,8 @@ export default {
                 this.dialogFormVisible = false;
                 this.form.productPrice =
                   (this.form.piecePrice + this.additivePrice) *
-                    this.form.productWeight +
+                  this.form.productWeight;
+                this.form.packagePrice =
                   innerPackPrice * this.form.innerCount +
                   outerPackPrice * this.form.outerCount;
                 this.form.extra = JSON.stringify(this.form.extra);
@@ -854,7 +891,8 @@ export default {
             this.dialogFormVisible = false;
             this.form.productPrice =
               (this.form.piecePrice + this.additivePrice) *
-                this.form.productWeight +
+              this.form.productWeight;
+            this.form.packagePrice =
               innerPackPrice * this.form.innerCount +
               outerPackPrice * this.form.outerCount;
             this.form.extra = JSON.stringify(this.form.extra);
@@ -939,7 +977,7 @@ export default {
         return "";
       }
       let date = new Date(timestamp);
-      return this.dateFormat(date, "yyyy-MM-dd HH:mm:ss");
+      return this.dateFormat(date, "yy-MM-dd HH:mm:ss");
     },
     showAdditive(str) {
       let show = "";

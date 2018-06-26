@@ -47,6 +47,8 @@ export default {
   updateOrderDetail: "/order/updateOrderDetail",
   deleteOrderDetail: "/order/deleteOrderDetail",
 
+  getPackLoss: "/order/getPackLoss",
+
   checkPickUp: "/order/checkPickUp",
 
   getOrderHistory: "/order/getOrderHistory",
@@ -73,6 +75,11 @@ export default {
   addPackage: "/setting/addPackage",
   updatePackage: "/setting/updatePackage",
   deletePackage: "/setting/deletePackage",
+
+  getCarTypeList: "/setting/getCarTypeList",
+  addCarType: "/setting/addCarType",
+  updateCarType: "/setting/updateCarType",
+  deleteCarType: "/setting/deleteCarType",
 
   /**工作分配**/
   addWorkRecord: "/order/addWorkRecord",

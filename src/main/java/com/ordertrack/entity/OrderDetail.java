@@ -64,6 +64,12 @@ public class OrderDetail {
     @Column(name = "isfinish")
     private Boolean isFinish;
 
+    @Column(name = "carprice")
+    private Double carPrice;
+
+    @Column(name = "packageprice")
+    private Double packagePrice;
+
     @Column(name = "changetime")
     private Timestamp changeTime;
 

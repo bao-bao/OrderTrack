@@ -2,7 +2,7 @@ spring:
   datasource:
     username: root
     password: root
-    url: jdbc:mysql://10.60.36.28:3306/otrack?useSSL=false
+    url: jdbc:mysql://120.79.152.56:3306/otrack?useSSL=false
     driver-class-name: com.mysql.jdbc.Driver
 
 server.port: 8081

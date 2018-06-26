@@ -24,14 +24,19 @@ public interface OrderDao extends JpaRepository<Order, Long> {
 
     List<Order> findOrderByOrderTimeBetweenAndStatusLessThan(Timestamp startTime, Timestamp endTime, Integer status);
     List<Order> findOrderByOrderTimeBetweenAndStatus(Timestamp startTime, Timestamp endTime, Integer status);
+    List<Order> findOrderByCarFeeTypeAndOrderTimeBetweenAndStatus(Integer carFeeType, Timestamp startTime, Timestamp endTime, Integer status);
 
     List<Order> findOrderByCustomNameContainingAndStatusLessThan(String customName, Integer status);
     List<Order> findOrderByCustomNameContainingAndStatus(String customName, Integer status);
+    List<Order> findOrderByCarFeeTypeAndCustomNameContainingAndStatus(Integer carFeeType, String customName, Integer status);
 
     List<Order> findOrderByCustomNameContainingAndOrderTimeBetweenAndStatusLessThan(String customName, Timestamp startTime, Timestamp endTime, Integer status);
     List<Order> findOrderByCustomNameContainingAndOrderTimeBetweenAndStatus(String customName, Timestamp startTime, Timestamp endTime, Integer status);
+    List<Order> findOrderByCarFeeTypeAndCustomNameContainingAndOrderTimeBetweenAndStatus(Integer carFeeType, String customName, Timestamp startTime, Timestamp endTime, Integer status);
 
     List<Order> findOrderByDeliveryDateBeforeAndStatusNot(Timestamp now, Integer finish);
+
+    List<Order> findByCarFeeTypeAndStatus(Integer carFeeType, Integer status);
 
     List<Order> findByStatusBetween(Integer min, Integer max);
     List<Order> findByStatusLessThan(Integer status);

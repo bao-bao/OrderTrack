@@ -15,6 +15,7 @@ public class IndexContentResponse {
     private int divisionCount;
     private int pickUpCount;
     private int balanceCount;
+    private int carCount;
     private List<OrderEvent> eventList;
     private List<VolumeResponse> volume;
     private ReturnCode code;
@@ -88,6 +89,15 @@ public class IndexContentResponse {
 
     public IndexContentResponse setBalanceCount(int balanceCount) {
         this.balanceCount = balanceCount;
+        return this;
+    }
+
+    public int getCarCount() {
+        return carCount;
+    }
+
+    public IndexContentResponse setCarCount(int carCount) {
+        this.carCount = carCount;
         return this;
     }
 

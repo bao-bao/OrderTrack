@@ -115,13 +115,17 @@ export default {
         { label: "管理员", value: 1 },
         { label: "仓库管理", value: 2 },
         { label: "班组经理", value: 3 },
-        { label: "工作班组", value: 4 }
+        { label: "工作班组", value: 4 },
+        { label: "装车管理", value: 5 },
+        { label: "班组组长", value: 6 },
       ],
       roleEditOption: [
         { label: "管理员", value: 1 },
         { label: "仓库管理", value: 2 },
         { label: "班组经理", value: 3 },
-        { label: "工作班组", value: 4 }
+        { label: "工作班组", value: 4 },
+        { label: "装车管理", value: 5 },
+        { label: "班组组长", value: 6 },
       ],
       form: {}
     };

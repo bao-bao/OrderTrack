@@ -3,10 +3,20 @@ package com.ordertrack.pojo;
 /* Created by AMXPC on 2018/4/8. */
 
 public class OrderListRequest {
+    private Integer carFeeType;
     private String contractId;
     private String customName;
     private Long startDate;
     private Long endDate;
+
+    public Integer getCarFeeType() {
+        return carFeeType;
+    }
+
+    public OrderListRequest setCarFeeType(Integer carFeeType) {
+        this.carFeeType = carFeeType;
+        return this;
+    }
 
     public String getContractId() {
         return contractId;

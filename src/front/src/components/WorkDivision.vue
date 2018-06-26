@@ -30,7 +30,10 @@
               <span>{{ order.customName }}</span>
             </el-form-item>
             <el-form-item label="总价值">
-              <span>{{ order.totalPrice }} 元</span>
+              <el-tooltip placement="top" :disabled="authCheck()"
+              :content="'产品' + order.totalPrice + '元 + 包装' + order.packagePrice + '元 + 装车' + order.carPrice + '元'">
+                <span>{{ showPrice(parseFloat(order.totalPrice) + parseFloat(order.packagePrice) + parseFloat(order.carPrice)) }} 元</span>
+             </el-tooltip>
             </el-form-item>
             <el-form-item label="要求交货期">
               <span>{{ showDate(order.deliveryDate) }}</span>
@@ -211,6 +214,18 @@ export default {
         val * this.pageSize
       );
     },
+    authCheck() {
+      if (localStorage.getItem("ms_user") == null) {
+        this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+        return;
+      }
+      let role = JSON.parse(localStorage.getItem("ms_user")).role;
+      if (role == 1) {
+        return false;
+      } else {
+        return true;
+      }
+    },
     handleEdit(index, row) {
     if (localStorage.getItem("ms_user") == null) {
       this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
@@ -345,6 +360,7 @@ export default {
     },
     renderPackageStandard() {
       let params = {
+        standard: "",
         status: 1,
         type: 2
       };
@@ -581,6 +597,9 @@ export default {
         });
         return show.substring(0, show.length - 1);
       }
+    },
+    showPrice(num) {
+      return JSON.parse(localStorage.getItem("ms_user")).role == 1 ? num : "-";
     },
     showTime(time) {
       let str = "";

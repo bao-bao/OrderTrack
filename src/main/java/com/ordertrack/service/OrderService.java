@@ -3,10 +3,7 @@ package com.ordertrack.service;
 /* Created by AMXPC on 2018/4/8. */
 
 import com.ordertrack.constant.ReturnCode;
-import com.ordertrack.entity.Car;
-import com.ordertrack.entity.Order;
-import com.ordertrack.entity.OrderDetail;
-import com.ordertrack.entity.WorkRecord;
+import com.ordertrack.entity.*;
 import com.ordertrack.pojo.PackageCheckResponse;
 
 import java.util.List;
@@ -17,13 +14,13 @@ public interface OrderService {
     List<Order> getOrderListOnBusiness(int pageId, int pageSize, Order filter);
     List<Order> queryOrderListOnBusiness(String contractId, String customName, Long startTime, Long endTime);
     List<Order> getOrderListHistory(int pageId, int pageSize, Order filter);
-    List<Order> queryOrderListHistory(String contractId, String customName, Long startTime, Long endTime);
+    List<Order> queryOrderListHistory(Integer carFeeType, String contractId, String customName, Long startTime, Long endTime);
     ReturnCode addOrder(Order order);
     ReturnCode updateOrder(Order order);
     ReturnCode deleteOrder(Order order);
     List<Order> queryOrderListByStatus(Integer status);
 
-    PackageCheckResponse checkPickUp(Integer orderId);
+    PackageCheckResponse checkPickUp(Integer orderId, List<PackLoss> losses);
 
     boolean orderCheck(Order order);
 
@@ -41,9 +38,12 @@ public interface OrderService {
     ReturnCode checkWork(int orderId);
 
     ReturnCode addCarInfo(Car car);
-    ReturnCode deleteCarInfo(Car car);
+    ReturnCode deleteCarInfo(Integer orderId, String license);
     ReturnCode updateCarInfo(Car car);
     List<Car> queryCarInfo(Integer orderId);
+
+    List<PackLoss> queryPackLoss(Integer orderId);
+    ReturnCode addPackLoss(List<PackLoss> packLosses);
 
     Integer getBusinessCount();
     Integer getOperateCount();
@@ -53,6 +53,7 @@ public interface OrderService {
     Integer getDivisionCount();
     Integer getPickUpCount();
     Integer getBalanceCount();
+    Integer getCarCount();
     List<Order> getOnBusinessList();
     List getLastYearList();
 }

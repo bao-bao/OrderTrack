@@ -21,9 +21,15 @@ public class Car {
     @Column(name = "orderid")
     private Integer orderId;
 
+    @Column(name = "orderdetail")
+    private Integer orderDetail;
+
     @Column(name = "count")
     private Integer count;
 
-    @Column(name = "standardid")
-    private Integer standardId;
+    @Column(name = "weight")
+    private Double weight;
+
+    @Column(name = "cartype")
+    private Integer carType;
 }

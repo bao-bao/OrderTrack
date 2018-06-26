@@ -3,30 +3,14 @@
     <div class="crumbs">
       <el-breadcrumb separator="/">
         <el-breadcrumb-item><i class="el-icon-date"></i> 其他配置</el-breadcrumb-item>
-        <el-breadcrumb-item>包装</el-breadcrumb-item>
+        <el-breadcrumb-item>装车方式</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div>
       <el-form ref="filterData" :model="filterData">
         <el-row :gutter="0">
-          <el-col :span="5">
-            <el-form-item label-width="0px">
-              <el-input v-model="filterData.standard">
-                <template slot="prepend">规格</template>
-              </el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="5">
-            <el-form-item label="类型" label-width="60px">
-              <el-select v-model="filterData.type">
-                <el-option v-for="item in filterOption"
-                :key="item.value" :label="item.label" :value="item.value">
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
           <el-col :span="6">
-            <el-form-item label="使用状态" label-width="90px">
+            <el-form-item label="使用状态" label-width="80px">
               <el-select v-model="filterData.status">
                 <el-option v-for="item in statusOption"
                 :key="item.value" :label="item.label" :value="item.value">
@@ -36,31 +20,25 @@
           </el-col>
           <el-col :span="4">
             <el-button type="primary" style="margin-left:20px"
-            icon="el-icon-search" @click="renderPackage(true)">搜索</el-button>
+            icon="el-icon-search" @click="renderCarType(true)">搜索</el-button>
           </el-col>
-          <el-col :span="4" style="text-align:right">
-            <el-button type="warning" icon="el-icon-circle-plus" @click="addPackage()">新增</el-button>
+          <el-col :span="4" :offset="10" style="text-align:right">
+            <el-button type="warning" icon="el-icon-circle-plus" @click="addCarType()">新增</el-button>
           </el-col>
         </el-row>
       </el-form>
     </div>
-    <el-table show-header border :data="tableData" style="width: 100%; text-align: center" >
+    <el-table show-header border :data="tableData" style="width: 100%; text-align: center">
       <el-table-column prop="id" label="#" min-width="50">
         <template slot-scope="scope">
           <el-tag size="medium">{{ scope.row.id }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="standard" label="规格" min-width="140">
-        <template slot-scope="scope">{{ scope.row.standard }}</template>
+      <el-table-column prop="name" label="名称" min-width="180">
+        <template slot-scope="scope">{{ scope.row.name }}</template>
       </el-table-column>
-      <el-table-column prop="type" label="类型" min-width="140">
-        <template slot-scope="scope">{{ showType(scope.row.type) }}</template>
-      </el-table-column>
-      <el-table-column prop="number" label="剩余数量" min-width="140">
-        <template slot-scope="scope">{{ scope.row.number }}</template>
-      </el-table-column>
-      <el-table-column prop="price" label="价格" min-width="140">
-        <template slot-scope="scope">{{ scope.row.price }} 元/个</template>
+      <el-table-column prop="price" label="价格" min-width="180">
+        <template slot-scope="scope">{{ scope.row.price }} 元/吨</template>
       </el-table-column>
       <el-table-column prop="isActive" label="是否使用" min-width="100">
         <template slot-scope="scope">
@@ -69,9 +47,8 @@
           </el-switch>
         </template>
       </el-table-column>
-      <el-table-column label="操作" min-width="170">
+      <el-table-column label="操作" min-width="140">
         <template slot-scope="scope">
-          <el-button size="mini" @click="handleUpdate(scope.$index, scope.row)">购进</el-button>
           <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
         </template>
       </el-table-column>
@@ -81,22 +58,15 @@
       :current-page.sync="currentPage" :page-size="pageSize" layout="total, prev, pager, next" :total="total">
       </el-pagination>
     </div>
-    <el-dialog title="新增包装" :visible="dialogFormVisible" width="30%">
+    <el-dialog title="新增装车方式" :visible="dialogFormVisible" width="30%">
       <el-form ref="form" :model="form">
         <el-row :gutter="20">
           <el-col :span="22">
-            <el-form-item label="规格" label-width="80px">
-              <el-input v-model="form.standard"></el-input>
+            <el-form-item label="名称" label-width="80px">
+              <el-input v-model="form.name"></el-input>
             </el-form-item>
             <el-form-item label="价格" label-width="80px">
               <el-input v-model="form.price"></el-input>
-            </el-form-item>
-            <el-form-item label="类型" label-width="80px">
-              <el-select v-model="form.type">
-                <el-option v-for="item in typeOption"
-                :key="item.value" :label="item.label" :value="item.value">
-                </el-option>
-              </el-select>
             </el-form-item>
           </el-col>
         </el-row>
@@ -104,21 +74,6 @@
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
         <el-button type="primary" @click="doAdd()">确 定</el-button>
-      </div>
-    </el-dialog>
-    <el-dialog title="购进包装" :visible="buyFormVisible" width="30%">
-      <el-form ref="buyForm" :model="form">
-        <el-row :gutter="20">
-          <el-col :span="22">
-            <el-form-item label="购进数量" label-width="80px">
-              <el-input v-model.number="buyNumber"></el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="buyFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="doUpdate(form)">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -129,33 +84,20 @@ export default {
   data: function() {
     return {
       dialogFormVisible: false,
-      buyFormVisible: false,
       tableData: [],
       listData: [],
       currentPage: 1,
       pageSize: 10,
       total: 0,
       filterData: {
-        standard: "",
-        status: 2,
-        type: 2
+        status: 0
       },
       statusOption: [
         { label: "全部", value: 2 },
         { label: "使用中", value: 1 },
         { label: "被禁用", value: 0 }
       ],
-      typeOption: [
-        { label: "外包装", value: 0 },
-        { label: "内包装", value: 1 }
-      ],
-      filterOption: [
-        { label: "全部", value: 2 },
-        { label: "外包装", value: 0 },
-        { label: "内包装", value: 1 }
-      ],
-      form: {},
-      buyNumber: 0
+      form: {}
     };
   },
   methods: {
@@ -166,7 +108,7 @@ export default {
       this.tableData = this.listData.slice(
         (this.currentPage - 1) * size,
         this.currentPage * size
-      )
+      );
     },
     handleSizeChange(val) {
       this.initPagination(val);
@@ -186,7 +128,7 @@ export default {
         })
         .catch(_ => {});
     },
-    renderPackage(rePage) {
+    renderCarType(rePage) {
       const loading = this.$loading({
         lock: true,
         text: "Loading",
@@ -194,7 +136,7 @@ export default {
       });
       let params = this.filterData;
       this.$api
-        .post(this.$url.getPackageList, params)
+        .post(this.$url.getCarTypeList, params)
         .then(res => {
           let data = res.data;
           if (data.code == "SUCCESS") {
@@ -229,17 +171,9 @@ export default {
           loading.close();
         });
     },
-    handleUpdate(index, row) {
-      this.form = JSON.parse(JSON.stringify(row));
-      this.buyNumber = 0;
-      this.buyFormVisible = true;
-    },
-    addPackage() {
+    addCarType() {
       this.form = {
-        standard: "",
-        type: 0,
-        number: 0,
-        price: "",
+        name: "",
         isActive: true
       };
       this.dialogFormVisible = true;
@@ -248,7 +182,7 @@ export default {
       this.dialogFormVisible = false;
       let params = this.form;
       this.$api
-        .post(this.$url.addPackage, params)
+        .post(this.$url.addCarType, params)
         .then(res => {
           let data = res.data;
           if (data == "SUCCESS") {
@@ -256,7 +190,7 @@ export default {
               message: "添加成功",
               type: "success"
             });
-            this.renderPackage(false);
+            this.renderCarType(false);
           } else if (data == "NO_AUTHORITY") {
             this.$message({
               message: "无权限操作",
@@ -278,12 +212,10 @@ export default {
         });
     },
     doUpdate(row) {
-      row.number += this.buyNumber;
-      this.buyNumber = 0;
-      this.buyFormVisible = false;
+      this.dialogFormVisible = false;
       let params = row;
       this.$api
-        .post(this.$url.updatePackage, params)
+        .post(this.$url.updateCarType, params)
         .then(res => {
           let data = res.data;
           if (data == "SUCCESS") {
@@ -291,7 +223,7 @@ export default {
               message: "更新成功",
               type: "success"
             });
-            this.renderPackage(false);
+            this.renderCarType(false);
           } else if (data == "NO_AUTHORITY") {
             this.$message({
               message: "无权限操作",
@@ -315,7 +247,7 @@ export default {
     doDelete(index, row) {
       let params = row;
       this.$api
-        .post(this.$url.deletePackage, params)
+        .post(this.$url.deleteCarType, params)
         .then(res => {
           let data = res.data;
           if (data == "SUCCESS") {
@@ -323,7 +255,7 @@ export default {
               message: "删除成功",
               type: "success"
             });
-            this.renderPackage(false);
+            this.renderCarType(false);
           } else if (data == "NO_AUTHORITY") {
             this.$message({
               message: "无权限操作",
@@ -343,21 +275,12 @@ export default {
             type: "error"
           });
         });
-    },
-    showType(type) {
-      let label = "";
-      this.typeOption.forEach(element => {
-        if (element.value == type) {
-          label = element.label;
-        }
-      });
-      return label;
     }
   },
   beforeRouteEnter(to, from, next) {
     next(vm => {
-      vm.filterData.status = 2;
-      vm.renderPackage(true);
+        vm.filterData.status = 2;
+      vm.renderCarType(true);
     });
   }
 };

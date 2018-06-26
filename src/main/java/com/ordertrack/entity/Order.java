@@ -40,11 +40,20 @@ public class Order {
     @Column(name = "totalprice")
     private Double totalPrice;
 
+    @Column(name = "carprice")
+    private Double carPrice;
+
+    @Column(name = "packageprice")
+    private Double packagePrice;
+
     @Column(name = "deliverydate")
     private Timestamp deliveryDate;
 
     @Column(name = "picture")
     private String picture;
+
+    @Column(name = "carfeetype")
+    private Integer carFeeType;
 
     @Column(name = "status")
     private Integer status;
@@ -69,6 +78,9 @@ public class Order {
 
     @Column(name = "cartime")
     private Timestamp carTime;
+
+    @Column(name = "carfeetime")
+    private Timestamp carFeeTime;
 
     @Column(name = "finishtime")
     private Timestamp finishTime;

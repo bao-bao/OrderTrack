@@ -49,6 +49,11 @@
                 </el-badge>
               </el-col>
               <el-col :span="4" class="quick-content">
+                <el-badge :value="carCount" class="item" :hidden="carCount == 0">
+                  <el-button @click="handleCarCheck">装车</el-button>
+                </el-badge>
+              </el-col>
+              <el-col :span="4" class="quick-content">
                 <el-badge :value="balanceCount" class="item" :hidden="balanceCount == 0">
                   <el-button @click="handleBalanceCheck">结算</el-button>
                 </el-badge>
@@ -68,11 +73,11 @@
                   <el-button @click="handleBusinessCheck">订单管理</el-button>
                 </el-badge>
               </el-col> -->
-              <el-col :span="4" class="quick-content">
+              <!-- <el-col :span="4" class="quick-content">
                 <el-badge :value="0" class="item" hidden>
                   <el-button @click="handleEmployeeCheck">职员管理</el-button>
                 </el-badge>
-              </el-col>
+              </el-col> -->
             </el-row>
           </div>
         </el-card>
@@ -108,6 +113,7 @@ export default {
       divisionCount: 0,
       pickUpCount: 0,
       balanceCount: 0,
+      carCount: 0,
       lineChart: {
         xAxis: {
           type: "category",
@@ -203,6 +209,21 @@ export default {
     }
       let role = JSON.parse(localStorage.getItem("ms_user")).role;
       if (role == 1 || role == 2) {
+        this.$router.push({ name: "status", params: { status: 7 } });
+      } else {
+        this.$message({
+          message: "无权限操作",
+          type: "error"
+        });
+      }
+    },
+    handleCarCheck() {
+    if (localStorage.getItem("ms_user") == null) {
+      this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+      return;
+    }
+      let role = JSON.parse(localStorage.getItem("ms_user")).role;
+      if (role == 1 || role == 5) {
         this.$router.push({ name: "status", params: { status: 5 } });
       } else {
         this.$message({
@@ -290,6 +311,7 @@ export default {
             this.divisionCount = data.divisionCount;
             this.pickUpCount = data.pickUpCount;
             this.balanceCount = data.balanceCount;
+            this.carCount = data.carCount;
             this.calendarEvents = data.eventList;
             this.lineChart.xAxis.data = [];
             this.lineChart.series[0].data = [];

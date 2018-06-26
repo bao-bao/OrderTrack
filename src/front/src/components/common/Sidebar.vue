@@ -82,12 +82,16 @@ export default {
               {
                 index: "/additive",
                 title: "添加物"
+              },
+              {
+                index: "/carType",
+                title: "装车方式"
               }
             ]
           }
         ]
       };
-    } else if (role == 2 || role == 3) {
+    } else if (role == 5 || role == 6) {
       return {
         items: [
           {
@@ -110,6 +114,72 @@ export default {
               }
             ]
           }
+        ]
+      };
+    } else if (role == 2) {
+      return {
+        items: [
+          {
+            icon: "el-icon-bell",
+            index: "/index",
+            title: "首页"
+          },
+          {
+            icon: "el-icon-document",
+            index: "/order",
+            title: "订单管理",
+            subs: [
+              {
+                index: "/onbusiness",
+                title: "生产中"
+              },
+              {
+                index: "/history",
+                title: "历史记录"
+              }
+            ]
+          },
+          {
+            icon: "el-icon-star-off",
+            index: "/setting",
+            title: "其他配置",
+            subs: [
+              {
+                index: "/package",
+                title: "包装"
+              }
+            ]
+          }
+        ]
+      };
+    } else if (role == 3) {
+      return {
+        items: [
+          {
+            icon: "el-icon-bell",
+            index: "/index",
+            title: "首页"
+          },
+          {
+            icon: "el-icon-document",
+            index: "/order",
+            title: "订单管理",
+            subs: [
+              {
+                index: "/onbusiness",
+                title: "生产中"
+              },
+              {
+                index: "/history",
+                title: "历史记录"
+              }
+            ]
+          },
+          {
+            icon: "el-icon-bell",
+            index: "/workrecord",
+            title: "工作记录"
+          },
         ]
       };
     } else {

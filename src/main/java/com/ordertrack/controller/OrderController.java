@@ -4,10 +4,7 @@ package com.ordertrack.controller;
 
 import com.ordertrack.constant.OrderStatus;
 import com.ordertrack.constant.ReturnCode;
-import com.ordertrack.entity.Car;
-import com.ordertrack.entity.Order;
-import com.ordertrack.entity.OrderDetail;
-import com.ordertrack.entity.WorkRecord;
+import com.ordertrack.entity.*;
 import com.ordertrack.pojo.*;
 import com.ordertrack.service.impl.OrderServiceImpl;
 import org.springframework.stereotype.Controller;
@@ -140,11 +137,12 @@ public class OrderController {
     @PostMapping("/getOrderHistory")
     public ListResponse<Order> getOrderHistory(@RequestBody OrderListRequest request) {
         ListResponse<Order> resp = new ListResponse<>();
+        Integer carFeeType = request.getCarFeeType();
         String contractId = request.getContractId();
         String customName = request.getCustomName();
         Long startDate = request.getStartDate();
         Long endDate = request.getEndDate();
-        List<Order> orderList = orderService.queryOrderListHistory(contractId, customName, startDate, endDate);
+        List<Order> orderList = orderService.queryOrderListHistory(carFeeType, contractId, customName, startDate, endDate);
         resp.setList(orderList);
         resp.setCode(ReturnCode.SUCCESS);
         return resp;
@@ -199,7 +197,8 @@ public class OrderController {
     @PostMapping("/checkPickUp")
     public PackageCheckResponse checkPickUp(@RequestBody CheckPickUpRequest request) {
         Integer orderId = request.getOrderId();
-        return orderService.checkPickUp(orderId);
+        List<PackLoss> losses = request.getLoss();
+        return orderService.checkPickUp(orderId, losses);
     }
 
     @ResponseBody
@@ -227,7 +226,26 @@ public class OrderController {
 
     @ResponseBody
     @PostMapping("/deleteCar")
-    public ReturnCode deleteCar(@RequestBody Car car) {
-        return orderService.deleteCarInfo(car);
+    public ReturnCode deleteCar(@RequestBody CarDeleteRequest request) {
+        Integer orderId = request.getOrderId();
+        String license = request.getLicense();
+        return orderService.deleteCarInfo(orderId, license);
+    }
+
+    @ResponseBody
+    @PostMapping("/getPackLoss")
+    public ListResponse<PackLoss> getPackLoss(@RequestBody PackLossRequest request) {
+        ListResponse<PackLoss> resp = new ListResponse<>();
+        Integer orderId = request.getOrderId();
+        List<PackLoss> lossList = orderService.queryPackLoss(orderId);
+        resp.setList(lossList);
+        resp.setCode(ReturnCode.SUCCESS);
+        return resp;
+    }
+
+    @ResponseBody
+    @PostMapping("/addPackLoss")
+    public ReturnCode addPackLoss(@RequestBody List<PackLoss> packLoss) {
+        return orderService.addPackLoss(packLoss);
     }
 }

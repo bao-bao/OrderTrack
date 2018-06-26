@@ -273,6 +273,7 @@ export default {
     },
     renderPackageStandard() {
       let params = {
+        standard: "",
         status: 1,
         type: 2
       };

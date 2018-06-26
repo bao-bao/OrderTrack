@@ -69,6 +69,10 @@ export default new Router({
           component: {template: "<router-view></router-view>"},
           children: [
             {
+              path: "carType",
+              component: resolve => require(["../components/CarType.vue"], resolve)
+            },
+            {
               path: "additive",
               component: resolve => require(["../components/Additive.vue"], resolve)
             },

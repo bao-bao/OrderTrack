@@ -196,3 +196,10 @@ td .el-form-item--small.el-form-item,.el-card .el-form-item--small.el-form-item 
   margin-right: 0;
   margin-bottom: 0;
 }
+.el-step.is-center .el-step__description {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+.el-popover--plain {
+  padding: 10px;
+}

@@ -11,27 +11,29 @@
         <el-row :gutter="20">
           <el-col :span="5">
             <el-form-item label-width="0px">
-              <el-input v-model="filterData.contractId">
-                <template slot="prepend">合同号</template>
-              </el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="5">
-            <el-form-item label-width="0px">
               <el-input v-model="filterData.customName">
                 <template slot="prepend">客户名称</template>
               </el-input>
             </el-form-item>
           </el-col>
-          <el-col :span="8">
-            <el-form-item>
+          <el-col :span="7">
+            <el-form-item label="缴运费方式" label-width="90px">
+              <el-select v-model="filterData.carFeeType">
+                <el-option v-for="item in carFeeOption"
+                :key="item.value" :label="item.label" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="10">
+            <el-form-item label="交货日期" label-width="70px">
               <el-date-picker v-model="filterData.daterange" type="daterange" value-format="timestamp"
               range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期">
               </el-date-picker>
             </el-form-item>
           </el-col>
-          <el-col :span="2">
-            <el-button type="primary" style="margin-left:20px"
+          <el-col :span="2" style="text-align:right">
+            <el-button type="primary"
             icon="el-icon-search" @click="renderOrder(true)">搜索</el-button>
           </el-col>
         </el-row>
@@ -59,6 +61,9 @@
             <el-form-item label="包装图片">
               <span>{{ props.row.picture }}</span>
             </el-form-item>
+            <el-form-item label="缴付运费" style="width: 100%;">
+              <span>{{ showCarFee(props.row.carFeeType) }}</span>
+            </el-form-item>
           </el-form>
         </template>
       </el-table-column>
@@ -74,7 +79,12 @@
         <template slot-scope="scope">{{ showDate(scope.row.deliveryDate) }}</template>
       </el-table-column>
       <el-table-column prop="totalPrice" label="总价值" min-width="140">
-        <template slot-scope="scope">{{ showPrice(scope.row.totalPrice.toFixed(2)) }} 元</template>
+        <template slot-scope="scope">
+          <el-tooltip placement="top" :disabled="authCheck()"
+           :content="'产品' + scope.row.totalPrice.toFixed(2) + '元 + 包装' + scope.row.packagePrice.toFixed(2) + '元 + 装车' + scope.row.carPrice.toFixed(2) + '元'">
+            <span>{{ showPrice((scope.row.totalPrice + scope.row.packagePrice + scope.row.carPrice).toFixed(2)) }} 元</span>
+          </el-tooltip>
+        </template>
       </el-table-column>
       <el-table-column prop="status" label="当前状态" min-width="90">
         <template slot-scope="scope">
@@ -112,6 +122,7 @@ export default {
       pageSize: 10,
       total: 0,
       filterData: {
+        carFeeType: 2,
         contractId: "",
         customName: "",
         daterange: null
@@ -125,8 +136,14 @@ export default {
         { label: "包装", value: 4 },
         { label: "验收", value: 5 },
         { label: "装车", value: 6 },
-        { label: "完成", value: 7 }
-      ]
+        { label: "运费", value: 7 },
+        { label: "完成", value: 8 }
+      ],
+      carFeeOption: [
+        { label: "全部", value: 2 },
+        { label: "工厂付款", value: 0 },
+        { label: "客户付款", value: 1 }
+      ],
     };
   },
   methods: {
@@ -149,6 +166,18 @@ export default {
         (val - 1) * this.pageSize,
         val * this.pageSize
       );
+    },
+    authCheck() {
+      if (localStorage.getItem("ms_user") == null) {
+        this.$message({ message: "登录信息丢失，请重新登录", type: "error" });
+        return;
+      }
+      let role = JSON.parse(localStorage.getItem("ms_user")).role;
+      if (role == 1) {
+        return false;
+      } else {
+        return true;
+      }
     },
     handleDivision(index, row) {
     if (localStorage.getItem("ms_user") == null) {
@@ -226,6 +255,7 @@ export default {
         background: "rgba(255, 255, 255, 0.7)"
       });
       let params = {
+        carFeeType: this.filterData.carFeeType,
         customName: this.filterData.customName,
         contractId: this.filterData.contractId,
         startDate:
@@ -233,6 +263,7 @@ export default {
         endDate:
           this.filterData.daterange == null ? 0 : this.filterData.daterange[1]
       };
+      console.log(params);
       this.$api
         .post(this.$url.getOrderHistory, params)
         .then(res => {
@@ -304,6 +335,15 @@ export default {
     showDate(timestamp) {
       let date = new Date(timestamp);
       return date.toLocaleDateString();
+    },
+    showCarFee(type) {
+      let str = "";
+      this.carFeeOption.forEach(element => {
+        if(element.value == type){
+          str = element.label;
+        }
+      });
+      return str;
     }
   },
   beforeRouteEnter(to, from, next) {

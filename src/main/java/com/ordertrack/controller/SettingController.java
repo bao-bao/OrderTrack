@@ -3,9 +3,7 @@ package com.ordertrack.controller;
 /* Created by AMXPC on 2018/4/11. */
 
 import com.ordertrack.constant.ReturnCode;
-import com.ordertrack.entity.Additive;
-import com.ordertrack.entity.Product;
-import com.ordertrack.entity.WorkRate;
+import com.ordertrack.entity.*;
 import com.ordertrack.entity.Package;
 import com.ordertrack.pojo.*;
 import com.ordertrack.service.impl.SettingServiceImpl;
@@ -125,9 +123,10 @@ public class SettingController {
     @PostMapping("/getPackageList")
     public ListResponse<Package> getPackageList(@RequestBody PackageListRequest filterData) {
         ListResponse<Package> resp = new ListResponse<>();
+        String standard = filterData.getStandard();
         Integer status = filterData.getStatus();
         Integer type = filterData.getType();
-        List<Package> packageList = settingService.queryPackageList(status, type);
+        List<Package> packageList = settingService.queryPackageList(standard, status, type);
         resp.setList(packageList);
         resp.setCode(ReturnCode.SUCCESS);
         return resp;
@@ -150,4 +149,34 @@ public class SettingController {
     public ReturnCode deletePackage(@RequestBody Package pack) {
         return settingService.deletePackage(pack);
     }
+
+    @ResponseBody
+    @PostMapping("/getCarTypeList")
+    public ListResponse<CarType> getCarTypeList(@RequestBody CarTypeListRequest filterData) {
+        ListResponse<CarType> resp = new ListResponse<>();
+        Integer status = filterData.getStatus();
+        List<CarType> carTypeList = settingService.queryCarTypeList(status);
+        resp.setList(carTypeList);
+        resp.setCode(ReturnCode.SUCCESS);
+        return resp;
+    }
+
+    @ResponseBody
+    @PostMapping("/addCarType")
+    public ReturnCode addCarType(@RequestBody CarType carType) {
+        return settingService.addCarType(carType);
+    }
+
+    @ResponseBody
+    @PostMapping("/updateCarType")
+    public ReturnCode updateCarType(@RequestBody CarType carType) {
+        return settingService.updateCarType(carType);
+    }
+
+    @ResponseBody
+    @PostMapping("/deleteCarType")
+    public ReturnCode deleteCarType(@RequestBody CarType carType) {
+        return settingService.deleteCarType(carType);
+    }
+
 }

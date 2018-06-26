@@ -23,15 +23,197 @@ import javax.servlet.http.HttpServletRequest;
 public class AuthorityAspect {
     private static final Logger logger = LoggerFactory.getLogger(AuthorityAspect.class);
 
+    @Around("execution(* com.ordertrack.controller.OrderController.update*(..))")
+    public Object forUpdateOrder(ProceedingJoinPoint pjp) throws Throwable {
+        RequestAttributes ra = RequestContextHolder.getRequestAttributes();
+        ServletRequestAttributes sra = (ServletRequestAttributes) ra;
+        HttpServletRequest request = sra.getRequest();
+        Integer currentUser = (Integer) request.getSession().getAttribute(SecurityConstant.CURRENT_AUTHORITY.getLabel());
+        String requestPath = request.getRequestURI();
+        Object inputParams = pjp.getArgs();
+        if (currentUser != 4) {
+            return pjp.proceed();
+        } else {
+            logger.warn("\n"
+                    + "Begin: " + "\n"
+                    + "Url: " + requestPath + "\n"
+                    + "Operator: " + currentUser + "\n"
+                    + "RequestParams: " + JSON.toJSON(inputParams) + "\n"
+                    + "End" + "\n");
+            return ReturnCode.NO_AUTHORITY;
+        }
+    }
+
+    @Around("execution(* com.ordertrack.controller.OrderController.get*(..))")
+    public Object forOrderList(ProceedingJoinPoint pjp) throws Throwable {
+        RequestAttributes ra = RequestContextHolder.getRequestAttributes();
+        ServletRequestAttributes sra = (ServletRequestAttributes) ra;
+        HttpServletRequest request = sra.getRequest();
+        Integer currentUser = (Integer) request.getSession().getAttribute(SecurityConstant.CURRENT_AUTHORITY.getLabel());
+        String requestPath = request.getRequestURI();
+        Object inputParams = pjp.getArgs();
+        if (currentUser != 4) {
+            return pjp.proceed();
+        } else {
+            logger.warn("\n"
+                    + "Begin: " + "\n"
+                    + "Url: " + requestPath + "\n"
+                    + "Operator: " + currentUser + "\n"
+                    + "RequestParams: " + JSON.toJSON(inputParams) + "\n"
+                    + "End" + "\n");
+            ListResponse<Object> resp = new ListResponse<>();
+            resp.setCode(ReturnCode.NO_AUTHORITY);
+            return resp;
+        }
+    }
+
+    @Around("execution(* com.ordertrack.controller.OrderController.addWorkRecord())")
+    public Object forDivision(ProceedingJoinPoint pjp) throws Throwable {
+        RequestAttributes ra = RequestContextHolder.getRequestAttributes();
+        ServletRequestAttributes sra = (ServletRequestAttributes) ra;
+        HttpServletRequest request = sra.getRequest();
+        Integer currentUser = (Integer) request.getSession().getAttribute(SecurityConstant.CURRENT_AUTHORITY.getLabel());
+        String requestPath = request.getRequestURI();
+        Object inputParams = pjp.getArgs();
+        if (currentUser == 1 || currentUser == 3) {
+            return pjp.proceed();
+        } else {
+            logger.warn("\n"
+                    + "Begin: " + "\n"
+                    + "Url: " + requestPath + "\n"
+                    + "Operator: " + currentUser + "\n"
+                    + "RequestParams: " + JSON.toJSON(inputParams) + "\n"
+                    + "End" + "\n");
+            return ReturnCode.NO_AUTHORITY;
+        }
+    }
+
+    @Around("execution(* com.ordertrack.controller.UserController.getUserList()) || " +
+            "execution(* com.ordertrack.controller.SettingController.getWorkRateList())")
+    public Object forDivisionList(ProceedingJoinPoint pjp) throws Throwable {
+        RequestAttributes ra = RequestContextHolder.getRequestAttributes();
+        ServletRequestAttributes sra = (ServletRequestAttributes) ra;
+        HttpServletRequest request = sra.getRequest();
+        Integer currentUser = (Integer) request.getSession().getAttribute(SecurityConstant.CURRENT_AUTHORITY.getLabel());
+        String requestPath = request.getRequestURI();
+        Object inputParams = pjp.getArgs();
+        if (currentUser == 1 || currentUser == 3) {
+            return pjp.proceed();
+        } else {
+            logger.warn("\n"
+                    + "Begin: " + "\n"
+                    + "Url: " + requestPath + "\n"
+                    + "Operator: " + currentUser + "\n"
+                    + "RequestParams: " + JSON.toJSON(inputParams) + "\n"
+                    + "End" + "\n");
+            ListResponse<Object> resp = new ListResponse<>();
+            resp.setCode(ReturnCode.NO_AUTHORITY);
+            return resp;
+        }
+    }
+
+
+    @Around("execution(* com.ordertrack.controller.SettingController.updatePackage()) ||" +
+            "execution(* com.ordertrack.controller.SettingController.addPackage()) ||" +
+            "execution(* com.ordertrack.controller.SettingController.deletePackage())")
+    public Object forWarehouse(ProceedingJoinPoint pjp) throws Throwable {
+        RequestAttributes ra = RequestContextHolder.getRequestAttributes();
+        ServletRequestAttributes sra = (ServletRequestAttributes) ra;
+        HttpServletRequest request = sra.getRequest();
+        Integer currentUser = (Integer) request.getSession().getAttribute(SecurityConstant.CURRENT_AUTHORITY.getLabel());
+        String requestPath = request.getRequestURI();
+        Object inputParams = pjp.getArgs();
+        if (currentUser == 1 || currentUser == 2) {
+            return pjp.proceed();
+        } else {
+            logger.warn("\n"
+                    + "Begin: " + "\n"
+                    + "Url: " + requestPath + "\n"
+                    + "Operator: " + currentUser + "\n"
+                    + "RequestParams: " + JSON.toJSON(inputParams) + "\n"
+                    + "End" + "\n");
+            return ReturnCode.NO_AUTHORITY;
+        }
+    }
+
+    @Around("execution(* com.ordertrack.controller.SettingController.getPackageList())")
+    public Object forWarehouseList(ProceedingJoinPoint pjp) throws Throwable {
+        RequestAttributes ra = RequestContextHolder.getRequestAttributes();
+        ServletRequestAttributes sra = (ServletRequestAttributes) ra;
+        HttpServletRequest request = sra.getRequest();
+        Integer currentUser = (Integer) request.getSession().getAttribute(SecurityConstant.CURRENT_AUTHORITY.getLabel());
+        String requestPath = request.getRequestURI();
+        Object inputParams = pjp.getArgs();
+        if (currentUser == 1 || currentUser == 2) {
+            return pjp.proceed();
+        } else {
+            logger.warn("\n"
+                    + "Begin: " + "\n"
+                    + "Url: " + requestPath + "\n"
+                    + "Operator: " + currentUser + "\n"
+                    + "RequestParams: " + JSON.toJSON(inputParams) + "\n"
+                    + "End" + "\n");
+            ListResponse<Object> resp = new ListResponse<>();
+            resp.setCode(ReturnCode.NO_AUTHORITY);
+            return resp;
+        }
+    }
+
+    @Around("execution(* com.ordertrack.controller.OrderController.*Car(..))")
+    public Object forCar(ProceedingJoinPoint pjp) throws Throwable {
+        RequestAttributes ra = RequestContextHolder.getRequestAttributes();
+        ServletRequestAttributes sra = (ServletRequestAttributes) ra;
+        HttpServletRequest request = sra.getRequest();
+        Integer currentUser = (Integer) request.getSession().getAttribute(SecurityConstant.CURRENT_AUTHORITY.getLabel());
+        String requestPath = request.getRequestURI();
+        Object inputParams = pjp.getArgs();
+        if (currentUser == 1 || currentUser == 5) {
+            return pjp.proceed();
+        } else {
+            logger.warn("\n"
+                    + "Begin: " + "\n"
+                    + "Url: " + requestPath + "\n"
+                    + "Operator: " + currentUser + "\n"
+                    + "RequestParams: " + JSON.toJSON(inputParams) + "\n"
+                    + "End" + "\n");
+            return ReturnCode.NO_AUTHORITY;
+        }
+    }
+
+    @Around("execution(* com.ordertrack.controller.OrderController.getCarInfo())")
+    public Object forCarList(ProceedingJoinPoint pjp) throws Throwable {
+        RequestAttributes ra = RequestContextHolder.getRequestAttributes();
+        ServletRequestAttributes sra = (ServletRequestAttributes) ra;
+        HttpServletRequest request = sra.getRequest();
+        Integer currentUser = (Integer) request.getSession().getAttribute(SecurityConstant.CURRENT_AUTHORITY.getLabel());
+        String requestPath = request.getRequestURI();
+        Object inputParams = pjp.getArgs();
+        if (currentUser == 1 || currentUser == 5) {
+            return pjp.proceed();
+        } else {
+            logger.warn("\n"
+                    + "Begin: " + "\n"
+                    + "Url: " + requestPath + "\n"
+                    + "Operator: " + currentUser + "\n"
+                    + "RequestParams: " + JSON.toJSON(inputParams) + "\n"
+                    + "End" + "\n");
+            ListResponse<Object> resp = new ListResponse<>();
+            resp.setCode(ReturnCode.NO_AUTHORITY);
+            return resp;
+        }
+    }
+
+
+
     @Around("execution(* com.ordertrack.controller.UserController.add*(..)) || " +
             "execution(* com.ordertrack.controller.UserController.update*(..)) ||" +
             "execution(* com.ordertrack.controller.UserController.delete*(..)) ||" +
-            "execution(* com.ordertrack.controller.SettingController.add*(..)) ||" +
-            "execution(* com.ordertrack.controller.SettingController.update*(..)) ||" +
-            "execution(* com.ordertrack.controller.SettingController.delete*(..)) ||" +
+            "execution(* com.ordertrack.controller.SettingController.*Additive(..)) ||" +
+            "execution(* com.ordertrack.controller.SettingController.*WorkRate(..)) ||" +
+            "execution(* com.ordertrack.controller.SettingController.*Product(..)) ||" +
             "execution(* com.ordertrack.controller.OrderController.addOrder()) || " +
             "execution(* com.ordertrack.controller.OrderController.addOrderDetail()) || " +
-            "execution(* com.ordertrack.controller.OrderController.delete*(..)) ")
+            "execution(* com.ordertrack.controller.OrderController.addOrderDetailBatch())")
     public Object forAdmin(ProceedingJoinPoint pjp) throws Throwable {
         RequestAttributes ra = RequestContextHolder.getRequestAttributes();
         ServletRequestAttributes sra = (ServletRequestAttributes) ra;
@@ -73,73 +255,6 @@ public class AuthorityAspect {
             ListResponse<Object> resp = new ListResponse<>();
             resp.setCode(ReturnCode.NO_AUTHORITY);
             return resp;
-        }
-    }
-
-    @Around("execution(* com.ordertrack.controller.OrderController.update*(..))")
-    public Object forUpdateOrder(ProceedingJoinPoint pjp) throws Throwable {
-        RequestAttributes ra = RequestContextHolder.getRequestAttributes();
-        ServletRequestAttributes sra = (ServletRequestAttributes) ra;
-        HttpServletRequest request = sra.getRequest();
-        Integer currentUser = (Integer) request.getSession().getAttribute(SecurityConstant.CURRENT_AUTHORITY.getLabel());
-        String requestPath = request.getRequestURI();
-        Object inputParams = pjp.getArgs();
-        if (currentUser == 1 || currentUser == 2 || currentUser == 3) {
-            return pjp.proceed();
-        } else {
-            logger.warn("\n"
-                    + "Begin: " + "\n"
-                    + "Url: " + requestPath + "\n"
-                    + "Operator: " + currentUser + "\n"
-                    + "RequestParams: " + JSON.toJSON(inputParams) + "\n"
-                    + "End" + "\n");
-            return ReturnCode.NO_AUTHORITY;
-        }
-    }
-
-    @Around("execution(* com.ordertrack.controller.OrderController.get*(..))")
-    public Object forOrderList(ProceedingJoinPoint pjp) throws Throwable {
-        RequestAttributes ra = RequestContextHolder.getRequestAttributes();
-        ServletRequestAttributes sra = (ServletRequestAttributes) ra;
-        HttpServletRequest request = sra.getRequest();
-        Integer currentUser = (Integer) request.getSession().getAttribute(SecurityConstant.CURRENT_AUTHORITY.getLabel());
-        String requestPath = request.getRequestURI();
-        Object inputParams = pjp.getArgs();
-        if (currentUser == 1 || currentUser == 2 || currentUser == 3) {
-            return pjp.proceed();
-        } else {
-            logger.warn("\n"
-                    + "Begin: " + "\n"
-                    + "Url: " + requestPath + "\n"
-                    + "Operator: " + currentUser + "\n"
-                    + "RequestParams: " + JSON.toJSON(inputParams) + "\n"
-                    + "End" + "\n");
-            ListResponse<Object> resp = new ListResponse<>();
-            resp.setCode(ReturnCode.NO_AUTHORITY);
-            return resp;
-        }
-    }
-
-    @Around("execution(* com.ordertrack.controller.OrderController.addWorkRecord()) || " +
-            "execution(* com.ordertrack.controller.UserController.getUserList()) || " +
-            "execution(* com.ordertrack.controller.SettingController.getWorkRateList())")
-    public Object forDivision(ProceedingJoinPoint pjp) throws Throwable {
-        RequestAttributes ra = RequestContextHolder.getRequestAttributes();
-        ServletRequestAttributes sra = (ServletRequestAttributes) ra;
-        HttpServletRequest request = sra.getRequest();
-        Integer currentUser = (Integer) request.getSession().getAttribute(SecurityConstant.CURRENT_AUTHORITY.getLabel());
-        String requestPath = request.getRequestURI();
-        Object inputParams = pjp.getArgs();
-        if (currentUser == 1 || currentUser == 3) {
-            return pjp.proceed();
-        } else {
-            logger.warn("\n"
-                    + "Begin: " + "\n"
-                    + "Url: " + requestPath + "\n"
-                    + "Operator: " + currentUser + "\n"
-                    + "RequestParams: " + JSON.toJSON(inputParams) + "\n"
-                    + "End" + "\n");
-            return ReturnCode.NO_AUTHORITY;
         }
     }
 

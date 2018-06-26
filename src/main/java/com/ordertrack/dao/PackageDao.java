@@ -11,7 +11,12 @@ import java.util.List;
 @Repository
 public interface PackageDao extends JpaRepository<Package, Long> {
 
-    List<Package> findByIsActiveAndType(boolean isactive, Integer type);
     List<Package> findByIsActive(boolean isactive);
     List<Package> findByType(Integer type);
+    List<Package> findByStandardContaining(String standard);
+    List<Package> findByIsActiveAndType(boolean isactive, Integer type);
+    List<Package> findByTypeAndStandardContaining(Integer type, String standard);
+    List<Package> findByIsActiveAndStandardContaining(boolean isactive, String standard);
+    List<Package> findByIsActiveAndTypeAndStandardContaining(boolean isactive, Integer type, String standard);
+
 }

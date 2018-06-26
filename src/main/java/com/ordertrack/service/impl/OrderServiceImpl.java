@@ -4,10 +4,7 @@ package com.ordertrack.service.impl;
 
 import com.ordertrack.constant.OrderStatus;
 import com.ordertrack.constant.ReturnCode;
-import com.ordertrack.dao.CarDao;
-import com.ordertrack.dao.OrderDao;
-import com.ordertrack.dao.OrderDetailDao;
-import com.ordertrack.dao.WorkRecordDao;
+import com.ordertrack.dao.*;
 import com.ordertrack.entity.*;
 import com.ordertrack.entity.Package;
 import com.ordertrack.pojo.MonthVolume;
@@ -37,6 +34,8 @@ public class OrderServiceImpl implements OrderService {
     private WorkRecordDao workRecordDao;
     @Resource
     private CarDao carDao;
+    @Resource
+    private PackLossDao packLossDao;
     @Resource
     private SettingServiceImpl settingService;
     @PersistenceContext
@@ -94,27 +93,39 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<Order> queryOrderListHistory(String contractId, String customName, Long startDate, Long endDate) {
+    public List<Order> queryOrderListHistory(Integer carFeeType, String contractId, String customName, Long startDate, Long endDate) {
         int finishStatus = OrderStatus.FINISH.getStatus();
-        if (!contractId.equals("")) {
-            return orderDao.findOrderByContractIdAndStatus(contractId, finishStatus);
-        } else if (customName.equals("") && startDate == 0) {
-            return orderDao.findOrderByStatus(finishStatus);
-        } else if (customName.equals("") && startDate != 0) {
-            return orderDao.findOrderByOrderTimeBetweenAndStatus(new Timestamp(startDate), new Timestamp(endDate), finishStatus);
-        } else if (!customName.equals("") && startDate == 0) {
-            return orderDao.findOrderByCustomNameContainingAndStatus(customName, finishStatus);
-        } else if (!customName.equals("") && startDate != 0) {
-            return orderDao.findOrderByCustomNameContainingAndOrderTimeBetweenAndStatus(customName, new Timestamp(startDate), new Timestamp(endDate), finishStatus);
+        if (carFeeType == 2) {
+            if (customName.equals("") && startDate == 0) {
+                return orderDao.findOrderByStatus(finishStatus);
+            } else if (customName.equals("") && startDate != 0) {
+                return orderDao.findOrderByOrderTimeBetweenAndStatus(new Timestamp(startDate), new Timestamp(endDate), finishStatus);
+            } else if (!customName.equals("") && startDate == 0) {
+                return orderDao.findOrderByCustomNameContainingAndStatus(customName, finishStatus);
+            } else {
+                return orderDao.findOrderByCustomNameContainingAndOrderTimeBetweenAndStatus(customName, new Timestamp(startDate), new Timestamp(endDate), finishStatus);
+            }
         } else {
-            return Collections.emptyList();
+            if (customName.equals("") && startDate == 0) {
+                return orderDao.findByCarFeeTypeAndStatus(carFeeType,finishStatus);
+            } else if (customName.equals("") && startDate != 0) {
+                return orderDao.findOrderByCarFeeTypeAndOrderTimeBetweenAndStatus(carFeeType, new Timestamp(startDate), new Timestamp(endDate), finishStatus);
+            } else if (!customName.equals("") && startDate == 0) {
+                return orderDao.findOrderByCarFeeTypeAndCustomNameContainingAndStatus(carFeeType, customName, finishStatus);
+            } else {
+                return orderDao.findOrderByCarFeeTypeAndCustomNameContainingAndOrderTimeBetweenAndStatus(carFeeType, customName, new Timestamp(startDate), new Timestamp(endDate), finishStatus);
+            }
         }
     }
 
     @Override
     @Transactional
     public List<Order> queryOrderListByStatus(Integer status) {
-        return orderDao.findOrderByStatus(status);
+        if(status == OrderStatus.BALANCING.getStatus()) {
+            return orderDao.findByStatusBetween(status, OrderStatus.CAR.getStatus());
+        } else {
+            return orderDao.findOrderByStatus(status);
+        }
     }
 
     @Override
@@ -189,17 +200,20 @@ public class OrderServiceImpl implements OrderService {
         Integer totalBig = 0;
         Double totalWeight = 0.0;
         Double totalPrice = 0.0;
+        Double packagePrice = 0.0;
         List<OrderDetail> details = orderDetailDao.findByOrderId(orderId);
         for (OrderDetail detail : details) {
             totalSmall += detail.getInnerCount();
             totalBig += detail.getOuterCount();
             totalPrice += detail.getProductPrice();
             totalWeight += detail.getProductWeight();
+            packagePrice += detail.getPackagePrice();
         }
         order.setTotalSmall(totalSmall);
         order.setTotalBig(totalBig);
         order.setTotalPrice(totalPrice);
         order.setTotalWeight(totalWeight);
+        order.setPackagePrice(packagePrice);
         orderDao.saveAndFlush(order);
         return ReturnCode.SUCCESS;
     }
@@ -214,6 +228,7 @@ public class OrderServiceImpl implements OrderService {
         order.setTotalBig(order.getTotalBig() - orderDetail.getOuterCount());
         order.setTotalPrice(order.getTotalPrice() - orderDetail.getProductPrice());
         order.setTotalWeight(order.getTotalWeight() - orderDetail.getProductWeight());
+        order.setPackagePrice(order.getPackagePrice() - orderDetail.getPackagePrice());
         workRecordDao.deleteByOrderDetail(orderDetail.getId());
         orderDao.saveAndFlush(order);
         return ReturnCode.SUCCESS;
@@ -279,13 +294,13 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public PackageCheckResponse checkPickUp(Integer orderId) {
+    public PackageCheckResponse checkPickUp(Integer orderId, List<PackLoss> losses) {
         PackageCheckResponse resp = new PackageCheckResponse();
         boolean tag = true;
         StringBuilder message = new StringBuilder();
         Map<Integer, Integer> packageNeed = new HashMap<>();
         List<OrderDetail> orderDetails = queryOrderDetail(orderId);
-        List<Package> packages = settingService.queryPackageList(1, 2);
+        List<Package> packages = settingService.queryPackageList("",1, 2);
         for (OrderDetail detail : orderDetails) {
             int outerPackId = detail.getOuterStandard();
             int outerPackNumber = detail.getOuterCount();
@@ -293,6 +308,11 @@ public class OrderServiceImpl implements OrderService {
             int innerPackNumber = detail.getInnerCount();
             packageNeed.merge(outerPackId, outerPackNumber, (a, b) -> b + a);
             packageNeed.merge(innerPackId, innerPackNumber, (a, b) -> b + a);
+        }
+        for (PackLoss loss : losses) {
+            int lossPackId = loss.getPackageId();
+            int lossPackNumber = loss.getNumber();
+            packageNeed.merge(lossPackId, lossPackNumber, (a, b) -> b + a);
         }
         for (Map.Entry<Integer, Integer> map : packageNeed.entrySet()) {
             for (Package pack : packages) {
@@ -310,11 +330,14 @@ public class OrderServiceImpl implements OrderService {
                 for (Package pack : packages) {
                     if (map.getKey() == pack.getId()) {
                         pack.setNumber(pack.getNumber() - map.getValue());
+                        message.append(pack.getStandard()).append("： 剩余").append(pack.getNumber()).append("个<br>");
                         settingService.updatePackage(pack);
                     }
                 }
             }
+            addPackLoss(losses);
             resp.setCode(ReturnCode.SUCCESS);
+            resp.setMessage(message.toString());
         } else {
             resp.setCode(ReturnCode.NO_ENOUGH_PACKAGE);
             resp.setMessage(message.toString());
@@ -345,10 +368,31 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public ReturnCode deleteCarInfo(Car car) {
-        carDao.delete(car);
+    public ReturnCode deleteCarInfo(Integer orderId, String license) {
+        carDao.deleteByOrderIdAndLicense(orderId, license);
         return ReturnCode.SUCCESS;
     }
+
+    @Override
+    @Transactional
+    public List<PackLoss> queryPackLoss(Integer orderId) {
+        return packLossDao.findByOrderId(orderId);
+    }
+
+    @Override
+    @Transactional
+    public ReturnCode addPackLoss(List<PackLoss> packLosses) {
+        for (int i = 0; i < packLosses.size(); i++) {
+            em.merge(packLosses.get(i));
+            if (i % 30 == 0) {
+                em.flush();
+                em.clear();
+            }
+        }
+        return ReturnCode.SUCCESS;
+    }
+
+
 
     @Override
     @Transactional
@@ -395,13 +439,19 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public Integer getBalanceCount() {
-        return orderDao.findOrderByStatus(OrderStatus.PICKING_UP.getStatus()).size();
+        return orderDao.findOrderByStatus(OrderStatus.CAR_FEE.getStatus()).size();
     }
 
     @Override
     @Transactional
     public List<Order> getOnBusinessList() {
         return orderDao.findByStatusLessThan(OrderStatus.FINISH.getStatus());
+    }
+
+    @Override
+    @Transactional
+    public Integer getCarCount() {
+        return orderDao.findOrderByStatus(OrderStatus.BALANCING.getStatus()).size() + orderDao.findOrderByStatus(OrderStatus.CAR.getStatus()).size();
     }
 
     @Override
