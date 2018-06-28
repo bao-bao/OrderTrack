@@ -602,10 +602,11 @@ export default {
       return JSON.parse(localStorage.getItem("ms_user")).role == 1 ? num : "-";
     },
     showTime(time) {
+      time == "" ? 0 : parseFloat(time);
       let str = "";
       let hour, minute;
-      if (time > 1) {
-        hour = time.toFixed(0);
+      if (time >= 1) {
+        hour = parseInt(time);
         minute = ((time - hour) * 60).toFixed(0);
         str = hour + "小时" + minute + "分钟";
       } else {

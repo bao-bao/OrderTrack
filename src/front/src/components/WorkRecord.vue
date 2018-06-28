@@ -86,7 +86,7 @@
           </el-col>
           <el-col :span="11">
             <el-form-item label="产品规格：" prop="productStandard" label-width="120px">
-              <span>{{form.productStandard}}</span>
+              <span>{{ form.productStandard == "" ? "无" : form.productStandard }}</span>
             </el-form-item>
           </el-col>
           <el-col :span="11">
@@ -106,18 +106,18 @@
           </el-col>
           <el-col :span="11">
             <el-form-item label="味道：" label-width="120px">
-              <span>{{ form.smell }}</span>
+              <span>{{ form.smell == "" ? "无" : form.smell }}</span>
             </el-form-item>
           </el-col>
           <el-col :span="11">
             <el-form-item label="水果贴：" label-width="120px">
-              <span>{{form.fruitSticker}}</span>
+              <span>{{ form.fruitSticker == "" ? "无" : form.fruitSticker }}</span>
             </el-form-item>
           </el-col>
           <el-col :span="22">
             <el-form-item label="额外添加：" label-width="120px" v-if="hasAdditive">
               <el-tag v-for="additive in form.extra" size="medium" :key="additive">
-              {{additive}}</el-tag>
+              {{ additive }}</el-tag>
             </el-form-item>
             <el-form-item label="额外添加：" label-width="120px" v-if="!hasAdditive">
               <span>无</span>
@@ -396,10 +396,11 @@ export default {
         });
     },
     showTime(time) {
+      time == "" ? 0 : parseFloat(time);
       let str = "";
       let hour, minute;
-      if (time > 1) {
-        hour = time.toFixed(0);
+      if (time >= 1) {
+        hour = parseInt(time);
         minute = ((time - hour) * 60).toFixed(0);
         str = hour + "小时" + minute + "分钟";
       } else {

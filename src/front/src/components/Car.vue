@@ -17,12 +17,12 @@
           </el-col>
           <el-col :span="2" :offset="18" style="text-align:right">
             <el-form-item label-width="0px">
-                <el-button type="success" icon="el-icon-circle-plus" v-show="order.status<7" @click="handleAdd()">新增</el-button>
+                <el-button type="success" icon="el-icon-circle-plus" v-show="order.status<6" @click="handleAdd()">新增</el-button>
             </el-form-item>
           </el-col>
           <el-col :span="2" style="text-align:right">
             <el-form-item label-width="0px">
-                <el-button type="warning" icon="el-icon-circle-plus" v-show="order.status<7" @click="handleNext()">提交</el-button>
+                <el-button type="warning" icon="el-icon-circle-plus" v-show="order.status<6" @click="handleNext()">提交</el-button>
             </el-form-item>
           </el-col>
         </el-row>
@@ -70,7 +70,7 @@
       <el-table-column label="操作" min-width="180">
         <template slot-scope="scope">
           <el-button size="mini" type="" @click="handleEdit(scope.$index, scope.row)">详细信息</el-button>
-          <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+          <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)" :disabled="order.status > 5">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -92,7 +92,7 @@
               <el-checkbox-group v-model="checkedProduct" @change="handleDetailChange" :disabled="order.status>7">
                 <el-row :gutter="0">
                   <el-col v-for="item in orderDetail" :key="item.id" style="width: 50%;text-align: left;">
-                    <el-checkbox :label="item.id">
+                    <el-checkbox :label="item.id" :disabled="order.status > 5">
                       {{item.chineseName}}({{getRest(item.id, "not license")}}件 —— {{(item.productWeight / item.outerCount) * getRest(item.id, "not license")}}kg)</el-checkbox>
                   </el-col>
                 </el-row>

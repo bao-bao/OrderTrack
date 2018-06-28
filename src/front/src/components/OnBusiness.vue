@@ -148,7 +148,7 @@
           <el-col :span="11" v-show="form.status > 2">
             <el-form-item label="分工情况" label-width="100px">
               <el-button size="mini" v-show="form.status == 3 || form.status == 4" @click="handleDivision(0, form)">重新分配</el-button>
-              <el-button size="mini" v-show="form.status > 4" @click="handleDivision(0, form)">查看详情</el-button>
+              <el-button size="mini" v-show="form.status > 4" @click="handleDivision(0, form)" style="margin-left: 0px">查看详情</el-button>
             </el-form-item>
           </el-col>
           <el-col :span="11" v-show="form.status > 3">
