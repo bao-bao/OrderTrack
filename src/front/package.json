@@ -10,11 +10,14 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "@vue/composition-api": "^1.0.0-rc.5",
     "axios": "^0.18.0",
+    "echarts": "^5.0.2",
     "element-ui": "^2.3.3",
     "font-awesome": "^4.7.0",
     "iconfont": "^0.3.1",
     "vue": "^2.5.16",
+    "vue-echarts": "^6.0.0-rc.3",
     "vue-event-calendar": "^1.5.2",
     "vue-router": "^3.0.1"
   },

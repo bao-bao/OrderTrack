@@ -8,7 +8,7 @@ import qs from 'qs'
 import Element from 'element-ui';
 import url from './axios/url';
 import vueEventCalendar from 'vue-event-calendar'
-import ECharts from 'vue-echarts/components/ECharts'
+import ECharts from 'vue-echarts'
  
 // import ECharts modules manually to reduce bundle size
 import 'echarts'
